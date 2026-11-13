@@ -1,0 +1,43 @@
+server:
+  port: 8081
+  tomcat:
+    uri-encoding: UTF-8
+
+spring:
+  application:
+    name: jsnws-server
+  datasource:
+    # MySQL 连接信息，按实际情况修改（默认连接本机 3306 的 jsnws 库）
+    url: jdbc:mysql://localhost:3306/jsnws?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 200MB
+  jackson:
+    # 前端 getDateDiff 需要 "yyyy-MM-dd HH:mm" 格式的字符串
+    date-format: yyyy-MM-dd HH:mm
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jsnws:
+  # 上传文件在磁盘上的根目录（/resource/upload 落盘位置），会自动创建
+  upload-base-dir: ./resource
+  # 上传文件对外访问地址前缀，与下方 resource-handler 映射保持一致
+  upload-url-prefix: http://localhost:8081/resource/file
+  # 登录密码 AES 密钥（与前端 utils/constant.js 中 cryptojs_key 一致，不要修改）
+  crypto-key: sarasarasarasara
+  # 登录 token 签名密钥
+  token-secret: jsnws-blog-token-secret-2026
+  # token 有效期（毫秒），默认 30 天
+  token-expire: 2592000000
+  # 站长用户 id（前端 constant.js 的 userId 与此对应）
+  boss-user-id: 1
+  # 邮件验证码：未配置邮件服务时为 false，此时验证码仅打印到控制台且校验放行
+  mail-enabled: false

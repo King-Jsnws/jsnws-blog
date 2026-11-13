@@ -1,0 +1,169 @@
+:root {
+    /* 背景 */
+    --background: white;
+    --gradualBackground: linear-gradient(to right bottom, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    --favoriteBg: #f7f9fe;
+
+    /* 字体 */
+    --fontColor: black;
+    /* 边框 */
+    --borderColor: rgba(0, 0, 0, 0.5);
+    /* 边框 */
+    --borderHoverColor: rgba(110, 110, 110, 0.4);
+    /* 文章字体 */
+    --articleFontColor: #1f1f1f;
+    /* 文章灰色字体 */
+    --articleGreyFontColor: #616161;
+    /* 评论背景颜色 */
+    --commentContent: #F7F9FE;
+
+
+    /* 主题背景 */
+    --themeBackground: orange;
+    /* 主题悬停背景 */
+    --gradualRed: linear-gradient(to right, #ff4b2b, #ff416c);
+
+    /* 导航栏字体 */
+    --toolbarFont: #333333;
+    /* 导航栏背景 */
+    --toolbarBackground: rgba(255, 255, 255, 1);
+    /* 灰色字体 */
+    --greyFont: #797979;
+    --maxGreyFont: #595A5A;
+    /* 次级灰字：比 --greyFont 再浅一档，用于时间、字数、说明等 */
+    --greyFontColor: #8c8c8c;
+    /* footer背景 */
+    --gradientBG: linear-gradient(-90deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    /* 白色遮罩 */
+    --whiteMask: rgba(255, 255, 255, 0.3);
+    /* max白色遮罩 */
+    --maxWhiteMask: rgba(255, 255, 255, 0.5);
+    --maxMaxWhiteMask: rgba(255, 255, 255, 0.7);
+    /* 后台登录页背景图：给全局兜底值，不依赖布局组件写入 */
+    --backgroundPicture: url('/images/login-bg.webp');
+    /* mini白色遮罩 */
+    --miniWhiteMask: rgba(255, 255, 255, 0.15);
+    /* 透明 */
+    --transparent: rgba(0, 0, 0, 0);
+    /* mini黑色遮罩 */
+    --miniMask: rgba(0, 0, 0, 0.15);
+    /* 黑色遮罩 */
+    --mask: rgba(0, 0, 0, 0.3);
+    /* 半透明 */
+    --translucent: rgba(0, 0, 0, 0.5);
+    /* 深黑遮罩 */
+    --maxMask: rgba(0, 0, 0, 0.7);
+
+
+    --white: white;
+
+    --red: red;
+    --lightRed: #ff4b2b;
+    --maxLightRed: #ff416c;
+    --orangeRed: #EF794F;
+
+    --azure: #ECF7FE;
+    --blue: rgb(3, 169, 244);
+
+    --lightGray: #DDDDDD;
+    --maxLightGray: #EEEEEE;
+    --maxMaxLightGray: rgba(242, 242, 242, 0.5);
+
+    --lightGreen: #39c5bb;
+
+    --green: #67C23A;
+    --black: black;
+    --lightYellow: #F4E1C0;
+
+    --globalFont: King-font;
+
+    /* 首页 / 留言页大图遮罩：同一套暗度，黑夜模式加深保证白字对比度 */
+    --heroMask: rgba(0, 0, 0, 0.35);
+
+    /* ===== 主题语义色：白天值，黑夜模式在下方 html.dark 中整体替换 ===== */
+    /* 卡片 / 面板表面 */
+    --cardBg: #ffffff;
+    --cardBorder: #ebeef5;
+    --subtleBg: #f4f4f4;
+    --hoverBg: #f5f7fa;
+    /* 导航下拉面板 / 头像卡片 */
+    --panelBg: #ffffff;
+    --panelBorder: #1f1f1f;
+    --panelText: #303133;
+    --panelTextSecondary: #4e5969;
+    --panelHoverBg: #f5f7fa;
+    --panelDivider: #f0f0f0;
+    --panelIconBg: #f3f4f6;
+    --panelIconHoverBg: #e9ebef;
+    /* 首页左侧卡片统计项描边 */
+    --statBorder: #dcdfe6;
+    /* 蓝色弱底（音乐播放器等） */
+    --blueSoftBg: #eef5ff;
+    --blueSoftBorder: #cfe0f7;
+    --blueSoftHoverBg: #e0eeff;
+    /* 进度条 / 音量条轨道与歌词弱化色 */
+    --trackBg: #e8eaee;
+    --lyricColor: #cfcfcf;
+    --lyricNearColor: #b4b4b4;
+    /* 登录 / 注册毛玻璃卡片 */
+    --glassBg: rgba(255, 255, 255, 0.88);
+    --glassInputBg: rgba(255, 255, 255, 0.95);
+}
+
+/* 黑夜模式：同一套变量整体替换，页面无需感知主题 */
+html.dark {
+    --background: #272727;
+    --favoriteBg: #1e1e1e;
+
+    --fontColor: #e6e6e6;
+    /* 暗色下用低透明度白色同时充当分隔线与柔光投影，避免黑色投影不可见 */
+    --borderColor: rgba(255, 255, 255, 0.1);
+    --borderHoverColor: rgba(255, 255, 255, 0.16);
+    --articleFontColor: #e4e4e4;
+    --articleGreyFontColor: #c9c9c9;
+    --commentContent: #242424;
+
+    --toolbarFont: #e6e6e6;
+    --greyFont: #a8a8a8;
+    --maxGreyFont: #c4c4c4;
+    /* 次级灰字：比 --greyFont 再暗一档，保持与正文的层级差 */
+    --greyFontColor: #999999;
+
+    --lightGray: #3c3c3c;
+    --maxLightGray: #333333;
+    --maxMaxLightGray: rgba(255, 255, 255, 0.06);
+    --azure: #17222c;
+    --lightYellow: #3a3327;
+
+    --cardBg: #202020;
+    --cardBorder: #333333;
+    --subtleBg: #2b2b2b;
+    --hoverBg: #303030;
+
+    --panelBg: #222222;
+    --panelBorder: #4b4b4b;
+    --panelText: #e6e6e6;
+    --panelTextSecondary: #b9bfc9;
+    --panelHoverBg: #2e2f33;
+    --panelDivider: #34363a;
+    --panelIconBg: #2c2d31;
+    --panelIconHoverBg: #383a3f;
+
+    --statBorder: #3a3a3a;
+
+    --blueSoftBg: rgba(59, 130, 246, 0.16);
+    --blueSoftBorder: rgba(59, 130, 246, 0.4);
+    --blueSoftHoverBg: rgba(59, 130, 246, 0.26);
+
+    --trackBg: #3a3a3a;
+    --lyricColor: #8c8c8c;
+    --lyricNearColor: #a8a8a8;
+
+    --glassBg: rgba(24, 24, 27, 0.9);
+    --glassInputBg: rgba(40, 40, 45, 0.95);
+
+    /* 后台登录卡片：深色下换成深色面板，避免半透明白块 */
+    --maxWhiteMask: rgba(24, 24, 27, 0.9);
+
+    --heroMask: rgba(0, 0, 0, 0.5);
+}

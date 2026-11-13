@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <!-- 站点图标：King 头像（favicon.png，v=2 用于刷新浏览器缓存） -->
+    <link rel="icon" type="image/png" href="<%= BASE_URL %>favicon.png?v=2" sizes="64x64">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>King</title>
+    <meta name="keywords" content="King,Sara,生活倒影,最美博客,个人博客,个人网站,生活笔记,记录生活,Java,SpringBoot,Vue,Vue2,Vue3,IM,聊天室">
+    <meta name="description" content="King：作诗，有诗意地描写。这是我的个人网站，我的生活倒影，有诗意地记录自己的生活。">
+    <meta name="author" content="Sara">
+
+    <!-- 旧项目依赖的全局脚本，迁移阶段保持同一套运行时依赖 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/clipboard.js/2.0.8/clipboard.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qiniu-js/3.4.0/qiniu.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+
+    <!-- 首屏主题：避免等待 JS 包加载时先闪一下浅色；规则与 src/utils/theme.js 保持一致 -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var hour = new Date().getHours();
+          var dark = stored ? stored === 'dark' : (hour >= 22 || hour < 7);
+          if (dark) {
+            document.documentElement.classList.add('dark');
+          }
+          document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        } catch (e) {
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>请启用 JavaScript 后再访问本应用。</noscript>
+    <div id="app"></div>
+    <script>
+      new WOW().init();
+    </script>
+  </body>
+</html>

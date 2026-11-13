@@ -1,0 +1,618 @@
+/* =========================================================
+   后台主题样式（仅作用于 .admin-shell，不影响前台站点）
+   ========================================================= */
+
+.admin-shell {
+  /* 设计变量 */
+  --admin-primary: #4c6fff;
+  --admin-sidebar-bg: #1b2333;
+  --admin-sidebar-bg-deep: #151c29;
+  --admin-sidebar-text: rgba(226, 232, 240, 0.72);
+  --admin-bg: #f4f6fa;
+  --admin-card: #ffffff;
+  --admin-border: #edf0f5;
+  --admin-text: #1f2937;
+  --admin-text-secondary: #64748b;
+  --admin-text-soft: #475467;
+  --admin-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 28px -16px rgba(15, 23, 42, 0.18);
+  /* 顶栏 / 悬停 / 表格等表面色，黑夜模式在下方整体替换 */
+  --admin-header-bg: rgba(255, 255, 255, 0.92);
+  --admin-hover: #f1f5f9;
+  --admin-subtle: #f8fafc;
+  --admin-table-head: #f8fafc;
+  --admin-table-row-hover: #f7f9ff;
+  --admin-table-border: #eef1f6;
+  --admin-danger-bg: #fef2f2;
+  --admin-primary-text: #3f56c9;
+
+  /* Element Plus 主题色跟随后台主色 */
+  --el-color-primary: #4c6fff;
+  --el-color-primary-light-3: #7b93ff;
+  --el-color-primary-light-5: #a3b4ff;
+  --el-color-primary-light-7: #cbd5ff;
+  --el-color-primary-light-8: #dfe5ff;
+  --el-color-primary-light-9: #eef2ff;
+  --el-color-primary-dark-2: #3a58d6;
+  --el-border-radius-base: 8px;
+
+  display: flex;
+  min-height: 100vh;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* ---------------- 黑夜模式（与公开站点共用 html.dark 开关） ---------------- */
+
+html.dark .admin-shell {
+  --admin-bg: #141414;
+  --admin-card: #1d1e1f;
+  --admin-border: #2f3033;
+  --admin-text: #e5eaf3;
+  --admin-text-secondary: #a3a6ad;
+  --admin-text-soft: #c2c7d0;
+  --admin-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px -16px rgba(0, 0, 0, 0.6);
+  --admin-header-bg: rgba(29, 30, 31, 0.92);
+  --admin-hover: #262727;
+  --admin-subtle: #232425;
+  --admin-table-head: #232425;
+  --admin-table-row-hover: #242629;
+  --admin-table-border: #3d3e42;
+  --admin-danger-bg: #2c1c1c;
+  --admin-primary-text: #9db0ff;
+
+  /* Element Plus 主色在暗色下用深一档的浅色梯度，避免浅色块过亮 */
+  --el-color-primary: #4c6fff;
+  --el-color-primary-light-3: #3f5ed8;
+  --el-color-primary-light-5: #33489f;
+  --el-color-primary-light-7: #263570;
+  --el-color-primary-light-8: #202c5c;
+  --el-color-primary-light-9: #1b2340;
+  --el-color-primary-dark-2: #7090ff;
+}
+
+/* ---------------- 侧边栏 ---------------- */
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  width: 236px;
+  background: linear-gradient(180deg, #1e2739 0%, var(--admin-sidebar-bg) 45%, var(--admin-sidebar-bg-deep) 100%);
+  color: var(--admin-sidebar-text);
+  transition: width 0.24s ease, transform 0.28s ease;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  height: 64px;
+  padding: 0 18px;
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-brand-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #5b7cff, #7c5cff);
+  box-shadow: 0 6px 16px rgba(76, 111, 255, 0.4);
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.admin-brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.admin-brand-text strong {
+  max-width: 140px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.admin-brand-text small {
+  margin-top: 3px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.admin-nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px 12px 24px;
+}
+
+.admin-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.admin-nav::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.28);
+}
+
+.admin-nav-group {
+  margin: 18px 0 8px;
+  padding: 0 12px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  color: rgba(148, 163, 184, 0.55);
+}
+
+.admin-nav-group:first-child {
+  margin-top: 0;
+}
+
+.admin-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 42px;
+  margin-bottom: 4px;
+  padding: 0 12px 0 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  white-space: nowrap;
+  color: var(--admin-sidebar-text);
+  text-decoration: none;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.admin-nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.admin-nav-item.active {
+  background: linear-gradient(90deg, rgba(76, 111, 255, 0.3), rgba(76, 111, 255, 0.08));
+  font-weight: 600;
+  color: #fff;
+}
+
+.admin-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 11px;
+  bottom: 11px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #7b93ff;
+}
+
+.admin-nav-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.admin-nav-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.admin-sidebar-footer {
+  flex-shrink: 0;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  color: rgba(148, 163, 184, 0.45);
+}
+
+/* 折叠态（仅桌面） */
+.admin-shell.is-collapsed .admin-sidebar {
+  width: 76px;
+}
+
+.admin-shell.is-collapsed .admin-body {
+  margin-left: 76px;
+}
+
+.admin-shell.is-collapsed .admin-brand {
+  justify-content: center;
+  padding: 0;
+}
+
+.admin-shell.is-collapsed .admin-brand-text {
+  display: none;
+}
+
+.admin-shell.is-collapsed .admin-nav-item {
+  justify-content: center;
+  padding: 0;
+}
+
+.admin-shell.is-collapsed .admin-nav-label {
+  display: none;
+}
+
+.admin-shell.is-collapsed .admin-nav-group {
+  height: 1px;
+  margin: 14px 10px;
+  padding: 0;
+  font-size: 0;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.admin-shell.is-collapsed .admin-sidebar-footer {
+  display: none;
+}
+
+/* ---------------- 右侧主体 ---------------- */
+
+.admin-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 100vh;
+  margin-left: 236px;
+  transition: margin-left 0.24s ease;
+}
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 24px 0 16px;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--admin-header-bg);
+  backdrop-filter: blur(8px);
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.admin-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--admin-text-secondary);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.admin-icon-btn:hover {
+  background: var(--admin-hover);
+  color: var(--admin-primary);
+}
+
+.admin-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--admin-text-secondary);
+}
+
+.admin-breadcrumb .current {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.admin-breadcrumb .sep {
+  font-size: 11px;
+  color: var(--admin-text-secondary);
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-header-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--admin-text-secondary);
+  text-decoration: none;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.admin-header-link:hover {
+  background: var(--admin-hover);
+  color: var(--admin-primary);
+}
+
+.admin-header-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 8px;
+  background: var(--admin-border);
+}
+
+.admin-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.admin-user:hover {
+  background: var(--admin-hover);
+}
+
+.admin-user-name {
+  max-width: 110px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--admin-text);
+}
+
+.admin-user-caret {
+  font-size: 12px;
+  color: var(--admin-text-secondary);
+}
+
+.admin-content {
+  padding: 24px 28px 40px;
+}
+
+/* 移动端：侧栏抽屉 */
+.admin-overlay {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .admin-sidebar {
+    width: 236px;
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .admin-body,
+  .admin-shell.is-collapsed .admin-body {
+    margin-left: 0;
+  }
+
+  .admin-shell.is-collapsed .admin-sidebar {
+    width: 236px;
+  }
+
+  .admin-shell.is-collapsed .admin-brand {
+    justify-content: flex-start;
+    padding: 0 18px;
+  }
+
+  .admin-shell.is-collapsed .admin-brand-text {
+    display: flex;
+  }
+
+  .admin-shell.is-collapsed .admin-nav-item {
+    justify-content: flex-start;
+    padding: 0 12px 0 15px;
+  }
+
+  .admin-shell.is-collapsed .admin-nav-label,
+  .admin-shell.is-collapsed .admin-sidebar-footer {
+    display: block;
+  }
+
+  .admin-shell.is-collapsed .admin-nav-group {
+    height: auto;
+    margin: 18px 0 8px;
+    padding: 0 12px;
+    font-size: 11px;
+    background: transparent;
+  }
+
+  .admin-shell.is-mobile-open .admin-sidebar {
+    transform: translateX(0);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+  }
+
+  .admin-shell.is-mobile-open .admin-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .admin-header {
+    padding: 0 14px;
+  }
+
+  .admin-content {
+    padding: 16px 14px 32px;
+  }
+
+  .admin-user-name {
+    display: none;
+  }
+
+  .admin-header-link span {
+    display: none;
+  }
+}
+
+/* ---------------- 内容卡片 ---------------- */
+
+.admin-content .admin-card {
+  padding: 20px 22px 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: var(--admin-card);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.admin-content .admin-card + .admin-card {
+  margin-top: 20px;
+}
+
+/* 卡片内的表格不再重复投影描边 */
+.admin-content .admin-card .el-table {
+  border: 1px solid var(--admin-table-border);
+  box-shadow: none;
+}
+
+/* 页面标题（替代旧版黄色横幅） */
+.admin-content .admin-page-head {
+  margin-bottom: 18px;
+}
+
+.admin-content .admin-page-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.admin-content .admin-page-head h2::before {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  margin-right: 8px;
+  border-radius: 2px;
+  background: var(--admin-primary);
+  vertical-align: -2px;
+}
+
+.admin-content .admin-page-head p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--admin-text-secondary);
+}
+
+/* ---------------- 列表页统一样式 ---------------- */
+
+.admin-content .el-table {
+  --el-table-border-color: var(--admin-table-border);
+  --el-table-header-bg-color: var(--admin-table-head);
+  --el-table-header-text-color: var(--admin-text-secondary);
+  --el-table-row-hover-bg-color: var(--admin-table-row-hover);
+  --el-table-bg-color: var(--admin-card);
+  --el-table-tr-bg-color: var(--admin-card);
+  --el-table-text-color: var(--admin-text);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--admin-card);
+  box-shadow: var(--admin-shadow);
+  font-size: 13px;
+}
+
+.admin-content .el-table th.el-table__cell {
+  font-weight: 600;
+}
+
+.admin-content .el-table .el-table__cell {
+  padding: 12px 0;
+}
+
+.admin-content .el-table .cell {
+  line-height: 1.6;
+}
+
+.admin-content .pagination {
+  margin: 18px 0 0;
+  text-align: right;
+}
+
+.admin-content .handle-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.admin-content .handle-box .el-button {
+  margin-bottom: 10px;
+}
+
+.admin-shell .el-button {
+  font-weight: 500;
+}
+
+.admin-shell .el-input__wrapper,
+.admin-shell .el-textarea__inner {
+  border-radius: 8px;
+}
+
+/* 弹窗圆角与卡片保持一致（Element Plus 默认仅 2px，显得方） */
+.admin-dialog {
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* 修改账号弹窗的说明文字：弹窗挂载到 body，取不到 .admin-shell 的局部变量，明暗分别给色 */
+.username-form-tip {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #909399;
+}
+
+html.dark .username-form-tip {
+  color: #a3a6ad;
+}
+
+/* 页面切换动画 */
+.admin-fade-enter-active,
+.admin-fade-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.admin-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.admin-fade-leave-to {
+  opacity: 0;
+}
