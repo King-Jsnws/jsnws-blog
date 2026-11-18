@@ -1,0 +1,294 @@
+/* ==========================================================================
+   移动端复刻（参考站 rainzt.cn）：仅作用于 ≤767px 窄屏。
+   桌面端（≥768px）样式完全不受影响，所有规则必须留在本媒体查询内。
+   原则：只复刻布局、间距、字号与组件形态；本站配色、数据、功能、文案不动。
+   ========================================================================== */
+@media screen and (max-width: 767px) {
+    :root {
+        /* 参考站 390 宽实测：内容左右留白 7px、卡片圆角 14px、模块间距 14px */
+        --ui-page-gutter: 8px;
+        --ui-page-gap: 14px;
+        --ui-page-top: 74px;
+        --ui-page-top-banner: 14px;
+        --ui-page-bottom: 40px;
+        --ui-card-radius: 14px;
+        --ui-card-padding-y: 14px;
+        --ui-card-padding-x: 14px;
+        --ui-title-size: 18px;
+        --ui-subtitle-size: 13px;
+    }
+
+    /* 参考站移动端正文基准 14px / 21px */
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    /* ---- 顶部栏：玻璃底 + 深色文字，站名收进药丸，与参考站形态一致 ---- */
+    html body .toolbar-content {
+        height: 60px;
+        color: var(--fontColor);
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(14px) saturate(150%);
+        -webkit-backdrop-filter: blur(14px) saturate(150%);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* 窄屏不铺头图，改用纯玻璃底，避免白字压在亮图上不可读 */
+    html body .toolbar-content::before {
+        display: none;
+    }
+
+    html.dark body .toolbar-content {
+        background: rgba(32, 32, 32, 0.86);
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+
+    html body .toolbar-title {
+        margin-left: 10px;
+        padding: 3px 10px 3px 3px;
+        gap: 6px;
+        max-width: 64vw;
+        background: var(--cardBg);
+        border-radius: 999px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        text-shadow: none;
+    }
+
+    html body .toolbar-title h2 {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.3;
+        color: var(--fontColor);
+        text-shadow: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    html body .toolbar-logo {
+        height: 26px;
+        max-width: 120px;
+        border-radius: 50%;
+        filter: none;
+    }
+
+    html body .toolbar-mobile-menu {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        margin-right: 10px;
+        font-size: 20px;
+        color: var(--fontColor);
+        background: var(--cardBg);
+        border-radius: 50%;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+        text-shadow: none;
+    }
+
+    /* ---- 移动端抽屉：改为浅色面板，与参考站整屏菜单一致 ---- */
+    html body .toolbarDrawer {
+        background: var(--favoriteBg);
+    }
+
+    html body .toolbarDrawer::before {
+        background: var(--favoriteBg);
+    }
+
+    html body .toolbarDrawer .el-drawer__header {
+        color: var(--fontColor);
+        font-size: 18px;
+    }
+
+    html body .small-menu {
+        color: var(--fontColor);
+        text-shadow: none;
+        font-size: 16px;
+    }
+
+    html body .small-menu > li {
+        line-height: 44px;
+    }
+
+    /* 抽屉改为浅色面板后，导航项同步改为深色文字与浅色悬停底 */
+    html body .toolbarDrawer .nav-pill,
+    html body .toolbarDrawer .nav-pill i,
+    html body .toolbarDrawer .nav-pill svg {
+        color: var(--fontColor);
+    }
+
+    html body .toolbarDrawer .nav-pill:hover {
+        background: var(--hoverBg);
+    }
+
+    html body .toolbarDrawer .nav-pill.is-active {
+        background: var(--hoverBg);
+        color: var(--themeBackground);
+    }
+
+    html body .toolbarDrawer .nav-pill.is-active i,
+    html body .toolbarDrawer .nav-pill.is-active svg {
+        color: var(--themeBackground);
+    }
+
+    /* 抽屉内的下拉导航（文章 / 动态 / 关于）同样改为深色文字 */
+    html body .toolbarDrawer .nav-dropdown-trigger,
+    html body .toolbarDrawer .nav-dropdown-trigger .el-icon,
+    html body .toolbarDrawer .nav-dropdown-item {
+        color: var(--fontColor);
+    }
+
+    html body .toolbarDrawer .nav-dropdown-trigger:hover,
+    html body .toolbarDrawer .nav-dropdown-trigger.is-open,
+    html body .toolbarDrawer .nav-dropdown-trigger.is-active {
+        background: var(--hoverBg);
+        color: var(--themeBackground);
+    }
+
+    html body .toolbarDrawer .nav-dropdown-panel {
+        background: var(--cardBg);
+        border-color: var(--cardBorder);
+    }
+
+    html body .toolbarDrawer .nav-dropdown-item:hover {
+        background: var(--hoverBg);
+        color: var(--themeBackground);
+    }
+
+    /* 内容页左右留白：统一到 8px，卡片铺满 374px。
+       页面容器内边距来自各页 scoped 样式（优先级更高），这里用 !important 收敛，仅窄屏生效 */
+    .about-container,
+    .anime-wrap,
+    .sponsor-container,
+    .travel-container,
+    .analytics-container,
+    .tag-page-container,
+    .comment-content,
+    .changelog-page,
+    .archive-page,
+    .categories-page,
+    .blog-log-page,
+    .graph-page,
+    .favorite-container,
+    .post-page,
+    .page-container {
+        width: 100% !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    /* ---- 首页 ---- */
+    .page-container {
+        gap: 14px;
+    }
+
+    .page-container .aside-content {
+        order: 2;
+    }
+
+    .page-container .recent-posts {
+        gap: 14px;
+    }
+
+    /* 首屏高度压到参考站的整屏比例，标题与诗句按窄屏缩放 */
+    .signature-wall h1.playful {
+        font-size: 32px;
+        line-height: 1.35;
+        padding: 0 16px;
+    }
+
+    .signature-wall h3 {
+        font-size: 14px;
+        line-height: 1.7;
+        padding: 0 18px;
+    }
+
+    .announcement {
+        font-size: 13px;
+        padding: 10px 12px;
+        border-radius: 14px;
+    }
+
+    /* ---- 文章列表 / 归档 / 分类 / 标签：字号与卡片内距贴近参考站 ---- */
+    .recent-post-item,
+    .article-item,
+    .archive-item {
+        border-radius: 14px;
+    }
+
+    .recent-post-item .post-title,
+    .archive-item .title {
+        font-size: 17px;
+        line-height: 1.45;
+    }
+
+    .recent-post-item .post-content,
+    .archive-item .content {
+        font-size: 14px;
+        line-height: 1.65;
+    }
+
+    /* 分类 / 标签页的侧栏卡片在窄屏下不再抢高度，顺序放到主内容之后 */
+    .tag-page-container .tag-page-aside,
+    .categories-page .categories-aside {
+        order: 2;
+    }
+
+    /* ---- 关于页 tab：窄屏横向滚动，不换行挤压 ---- */
+    .about-container .about-tabs,
+    .about-container .tabs-nav {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .about-container .about-tabs::-webkit-scrollbar,
+    .about-container .tabs-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .about-container .about-tabs > *,
+    .about-container .tabs-nav > * {
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    /* ---- 项目更新日志：两栏在窄屏堆叠为单列，标题区收紧 ---- */
+    .changelog-page {
+        grid-template-columns: minmax(0, 1fr);
+        padding-top: 72px;
+    }
+
+    .changelog-main .notice-title {
+        font-size: 20px;
+        line-height: 1.4;
+    }
+
+    /* ---- 博客日志：与内容页同一留白与字号 ---- */
+    .blog-log-inner {
+        max-width: 100%;
+    }
+
+    .blog-log-head h1 {
+        font-size: 22px;
+    }
+
+    /* ---- 文章详情：可读性优先，正文适度放大 ---- */
+    .post-page .article-content,
+    .post-page .markdown-body {
+        font-size: 15px;
+        line-height: 1.8;
+    }
+
+    /* ---- 页脚：窄屏收敛间距，避免备案行挤压换行 ---- */
+    .myFooter {
+        padding-bottom: 14px;
+    }
+}

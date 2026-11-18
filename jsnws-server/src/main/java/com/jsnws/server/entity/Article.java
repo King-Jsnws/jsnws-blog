@@ -26,6 +26,8 @@ public class Article {
     private Boolean viewStatus;
     private Boolean commentStatus;
     private Boolean recommendStatus;
+    /** 是否置顶 */
+    private Boolean isTop;
     private String password;
     private String tips;
     private Date createTime;
@@ -66,6 +68,8 @@ public class Article {
     public void setCommentStatus(Boolean commentStatus) { this.commentStatus = commentStatus; }
     public Boolean getRecommendStatus() { return recommendStatus; }
     public void setRecommendStatus(Boolean recommendStatus) { this.recommendStatus = recommendStatus; }
+    public Boolean getIsTop() { return isTop; }
+    public void setIsTop(Boolean isTop) { this.isTop = isTop; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
     public String getTips() { return tips; }

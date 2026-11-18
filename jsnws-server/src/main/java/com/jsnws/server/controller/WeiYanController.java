@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jsnws.server.common.ApiException;
 import com.jsnws.server.common.Result;
+import com.jsnws.server.common.UserRole;
 import com.jsnws.server.entity.TreeHole;
 import com.jsnws.server.entity.WeiYan;
 import com.jsnws.server.mapper.TreeHoleMapper;
 import com.jsnws.server.mapper.WeiYanMapper;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,9 +29,6 @@ public class WeiYanController extends BaseController {
 
     private final WeiYanMapper weiYanMapper;
     private final TreeHoleMapper treeHoleMapper;
-
-    @Value("${jsnws.boss-user-id}")
-    private Long bossUserId;
 
     public WeiYanController(WeiYanMapper weiYanMapper, TreeHoleMapper treeHoleMapper) {
         this.weiYanMapper = weiYanMapper;
@@ -96,7 +93,7 @@ public class WeiYanController extends BaseController {
             throw new ApiException("记录不存在！");
         }
         Long userId = currentUserId();
-        if (!bossUserId.equals(userId) && !userId.equals(weiYan.getUserId())) {
+        if (currentRole() != UserRole.BOSS && !userId.equals(weiYan.getUserId())) {
             throw new ApiException("无权删除！");
         }
         weiYanMapper.deleteById(id);
@@ -114,7 +111,10 @@ public class WeiYanController extends BaseController {
             wrapper.like("message", String.valueOf(params.get("searchKey")));
         }
         wrapper.orderByDesc("create_time");
-        return Result.ok(treeHoleMapper.selectPage(page, wrapper));
+        Page<TreeHole> result = treeHoleMapper.selectPage(page, wrapper);
+        // 后台列表额外提供 IP 字段（实体中 ip 带 @JsonIgnore，避免前台接口泄露）
+        result.getRecords().forEach(item -> item.setIpAddress(item.getIp()));
+        return Result.ok(result);
     }
 
     private long longVal(Object value, long def) {

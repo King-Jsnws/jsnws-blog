@@ -44,7 +44,7 @@
                   disable-transitions>
             {{scope.row.viewStatus === false ? '不可见' : '可见'}}
           </el-tag>
-          <el-switch @click="changeStatus(scope.row, 1)" v-model="scope.row.viewStatus"></el-switch>
+          <el-switch v-if="isBoss" @click="changeStatus(scope.row, 1)" v-model="scope.row.viewStatus"></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="封面" align="center">
@@ -58,7 +58,7 @@
                   disable-transitions>
             {{scope.row.commentStatus === false ? '否' : '是'}}
           </el-tag>
-          <el-switch @click="changeStatus(scope.row, 2)" v-model="scope.row.commentStatus"></el-switch>
+          <el-switch v-if="isBoss" @click="changeStatus(scope.row, 2)" v-model="scope.row.commentStatus"></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="是否推荐" align="center">
@@ -67,7 +67,16 @@
                   disable-transitions>
             {{scope.row.recommendStatus === false ? '否' : '是'}}
           </el-tag>
-          <el-switch @click="changeStatus(scope.row, 3)" v-model="scope.row.recommendStatus"></el-switch>
+          <el-switch v-if="isBoss" @click="changeStatus(scope.row, 3)" v-model="scope.row.recommendStatus"></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否置顶" align="center">
+        <template #default="scope">
+          <el-tag :type="scope.row.isTop === true ? 'success' : 'danger'"
+                  disable-transitions>
+            {{scope.row.isTop === true ? '是' : '否'}}
+          </el-tag>
+          <el-switch v-if="isBoss" @click="changeStatus(scope.row, 4)" v-model="scope.row.isTop"></el-switch>
         </template>
       </el-table-column>
       <el-table-column prop="commentCount" label="评论数" align="center"></el-table-column>
@@ -76,7 +85,7 @@
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
           <el-button type="text" icon="Edit" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button type="text" icon="Delete" style="color: var(--orangeRed)" @click="handleDelete(scope.row)">
+          <el-button v-if="isBoss" type="text" icon="Delete" style="color: var(--orangeRed)" @click="handleDelete(scope.row)">
             删除
           </el-button>
         </template>
@@ -98,7 +107,9 @@
   export default {
     data() {
       return {
-        isBoss: this.$store.state.currentAdmin.isBoss,
+        // AI 站长沿用站长的全量视图，否则 user/list 只看自己的文章会一篇文章都看不到
+        isBoss: this.$store.state.currentAdmin.isBoss ||
+          Number(this.$store.state.currentAdmin.userType) === 5,
         pagination: {
           current: 1,
           size: 10,
@@ -208,6 +219,11 @@
           param = {
             articleId: article.id,
             recommendStatus: article.recommendStatus
+          }
+        } else if (flag === 4) {
+          param = {
+            articleId: article.id,
+            isTop: article.isTop
           }
         }
         this.$http.get(this.$constant.baseURL + "/admin/article/changeArticleStatus", param, true)

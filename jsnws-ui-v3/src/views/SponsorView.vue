@@ -1,9 +1,14 @@
 <template>
   <div>
-    <div class="sponsor-container">
-      <!-- 左侧栏（与主页一致），与右侧内容同处一行、顶边齐平 -->
+    <!-- 两句诗：与关于我页共用同一组件，背景图取图规则一致 -->
+    <div class="my-animation-slide-top">
+      <TwoPoem :isHitokoto="false"></TwoPoem>
+    </div>
+
+    <div class="sponsor-container my-animation-slide-bottom">
+      <!-- 左侧栏（与主页一致），与右侧内容同处一行、顶边齐平；日历按参考站放在右栏 -->
       <div class="sponsor-aside">
-        <MyAside @selectSort="selectSort" @selectArticle="selectArticle"></MyAside>
+        <MyAside hide-calendar @selectSort="selectSort" @selectArticle="selectArticle"></MyAside>
       </div>
 
       <!-- 右侧内容：标题与正文同在一列，标题顶边自然与左侧卡片齐平 -->
@@ -30,13 +35,13 @@
         </div>
 
         <!-- 右侧正文 -->
-        <div class="sponsor-page my-animation-slide-bottom">
+        <div class="sponsor-page">
 
       <!-- 收款码 -->
       <div class="sponsor-pay">
         <div class="pay-card">
           <div class="pay-head">
-            <svg class="pay-icon" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+            <svg class="pay-icon pay-icon-alipay" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
               <rect x="1.5" y="1.5" width="21" height="21" rx="5" fill="currentColor"/>
               <text x="12" y="17" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">支</text>
             </svg>
@@ -51,17 +56,12 @@
 
         <div class="pay-card">
           <div class="pay-head">
-            <svg class="pay-icon" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
-              <path fill="currentColor"
-                    d="M9.2 3C5.1 3 1.8 5.7 1.8 9c0 1.9 1.1 3.6 2.8 4.7l-.7 2.1 2.4-1.2c.9.2 1.9.4 2.9.4h.5a5.6 5.6 0 0 1-.2-1.5c0-3.2 3.1-5.8 6.9-5.8h.4C16.1 4.8 12.9 3 9.2 3z"/>
-              <path fill="currentColor"
-                    d="M22.2 13.4c0-2.7-2.7-4.9-6-4.9s-6 2.2-6 4.9 2.7 4.9 6 4.9c.7 0 1.4-.1 2.1-.3l2.2 1.1-.6-1.8c1.4-.9 2.3-2.3 2.3-3.9z"/>
-            </svg>
+            <i class="fa fa-weixin pay-icon pay-icon-weixin" aria-hidden="true"></i>
             <span class="pay-name">微信</span>
           </div>
           <div class="pay-tip">使用 微信 扫码赞助</div>
           <div class="pay-qr">
-            <img v-if="webInfo.wechat" :src="webInfo.wechat" alt="微信收款码">
+            <img v-if="webInfo.wechatReward" :src="webInfo.wechatReward" alt="微信收款码">
             <div v-else class="pay-empty">未配置微信收款码</div>
           </div>
         </div>
@@ -87,7 +87,7 @@
             <div class="sponsor-info">
               <div class="sponsor-line">
                 <span class="sponsor-name">{{ item.name }}</span>
-                <span class="sponsor-amount">￥{{ item.amount }}</span>
+                <span class="sponsor-amount"><span class="sponsor-currency">￥</span>{{ item.amount }}</span>
               </div>
               <div v-if="item.remark" class="sponsor-remark" :title="item.remark">{{ item.remark }}</div>
               <div v-if="item.createTime" class="sponsor-date">{{ item.createTime }}</div>
@@ -98,6 +98,11 @@
         </div>
       </div>
     </div>
+
+      <!-- 右栏：与归档页同一套，日历卡按参考站放这里 -->
+      <aside class="sponsor-side">
+        <ArchiveSidebar></ArchiveSidebar>
+      </aside>
     </div>
 
     <!-- 页脚 -->
@@ -108,11 +113,15 @@
 <script>
   import MyFooter from "../components/common/MyFooter.vue";
   import MyAside from "../components/common/MyAside.vue";
+  import ArchiveSidebar from "../components/common/ArchiveSidebar.vue";
+  import TwoPoem from "../components/common/TwoPoem.vue";
 
   export default {
     components: {
       MyFooter,
-      MyAside
+      MyAside,
+      ArchiveSidebar,
+      TwoPoem
     },
     data() {
       return {
@@ -129,7 +138,7 @@
     },
     methods: {
       selectSort(sort) {
-        this.$router.push({path: "/sort", query: {sortId: sort.id}});
+        this.$router.push({path: "/archive", query: {category: sort.sortName}});
       },
       selectArticle(articleSearch) {
         if (!this.$common.isEmpty(articleSearch)) {
@@ -154,18 +163,36 @@
 <style scoped>
   .sponsor-container {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    column-gap: 30px;
+    grid-template-columns: var(--ui-aside-width) minmax(0, 1fr);
+    column-gap: var(--ui-page-gap);
     align-items: start;
-    width: 90%;
-    max-width: 1400px;
+    width: var(--ui-page-inline);
+    max-width: var(--ui-page-width);
     margin: 0 auto;
-    padding: 70px 20px 50px;
+    padding: var(--ui-page-top-banner) var(--ui-page-gutter) var(--ui-page-bottom);
+    background: var(--ui-page-bg);
   }
 
   .sponsor-main {
     grid-column: 2;
     min-width: 0;
+  }
+
+  /* 右栏默认隐藏，与归档页同一断点：≥1280 才出现第三列 */
+  .sponsor-side {
+    display: none;
+    min-width: 0;
+  }
+
+  @media screen and (min-width: 1280px) {
+    .sponsor-container {
+      grid-template-columns: var(--ui-aside-width) minmax(0, 1fr) var(--ui-aside-width);
+      column-gap: var(--ui-page-gap);
+    }
+
+    .sponsor-side {
+      display: block;
+    }
   }
 
   .sponsor-header {
@@ -182,8 +209,8 @@
 
   .sponsor-subtitle {
     margin-top: 14px;
-    font-size: 15px;
-    color: var(--maxGreyFont);
+    font-size: var(--ui-subtitle-size);
+    color: var(--ui-subtitle-color);
     letter-spacing: 1px;
   }
 
@@ -209,19 +236,14 @@
   .sponsor-title-icon {
     width: 32px;
     height: 32px;
-    border-radius: 10px;
-    background: #1f1f1f;
+    border-radius: 8px;
+    background: var(--ui-accent-strong);
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 12px;
     flex-shrink: 0;
-  }
-
-  /* 黑夜模式下黑色图标底色与卡片过近，换成低透明度白底保留方块观感 */
-  html.dark .sponsor-title-icon,
-  html.dark .sponsor-list-icon {
-    background: rgba(255, 255, 255, 0.1);
   }
 
   .sponsor-aside {
@@ -230,13 +252,12 @@
 
   .sponsor-page {
     min-width: 0;
-    animation: hideToShow 1s ease-in-out;
   }
 
   .sponsor-title {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--fontColor);
+    font-size: var(--ui-title-size);
+    font-weight: var(--ui-title-weight);
+    color: var(--ui-title-color);
     line-height: 1.2;
   }
 
@@ -247,17 +268,17 @@
   }
 
   .pay-card {
-    background: var(--cardBg);
-    border: 1px solid rgba(128, 128, 128, 0.16);
-    border-radius: 18px;
+    background: var(--ui-card-bg);
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
     padding: 34px 24px 40px;
     text-align: center;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--ui-card-shadow);
     transition: all 0.3s;
   }
 
   .pay-card:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--ui-card-shadow-hover);
     transform: translateY(-3px);
   }
 
@@ -272,6 +293,17 @@
     color: var(--fontColor);
     margin-right: 10px;
     flex-shrink: 0;
+    font-size: 26px;
+  }
+
+  /* 黑夜模式支付宝图标换用品牌蓝，浅色模式与微信图标保持原样 */
+  html.dark .pay-icon-alipay {
+    color: #1677ff;
+  }
+
+  /* 黑夜模式微信图标换用品牌绿 */
+  html.dark .pay-icon-weixin {
+    color: #07c160;
   }
 
   .pay-name {
@@ -314,10 +346,11 @@
 
   .sponsor-list {
     margin-top: 30px;
-    padding: 22px 24px 26px;
-    background: var(--cardBg);
-    border: 1px solid rgba(128, 128, 128, 0.16);
-    border-radius: 18px;
+    padding: var(--ui-card-padding-y) var(--ui-card-padding-x);
+    background: var(--ui-card-bg);
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
+    box-shadow: var(--ui-card-shadow);
   }
 
   .sponsor-list-head {
@@ -330,8 +363,9 @@
   .sponsor-list-icon {
     width: 34px;
     height: 34px;
-    border-radius: 10px;
-    background: #1f1f1f;
+    border-radius: 8px;
+    background: var(--ui-accent-strong);
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -404,11 +438,48 @@
     max-width: 140px;
   }
 
+  /* 金额标签：高度与圆角统一由 --amount-h 推导；相对定位作为币符的挂载点 */
   .sponsor-amount {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--fontColor);
+    --amount-h: 22px;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    box-sizing: border-box;
+    height: var(--amount-h);
+    /* 圈直径 = 胶囊高度 22px（贴 border-box 左侧），圆右缘在内缘 21px 处，
+       再留 5px 给数字，故左内边距 26px */
+    padding: 0 8px 0 26px;
+    /* 圈与胶囊左端齐平、不探出，外边距保持与用户名的常规间距 */
     margin-left: 6px;
+    border: 1px solid var(--cardBorder);
+    border-radius: calc(var(--amount-h) / 2);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--fontColor);
+    /* 数字整体不拆行 */
+    white-space: nowrap;
+  }
+
+  /* 币符：直径直接取胶囊高度变量（不写死，胶囊变高圈跟着变），左上角对齐胶囊 border-box；
+     高 22px + 圆角 50% → 外半径 11px，与胶囊左端圆弧同心同半径，
+     1px 描边又取胶囊边框同色，左半圈与胶囊左边框完全重合，不会出现双层线或粗细不匀；
+     右半圈落在胶囊内部，形成「圆镶在胶囊左端」的观感 */
+  .sponsor-currency {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--amount-h);
+    height: var(--amount-h);
+    border: 1px solid var(--cardBorder);
+    border-radius: 50%;
+    font-size: 0.9em;
+    line-height: 1;
   }
 
   .sponsor-date {
@@ -439,8 +510,8 @@
   @media (max-width: 1000px) {
     .sponsor-container {
       grid-template-columns: minmax(0, 1fr);
-      width: 100%;
-      padding: 40px 16px 40px;
+      width: var(--ui-page-inline);
+      padding: var(--ui-page-top-banner) var(--ui-page-gutter) var(--ui-page-bottom);
     }
 
     /* 单列时拆掉右列容器，让标题、侧栏、正文仍按原顺序排列 */
@@ -468,6 +539,11 @@
   @media (max-width: 768px) {
     .sponsor-pay {
       grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sponsor-list,
+    .pay-card {
+      padding: 18px 16px;
     }
   }
 </style>

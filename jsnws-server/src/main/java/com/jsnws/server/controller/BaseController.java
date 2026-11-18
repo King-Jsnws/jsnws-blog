@@ -1,6 +1,7 @@
 package com.jsnws.server.controller;
 
 import com.jsnws.server.common.ApiException;
+import com.jsnws.server.common.UserRole;
 import com.jsnws.server.entity.SysUser;
 import com.jsnws.server.mapper.SysUserMapper;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -14,12 +15,20 @@ import javax.servlet.http.HttpServletRequest;
 public abstract class BaseController {
 
     protected static final String USER_ID_ATTR = "userId";
+    protected static final String USER_ROLE_ATTR = "userRole";
 
     /** 当前登录用户 id（未登录返回 null） */
     protected Long currentUserId() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         Object attr = request.getAttribute(USER_ID_ATTR);
         return attr == null ? null : (Long) attr;
+    }
+
+    /** 当前登录用户角色等级（未登录按普通用户） */
+    protected int currentRole() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        Object attr = request.getAttribute(USER_ROLE_ATTR);
+        return attr == null ? UserRole.USER : (Integer) attr;
     }
 
     /** 当前登录用户，未登录抛出异常 */

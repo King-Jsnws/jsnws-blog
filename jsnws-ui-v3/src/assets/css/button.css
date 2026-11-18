@@ -1,0 +1,276 @@
+/* ===== 前台统一按钮体系 =====
+   视觉依据：用户最近一轮的两张（外加同一按钮的高清裁切共三张）截图，优先级高于此前的白底实心方案
+     次要按钮（图 2/图 3「✎ 收起」）：纯白底 + 1px 浅蓝【虚线】描边 + 蓝色文字 + 左侧图标 + 柔和外投影
+       逐像素量取：底色 #ffffff；虚线短划约 2px、间隔约 2px，颜色约为主蓝 45%~55% 透明度（经截图缩放模糊后读数）；
+        圆角约 10px；字色取主色 #53a3f2（与参考站一致；白底 2.66:1，参考站本身即此值）、字重 500；图标与文字间距约 6~8px；按钮下缘有 4~6px 柔和投影。
+     主按钮（图 1「发布」）：实心主题蓝 + 白字（白字 / #53a3f2 = 2.66:1，已按确认保留参考站原值），无可见描边，圆角 10px，高 36px，与次要按钮同一几何节奏
+     hover：虚线保留，只加深描边与阴影；按压：瞬时 scale(.95)，无缩放过渡
+   几何：圆角 10px / 14px 500 / 内边距 8px 14px（横向约 1em）/ 最小高 36px。
+   深浅两套：浅色按截图取色，深色底色用本站 --cardBg、描边与文字由强调色推导。 */
+
+:root {
+    /* 强调色与参考站主色一致：#53a3f2（oklch(.7 .14 250)）。
+       hover 取参考站 --title-active（oklch(.6 .1 250) = #4f84ba），不是新派生色 */
+    --ui-accent: #53a3f2;
+    --ui-accent-strong: #53a3f2;
+    --ui-accent-strong-hover: #4f84ba;
+    /* 实心强调块上的文字：浅色保持白字（白字 / #53a3f2 = 2.66:1，参考站同款主色下的既有表现） */
+    --ui-accent-contrast: #ffffff;
+    --ui-btn-bg: var(--cardBg);
+    --ui-btn-border: color-mix(in srgb, var(--ui-accent) 50%, transparent);
+    --ui-btn-border-hover: color-mix(in srgb, var(--ui-accent) 80%, transparent);
+    --ui-btn-shadow:
+        0 1px 2px rgba(38, 38, 38, 0.05),
+        0 2px 7px rgba(38, 38, 38, 0.08);
+    --ui-btn-shadow-hover:
+        0 2px 4px rgba(38, 38, 38, 0.07),
+        0 4px 12px rgba(38, 38, 38, 0.1);
+    --ui-btn-radius: 10px;
+    --ui-btn-transition: color 0.22s ease, box-shadow 0.22s ease,
+        border-color 0.22s ease, background-color 0.22s ease;
+}
+
+html.dark {
+    /* 深色：底色取本站面板色（--cardBg），强调色为参考站深色主色 #63b3ff（oklch(.75 .14 250)） */
+    --ui-accent: #63b3ff;
+    --ui-accent-strong: #63b3ff;
+    /* 深色下 hover 不再压深（压深会落到参考站没有的色值），靠虚线描边与阴影抬升区分 */
+    --ui-accent-strong-hover: #63b3ff;
+    /* 亮蓝实心块上白字只有 2.23:1，沿用站点既有的深色字处理（#0b1b2b / #63b3ff = 7.72:1） */
+    --ui-accent-contrast: #0b1b2b;
+    --ui-btn-border: rgba(99, 179, 255, 0.42);
+    --ui-btn-border-hover: rgba(99, 179, 255, 0.78);
+    --ui-btn-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.35),
+        0 2px 8px rgba(0, 0, 0, 0.28);
+    --ui-btn-shadow-hover:
+        0 2px 5px rgba(0, 0, 0, 0.4),
+        0 5px 14px rgba(0, 0, 0, 0.38);
+}
+
+/* 基础（次要）按钮：白色实心底 + 浅蓝虚线描边 + 强调色文字 */
+.ui-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 8px 14px;
+    border: 1px dashed var(--ui-btn-border);
+    border-radius: var(--ui-btn-radius);
+    background-color: var(--ui-btn-bg);
+    box-shadow: var(--ui-btn-shadow);
+    color: var(--ui-accent);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: normal;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: var(--ui-btn-transition);
+}
+
+.ui-btn:hover,
+.ui-btn:focus-visible {
+    border-color: var(--ui-btn-border-hover);
+    box-shadow: var(--ui-btn-shadow-hover);
+    color: var(--ui-accent);
+}
+
+.ui-btn:focus-visible {
+    outline: 2px solid var(--ui-accent);
+    outline-offset: 3px;
+}
+
+/* 按压：CSS scale 属性，且 transition 不含 scale → 与参考站一致为瞬时按压/回弹 */
+.ui-btn:active {
+    border-color: var(--ui-btn-border-hover);
+    box-shadow: var(--ui-btn-shadow-hover);
+    scale: 0.95;
+}
+
+.ui-btn:disabled,
+.ui-btn.is-disabled,
+.ui-btn[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.ui-btn:disabled:hover,
+.ui-btn.is-disabled:hover,
+.ui-btn[aria-disabled='true']:hover {
+    border-color: var(--ui-btn-border);
+    box-shadow: none;
+}
+
+/* 主按钮：同尺寸节奏换成实心强调色，悬停加描边虚线 + 阴影抬升 */
+.ui-btn--primary {
+    border-color: transparent;
+    background-color: var(--ui-accent-strong);
+    color: var(--ui-accent-contrast);
+    box-shadow: var(--ui-btn-shadow);
+}
+
+.ui-btn--primary:hover,
+.ui-btn--primary:focus-visible,
+.ui-btn--primary:active {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.55);
+    background-color: var(--ui-accent-strong-hover);
+    color: var(--ui-accent-contrast);
+}
+
+.ui-btn--primary:disabled,
+.ui-btn--primary.is-disabled {
+    background-color: var(--ui-accent-strong);
+    color: var(--ui-accent-contrast);
+    opacity: 0.55;
+}
+
+/* 尺寸：只改尺寸，圆角/字重/内边距节奏与基础按钮一致（横向保持约 1em） */
+.ui-btn--sm {
+    min-height: 28px;
+    padding: 5px 12px;
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.ui-btn--lg {
+    min-height: 42px;
+    padding: 10px 18px;
+    font-size: 15px;
+}
+
+/* 纯图标方形按钮：保持方形不裁圆 */
+.ui-btn--icon {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+}
+
+.ui-btn--block {
+    width: 100%;
+}
+
+/* 窄屏：不撑破容器，文字过长时省略 */
+@media screen and (max-width: 480px) {
+    .ui-btn {
+        max-width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-btn {
+        transition: none;
+    }
+
+    .ui-btn:active {
+        scale: 1;
+    }
+}
+
+/* ===== Element Plus 按钮：同一套视觉覆盖（只作用于显式带 ui-btn 的前台按钮，后台不受影响） ===== */
+.el-button.ui-btn {
+    height: auto;
+    min-height: 36px;
+    padding: 8px 14px;
+    border: 1px dashed var(--ui-btn-border);
+    border-radius: var(--ui-btn-radius);
+    background-color: var(--ui-btn-bg);
+    box-shadow: var(--ui-btn-shadow);
+    color: var(--ui-accent);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: normal;
+    transition: var(--ui-btn-transition);
+}
+
+.el-button.ui-btn > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.el-button.ui-btn:hover,
+.el-button.ui-btn:focus-visible {
+    border-color: var(--ui-btn-border-hover);
+    background-color: var(--ui-btn-bg);
+    box-shadow: var(--ui-btn-shadow-hover);
+    color: var(--ui-accent);
+}
+
+.el-button.ui-btn:focus-visible {
+    outline: 2px solid var(--ui-accent);
+    outline-offset: 3px;
+}
+
+.el-button.ui-btn:active {
+    border-color: var(--ui-btn-border-hover);
+    box-shadow: var(--ui-btn-shadow-hover);
+    scale: 0.95;
+}
+
+.el-button.ui-btn--primary,
+.el-button.ui-btn--primary:not(.is-text):not(.is-link) {
+    border-color: transparent;
+    background-color: var(--ui-accent-strong);
+    color: var(--ui-accent-contrast);
+}
+
+.el-button.ui-btn--primary:hover,
+.el-button.ui-btn--primary:focus-visible,
+.el-button.ui-btn--primary:active {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.55);
+    background-color: var(--ui-accent-strong-hover);
+    color: var(--ui-accent-contrast);
+}
+
+.el-button.ui-btn--primary.is-loading {
+    border-color: transparent;
+    background-color: var(--ui-accent-strong);
+    color: var(--ui-accent-contrast);
+}
+
+.el-button.ui-btn--sm {
+    min-height: 28px;
+    padding: 5px 12px;
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.el-button.ui-btn--lg {
+    min-height: 42px;
+    padding: 10px 18px;
+    font-size: 15px;
+}
+
+.el-button.ui-btn--block {
+    width: 100%;
+}
+
+.el-button.ui-btn.is-disabled,
+.el-button.ui-btn.is-disabled:hover {
+    border-color: var(--ui-btn-border);
+    background-color: var(--ui-btn-bg);
+    box-shadow: none;
+    color: var(--ui-accent);
+    opacity: 0.55;
+    scale: 1;
+}
+
+.el-button.ui-btn--primary.is-disabled,
+.el-button.ui-btn--primary.is-disabled:hover {
+    border-color: transparent;
+    background-color: var(--ui-accent-strong);
+    color: var(--ui-accent-contrast);
+}

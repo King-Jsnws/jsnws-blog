@@ -1,263 +1,642 @@
-/* markdown样式 */
-.entry-content {
+/* ==========================================================================
+   文章正文（富文本）排版 —— 1:1 对齐 halo-theme-joe2.0
+   源码依据：
+   - source/css/global.less  `.joe_detail__article`（正文）、`.joe_container`（行内代码/代码块）
+   - source/css/theme.less   配色变量（html 与 [data-mode="dark"]）
+   - source/css/normalize.less 全局重置（标题字重、列表、表格、图片基线等）
+   - source/lib/prism/themes/prism-one-dark.css（代码块配色）
+   作用域同时覆盖：
+   - 前台 `.post-page .post-body .entry-content`
+   - 后台编辑器预览 `.post-edit-page .editor-shell .md-editor-preview`
+   ========================================================================== */
+
+/* ---- 主题变量（theme.less 白天值，原样照搬） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) {
+    --background: #fff;
+    --main: #303133;
+    --routine: #606266;
+    --minor: #909399;
+    --seat: #c0c4cc;
+    --classA: #dcdfe6;
+    --classB: #e4e7ed;
+    --classC: #ebeef5;
+    --classD: #f2f6fc;
+    --classE: #dcdcdc;
+    --quote: #50bfff;
+    --code: #409eff;
+    --code-background: #e8f3ff;
+    --radius-inner: 4px;
+    --radius-img: 5px;
+    --img-max-width: 100%;
+    --shadow-code: #bdbdbd;
+    /* joe2.0 默认主色（settings theme_color 默认值），仅作用于正文容器，
+       不改动全站 --themeBackground */
+    --theme: #fb6c28;
+
     position: relative;
+    padding: 10px 0;
+    font-size: 15px;
+    word-break: break-word;
+    color: var(--routine);
 }
 
-.entry-content blockquote {
-    margin: 0;
-    padding: 15px 50px;
+/* ---- 主题变量（theme.less 黑夜值，原样照搬） ---- */
+html.dark :is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) {
+    --background: #232323;
+    --main: #999;
+    --routine: #888;
+    --minor: #777;
+    --seat: #666;
+    --classA: #515253;
+    --classB: #454545;
+    --classC: #414243;
+    --classD: #303030;
+    --classE: #585858;
+    --quote: #276b92;
+    --code: #efa141;
+    --code-background: #353246;
+    --shadow-code: #191919;
+    /* joe2.0 暗色默认主色 */
+    --theme: #9999ff;
+}
+
+/* ---- 标题（global.less 4525-4571 + normalize h1-h6） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h1,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h2,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h3,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h4,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h5,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h6 {
     position: relative;
-    word-break: break-word;
-    text-align: center;
-}
-
-.entry-content blockquote:before {
-    content: "\f10d";
-    font-size: 1.5rem;
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: orange;
-    font-family: FontAwesome;
-}
-
-.entry-content blockquote:after {
-    content: '\f10e';
-    font-size: 1.5rem;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    color: orange;
-    font-family: FontAwesome;
-}
-
-.entry-content code:not(.hljs) {
-    background: #fefac7;
-    color: #e67474;
-    word-break: break-word;
-    padding: 4px 6px;
-    border-radius: 5px;
-}
-
-.entry-content ul {
-    list-style: disc;
-    padding: 0 10px 0 35px;
-    color: var(--articleGreyFontColor);
-    border-radius: 10px;
-}
-
-.entry-content ol {
-    list-style: decimal;
-    padding: 0 10px 0 35px;
-    color: var(--articleGreyFontColor);
-    border-radius: 10px;
-}
-
-.entry-content ol li,
-.entry-content ul li {
-    padding: 8px 0;
-    Letter-spacing: 1px;
+    margin: 0 0 18px;
+    padding: 0;
+    border-bottom: none;
+    font-weight: 500;
     line-height: 24px;
+    color: var(--main);
 }
 
-.entry-content h3 {
-    padding-bottom: 8px;
-    border-bottom: 1px dashed #ddd;
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h1 {
+    margin: 40px 0 20px;
+    font-size: 2em;
 }
 
-.entry-content h1,
-.entry-content h2,
-.entry-content h2,
-.entry-content h3,
-.entry-content h4 {
-    margin-top: 30px;
-    margin-bottom: 20px;
-}
-
-.entry-content h2 {
-    padding-left: 40px;
-}
-
-.entry-content h3 {
-    padding-left: 20px;
-    font-size: 22px;
-}
-
-.entry-content h4 {
-    padding-left: 20px;
-    font-size: 20px;
-}
-
-.entry-content h5 {
-    font-size: 18px;
-    padding-left: 28px;
-}
-
-.entry-content h2:before {
-    content: "🌺";
-    position: absolute;
-    left: 0;
-    font-size: 1.03em;
-    margin-top: -2px;
-}
-
-.entry-content h3:before {
-    content: "#";
-    left: 0;
-    position: absolute;
-    margin-top: 2px;
-    color: #ff6d6d;
-}
-
-.entry-content h4:before {
-    content: "▌";
-    left: 0;
-    position: absolute;
-    color: #ff6d6d;
-}
-
-.entry-content h5:before {
-    content: "🌷";
-    left: 0;
-    position: absolute;
-}
-
-.entry-content a {
-    color: #e67474;
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h1::before {
     position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    top: -4px;
+    margin-right: 12px;
+    content: "¶";
+    font-size: 24px;
+    color: var(--theme);
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h2 {
+    margin: 40px 0 20px;
+    font-size: 1.4em;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h2::before {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    top: -2px;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    content: "";
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAVJJREFUWEftl7FKw1AUhv9rbmf1PRw6utkHEOoi6WPoE1ifQJ8gySKCOtRFRBKsDuIiDdZAURBFF50M2sFIzpGogVK03JA2cbh3S/i55zvfvYETgRyLj5erIKOO949FyKm5eHvvHEBV2jyruq1QDQ7n2DNXALEx+D7e2vl6lBYp76scHCzErtmCEPVhqEIAfus8BZk4wM+Zd/46tskDeI0mgLUyAdoAFsoDcM0XCDFdHoDX4FGfbRF3QANoA9qANqANaAPawD82EEWId1sAOJQWz6iO+5nGch41kDw9I3bbYOaTis21wgG4G4AuAzCwXrEoGV6V1ngMJPoPjoB+PzSIa8KBr1QdwFgA6KID7t1AgFYNC5uqxZNcbgB+eASdngHM+9LmpSzF8wFEEagbgHvXoQA3s3aegmYz8P1f4NNVME+39z5e3w4lkSMc3GXtPM1/AjYDFjDGddN5AAAAAElFTkSuQmCC");
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h3 {
+    margin: 30px 0 18px;
+    font-size: 1.3em;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h3::before {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    top: -3px;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    content: "";
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAH1JREFUWEft1qENgDAQheH/JANg60DAJIgmrMFCzEEYgTFgDyRFIClp0yBf9evl8pl3RsYbp7BjNLHoMptljPiMZH3WAhKQgAQkIIGXQAXUT79cniHaNMa5draliqqojIID86nRHEtvbSqlBSQgAQlIQAISkECRAA746SC5Ad6XpiGnnOGPAAAAAElFTkSuQmCC");
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h4 {
+    font-size: 1.18em;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h4::before {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    top: -2px;
+    width: 22px;
+    height: 22px;
+    margin-right: 6px;
+    content: "";
+    color: var(--theme);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAndJREFUWEftVkty2kAQfT1SBLtwg6AqwzbxCQIniG8QvAmwCp8kRqvgFa5KwHjlkI3NCeIbhJwgXptUgW9AdiDQdGoITqUsjcZyuYqNZ6WSXs88vel+3YQtL9ry+Xgk8KhApALNAe8x5PPbCUrgabdsD2/e+1edEpN4FsIRps7OwT9cXKKHCLw75QIL+V0XRFIUP1dptBx3ChKkxQlw8UnOG5mqLESgdsYZy5dTAE8jg5lH3Ypd5Mlxxl8ttDgGRulcq5iYgApofgn6ILzVBQsSu5/e0OXiqnMOotdatVjsOvkPl4muQIFrp5y1hJzEBA67ZavEk07WX5EexzxM5b1SYgJrFQbBOQDt3wVSuP0qTRfjowsAr3SHODa75HrqqiKX1gdMycjAYa9stU3JCPBhKue1ExNQAY3BakSgl1HBDMykI9z+Ps0WV0eXIITKdhM3c+yUS259FrVPrBM2TlclEnSmY8+S93tV+/yvH+hxxLzv5D11paFltOLmIFD3FzIbtRMzpr2K5arn+bgzJZAWl8631rjby0zAUJI3xnTfkjQTiFEAwHW3bGWNCoCv0zlvjUukgOoJgPymzQGg3itbfVMOMKiezh30ExOIqwIAvwNHZFUVzMcdbbUonGOnsomr4P1XfiFZ/tS6GOOkW7FqJh8gwomz06ol9oE7O6GhH9zLCbfeCxqDoE3AR61sm5nA/3XUZ47pmneYCSLnAeHLCQGZaAvmH72yXdjMA6oTanHpnFfQ5tDmQ+KJ6MZ+jckXY7//k4pWYB7sQVCUccxU3a9teHKcWS7ne0wI4Rhipqv7REZkku8hvhut+CEOidvjkcDWFfgD9RMzMKE7f80AAAAASUVORK5CYII=");
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h5 {
+    font-size: 1em;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h5::before {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    top: -1px;
+    left: 0;
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    content: "";
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAC8klEQVRYR+3WP2gTURwH8O/vKnVRRHKXP52cBO3g4p/BqYNIhy4muajUQRBFKjQV1En6ZxJBcmlRCoJDRe3FDiJVwamLS3FwqbgIgss1l2ZQF5XeT3I1Z3NJ7u5dLlAwN9699/t97vfe7/EIO/yhHe5DD9jpCv3fFVTu856+Xzi62Y/35hj9CFPNrlUwWeRJAJfBGADwBcBNI0/PRZFdAdo4xlQLjCqKjBzogat7hZCRAgPghJGBgbFnxglAOvS7b/fLb+q+qnv5BHBCyEBAWTdnANy2IxOtWSC1qsY+1jOFwAVG+gIVvXyHQbcaKuZCxmf5iMQogXFQtEsBeO5JT6BcMu+Bcb1lUhcyqfExACUAB6JEtgUqi+U5JrrmmcyFHCjwSYtQO+tSUSFbAmXdnAdwJVASdyWLPAS2kbFA8xsHNS13EzCmlx8R6KJQcBcypfFpho3cKxRna3ADsgEo6+ZjAKMhgjZ1d2KWR2gTSyD0h4jnIB2gXDIXwciFCPZvSnMl0wwshYrJGDImaMUGKovlLBPVOrDjh8APzFx8zDkjNa7FzYoGZsKT9XEarQOHmei1aJA246cqOWW6/i2l8VMGzoWIPW/k6eq2Ja6UwCz8pw2JGZ8sS8pUz8fWau/jGp+SgLchcGBgZD1Py41NUuoI+ZloV8ZU93+ogZKzfBiWfXAPCgMJU8Y42avQdMzI4ZBfmSizocqrUeJaAmsvBZGGBCtTziXeRY1rCxRAViEhXckqK93AeQJ9kYTvlmVlqmcTdhNEtefc+9X3utVmuX+CkK6oyqtu4nwrWP8bF5IZdGYjJ79wDuMCz4D+XmhFWnZbt7ab5ltBB6mbkyAaBPFCJassuwMmNb4L4EZgXwBc4AoGTZrUeA6A9x1yK6tzzvnFDlxBv0D176kCP2TCpbbjBXCRV9DZk0VeAONCE1IQ1zWg3dlF1sFQHWQIXFeBNrLAw5BwHBZWjQl6E3SbbB8X+R4Mg/Ca0wN2WtFeBTut4B84mFI4VpekyAAAAAElFTkSuQmCC");
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h6 {
+    font-size: 1em;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) h6::before {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    top: -1px;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    content: "";
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: auto 100%;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAEI0lEQVRYR+3Xb2wTZRwH8G/vL22RPy5GW8fK6rJpGeFFY9RO3TRRE1HfmEAammEyjZmOSEg1RrPZaTD6xjhU/Ndlf0CZgwmD+qcgZBRIETeqY0Vcnc7pGonhRY2l3m2t5upqjq693l2vcy+8N81zz/NcPvf75fd7rjos8ku3yH34HyjK0PqlDLPzD56vMNL0VHxmpgXAoUIZXKgI3sMSpK+cNTAbylaj/9IkprnLM3+mkg8XQi4EsJ4lSL+ZNbAfVd+JG/XLcSERg3M8IAtZauBtDEkeNdN6fX9NfRqXueQiSwm00wQRMDMGw94snBJkqYBrSYIIXs/ojftqGq6IXHZRFIpkKYC2JSw9SJE663W0nthlqcMawwrJYpVCag1M48pNy1YNvLWRffGNIYSCv6Cnog7rjCtVIbUEXoG7qeqaNMj51F58dWoKPZY62JeWyUJG+ctcIplcIizWCpgTl9EIyODJn9BtceDWq/6B57tO/H4R688fFaZ7AWzWAiiJEyMDx39Ed6UDdyy7Ni/w1ekxbP95VJi/F8CRYoGycGLksaEJdFU6cPdy0zxkR/RbtE6FhPvHATQUm2JFODHSfyyCLmsd7lth/hf53q/jcE8OC+NTAG7PTKiNoCqcGPnpF+PotDrwwNXl+OC3H9A8cVqYPgPgFnFo1QCLwomRg4cvoPMGBzZHTgq3zwKwZ+ddKVATXAZhf+gdnPvuojAUqmJdrspRAtQU93pXEM+8clgwhQHU5itruUBNcTt6TsP9sl8weQC0S/VFOUBNcW/2folt2z+XhZPTZh6kSKJ79aqVRuFszRxfUm8sNbdz9xlsfekz2bhCQBvDMMM8z+ubN92Mjrb71brS+97dM4wtnk8U4SSBBEGErVarzeVywePxoHVLA1pb6lUh3+8bwZMv+BTjpIAVACa9Xq+uqakJ7e3tqpGd/WfR3Jr+81awIJS0mY0A+sLhMGw2W3qfGmTXvhAef/6gapxUBDuqqqoejUQiBvFbKUH2DHyNx54bLAqXF0jT9HBjY6Pd6/XOi7oc5K7936Dp2QNF4/IBrTqdLuLxeIi2tracRSGF/PDgKB55er8muHzATQB2m81m+P1+1NbmPoVyIfsOnUOj+2PNcPmAO1iWbeE4TmexWODz+WQhayrL4No2oCkuJ5Bl2VGO49ZmcisXObdeVSuRaq7ZZ3G10KBTqRQl3pQPGY1GEQgE4HQ6heVDAO5S1cklNmUDXQRB9KZSqXkfESaTCW63G7FYDKFQKDEyMoJoNKqfe/bbAJ7QGpcrxa8xDLOV5/k0kGXZv2ZnZ5FMJtNjmqYvURR1IpFInAcwAeD7ud/pUuDmAY1G41g8Hl9DkmScoqggx3FHAIyJMMlSQfI9V5zKagDC93dsoRFKimQx2dIWOV/U/yn6bx0WyDj8vgLOAAAAAElFTkSuQmCC");
+}
+
+/* ---- 分割线（global.less 4773） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) hr {
+    height: 1px;
+    margin: 0 0 18px;
+    border: none;
+    background-color: var(--classB);
+}
+
+/* ---- 段落（global.less 4775） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) p {
+    margin: 0 0 18px;
+    font-size: inherit;
+    line-height: 26px;
+    color: inherit;
+}
+
+/* ---- 引用（global.less 4780-4795） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) blockquote {
+    margin: 0 0 18px;
+    padding: 8px 15px;
+    line-height: 26px;
+    color: var(--routine);
+    background: var(--classD);
+    border-left: 5px solid var(--quote);
+    border-radius: var(--radius-inner);
+}
+
+/* 本站适配：旧全站样式给引用加了装饰性引号与居中，这里清掉 */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) blockquote::before,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) blockquote::after {
+    content: none;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) blockquote p {
+    margin: 0;
+    color: inherit;
+    line-height: inherit;
+}
+
+/* ---- 链接（global.less 4797-4834） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) a:not([class]) {
+    position: relative;
+    display: inline-block;
+    line-height: 26px;
+    text-indent: 0;
+    color: var(--theme);
     text-decoration: none;
 }
 
-.entry-content a:hover {
-    color: orange;
-}
-
-.entry-content a:after {
-    content: '';
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) a:not([class])::after {
     position: absolute;
-    width: 100%;
-    transform: scaleX(0);
-    height: 1.5px;
-    bottom: -2px;
+    bottom: -1px;
     left: 0;
-    background-color: orange;
-    transform-origin: bottom right;
-    transition: transform 0.25s ease-out;
-}
-
-.entry-content a:hover:after {
-    transform: scaleX(1);
-    transform-origin: bottom left;
-}
-
-.entry-content p {
-    color: var(--articleFontColor);
-    line-height: 35px;
-    word-break: break-word;
-    font-size: 18px;
-}
-
-.entry-content hr {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border: 0.5px dashed #fc625d;
-}
-
-.entry-content img {
-    max-width: 100%;
-    border-radius: 5px;
-}
-
-
-/* 高亮代码块 */
-.highlight-wrap {
-    position: relative;
-    background: #21252b;
-    border-radius: 5px;
-    font: 15px/22px "Microsoft YaHei", "Arial";
-    line-height: 1.6;
-    margin-bottom: 1.6em;
-    width: 100%;
-    padding-top: 30px;
-    box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.4);
-}
-
-.highlight-wrap:before {
     content: "";
-    position: absolute;
-    border-radius: 50%;
-    background: #fc625d;
-    width: 12px;
-    height: 12px;
-    left: 12px;
-    margin-top: -18px;
-    box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
-    z-index: 2;
+    width: 100%;
+    height: 1px;
+    background: var(--theme);
+    transform: scaleX(0.25);
+    opacity: 0;
+    transition: transform 0.35s, opacity 0.35s;
 }
 
-.highlight-wrap .copy-code {
-    color: #fff;
-    position: absolute;
-    right: 10px;
-    top: 5px;
-    font-size: 16px;
-    z-index: 2;
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) a:not([class]):hover::after {
+    opacity: 1;
+    transform: scaleX(1);
 }
 
-.highlight-wrap .copy-code:hover {
-    color: rgba(255, 255, 255, 0.5);
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) ins > a:not([class]),
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) del > a:not([class]) {
+    text-decoration: inherit;
 }
 
-.highlight-wrap code::-webkit-scrollbar {
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) ins > a:not([class])::after,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) del > a:not([class])::after {
+    display: none;
+}
+
+/* ---- 图片（global.less 4836-4865 + theme.less 暗色 filter） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) span[data-fancybox] {
+    display: block;
+    text-align: left;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) img {
+    display: inline-block;
+    max-width: var(--img-max-width) !important;
+    margin: 5px 0;
+    border: 0;
+    border-radius: var(--radius-img);
+    vertical-align: middle;
+    cursor: zoom-in;
+    transition: transform 0.35s, box-shadow 0.35s;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) img:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 34px 20px -24px rgba(136, 161, 206, 0.3);
+}
+
+/* 本站适配：joe2.0 用 span[data-fancybox] 包裹图片并默认居中，本站输出裸 <img>，
+   用块级 + 自动外边距复现同样的居中效果，保留 img 的 5px 上下间距 */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) p > img,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) p > a > img {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+html.dark :is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) img {
+    filter: brightness(0.9);
+}
+
+/* ---- 媒体与扩展块（global.less 4795-4834） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) > iframe {
+    display: block;
+    /* joe 源码为 min-width:700px；窄屏（容器 <700px）会撑出横向滚动，
+       这里用 min() 保持 ≥700px 时的原值，窄屏退化为容器宽度 */
+    min-width: min(700px, 100%);
+    min-height: 500px;
+    max-width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    border: none;
+    border-radius: var(--radius-img);
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) video {
+    display: block;
+    min-width: min(700px, 100%);
+    max-width: 100% !important;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: var(--radius-img);
+}
+
+/* 行内音频：joe2.0 没有 audio 规则，这里按正文媒体的视觉补一条（宽度占满容器、与段落留白一致） */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) audio {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 18px 0;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) .mermaid {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: var(--radius-inner);
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) .mermaid svg {
+    display: block;
+    margin: 0 auto;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) .owo_image {
+    max-height: 26px;
+    vertical-align: top;
+}
+
+/* 段落级缩进块（global.less 4832） */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) .indent {
+    text-indent: 2em;
+}
+
+/* 整篇缩进模式（global.less 4549-4557，对应 settings enable_indent；
+   本站正文容器不带 .indent，保留以便将来对接该设置） */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview).indent > p {
+    text-indent: 2em;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview).indent > p > img {
+    margin-left: -2em;
+}
+
+/* ---- 列表（global.less 4727-4771 + normalize 列表重置） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) ol,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) ul {
+    margin: 0 0 18px;
+    padding: 0 0 0 36px;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) li {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    line-height: 26px;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) li.task-list-item {
+    margin-left: -16px;
+    list-style: none;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) li.task-list-item input {
+    position: relative;
+    top: 1px;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) ol li {
+    list-style: decimal;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) ul li {
+    list-style: disc;
+}
+
+/* ---- 表格（global.less 4907-4990） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 18px;
+    table-layout: fixed;
+    /* 源码写的是 border-collapse: unset（非继承属性 → 初始值 separate），配合 normalize 的 border-spacing: 0 */
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    font-size: 13px;
+    color: var(--routine);
+    background: var(--classD);
+    border: 1px solid var(--classE);
+    border-radius: var(--radius-inner);
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table td,
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table th {
+    padding: 8px;
+    border-right: 1px solid var(--classE);
+    border-bottom: 1px solid var(--classE);
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table thead th {
+    font-weight: 500;
+    background: var(--classC);
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table thead th:last-child {
+    border-right: none;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table tbody tr {
+    transition: background 0.35s;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table tbody tr:hover {
+    background: var(--classD);
+}
+
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) table tbody tr td:last-child {
+    border-right: none;
+}
+
+/* 本站适配：表格在列表中会被包一层滚动容器 */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) .table-wrapper::-webkit-scrollbar {
     height: 6px;
     width: 6px;
 }
 
-.highlight-wrap code {
+/* ---- 行内代码（global.less 209-222，原样照搬） ---- */
+:is(.post-page, .post-edit-page) :is(.post-body, .editor-shell) :is(.entry-content, .md-editor-preview) code:not([class]) {
+    display: inline-block;
+    margin: 2px 5px;
+    padding: 0 8px;
+    font-size: 13px;
+    color: var(--code);
+    background: var(--code-background);
+    border-radius: var(--radius-inner);
+    white-space: normal;
+    text-indent: 0;
+    user-select: auto;
+    vertical-align: baseline;
     word-break: break-word;
-    border-radius: 0 0 5px 5px;
 }
 
-.highlight-wrap code[data-rel]:before {
-    color: #fff;
-    content: attr(data-rel);
-    height: 30px;
-    line-height: 23px;
-    background: #21252b;
-    font-size: 16px;
-    position: absolute;
-    left: 0;
-    margin-top: -30px;
+/* ==========================================================================
+   前台代码块：本站用 highlight.js 的 pre.highlight-wrap 结构，
+   按 .code-toolbar + prism-one-dark 的视觉重绘（圆角 8、标题栏 30、mac 彩点 12）。
+   joe2.0 默认 enable_code_line_number = false，这里同样隐藏行号。
+   ========================================================================== */
+.post-body .entry-content pre {
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.post-body .entry-content pre code {
+    overflow-x: auto;
+}
+
+.post-body .entry-content .highlight-wrap {
+    position: relative;
+    margin: 20px 0;
     width: 100%;
-    font-family: Ubuntu;
-    font-weight: 700;
+    /* joe2.0 默认 c_title + c_hr：pre 上内边距 30px（标题区），标题分隔线在 30px 处 */
+    padding-top: 30px;
+    overflow: hidden;
+    background: #282c34;
+    border-radius: 8px;
+    box-shadow: 1px 1px 5px 0 var(--shadow-code, #bdbdbd);
+    font: 16px/1.5 "Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+}
+
+/* 标题分隔线（global.less .c_hr:after，原样照搬） */
+.post-body .entry-content .highlight-wrap::after {
+    content: "";
+    position: absolute;
+    top: 30px;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 1px;
+    background: #d8d8d8;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.post-body .entry-content .highlight-wrap::before {
+    content: "";
+    position: absolute;
+    top: 9px;
+    left: 12px;
+    z-index: 1;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fc625d;
+    box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
+}
+
+.post-body .entry-content .highlight-wrap .copy-code {
+    position: absolute;
+    top: 3px;
+    right: 10px;
+    z-index: 5;
+    font-size: 14px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.25s;
+}
+
+.post-body .entry-content .highlight-wrap .copy-code:hover {
+    color: #999;
+    filter: brightness(1.2);
+}
+
+.post-body .entry-content .highlight-wrap code::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+
+.post-body .entry-content .highlight-wrap code {
+    word-break: break-word;
+    border-radius: 0 0 8px 8px;
+}
+
+/* 语言标签：对应 joe2.0 .toolbar（30px 高、居中、14px 加粗 #999） */
+.post-body .entry-content .highlight-wrap code[data-rel]::before {
+    content: attr(data-rel);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
     text-align: center;
+    color: #999;
+    background: #282c34;
     pointer-events: none;
     z-index: 1;
 }
 
+/* 行号：joe2.0 默认关闭，CSS 隐藏高亮插件生成的行号列 */
+.post-body .entry-content .highlight-wrap .hljs-ln-numbers {
+    display: none;
+}
+
+.post-body .entry-content .highlight-wrap .hljs-ln-code {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* ---- 代码高亮配色：prism-one-dark（与主题 code_theme 默认值一致） ---- */
 .hljs {
-    color: #a9b7c6;
-    background: #1d1f21;
     display: block;
+    padding: 12px 12px 14px 18px;
     overflow-x: auto;
-    padding: 0.5em;
+    font-family: "Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    color: #abb2bf;
+    background: #282c34;
+    text-shadow: none;
+    tab-size: 2;
+}
+
+/* 行号插件（highlightjs-line-numbers）生成的是 <table class="hljs-ln">，
+   joe2.0 用的是 prism 的 span 行号，不会被正文 table 规则命中；
+   这里把该表格重置回无样式，避免继承正文表格的边框/底色/悬停 */
+.post-body .entry-content .highlight-wrap .hljs-ln {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    background: none;
+    font-size: inherit;
+    color: inherit;
+    table-layout: auto;
+}
+
+.post-body .entry-content .highlight-wrap .hljs-ln tr,
+.post-body .entry-content .highlight-wrap .hljs-ln td {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: inherit;
+    color: inherit;
+    transition: none;
+}
+
+.post-body .entry-content .highlight-wrap .hljs-ln tbody tr:hover {
+    background: none;
+}
+
+.hljs-ln {
+    margin: 0;
+    width: 100%;
 }
 
 .hljs-ln-line span::selection,
 .hljs-ln-line::selection {
-    background: #fff;
-    color: #21252b;
-}
-
-.hljs-ln {
-    margin: 6px 0 0;
-    width: 100%;
+    background: #3e4451;
+    color: #abb2bf;
 }
 
 .hljs-ln-line.hljs-ln-code {
-    padding-left: 25px;
-    padding-right: 10px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .hljs-ln-line.hljs-ln-code:hover {
@@ -265,18 +644,18 @@
 }
 
 .hljs-ln-line.hljs-ln-numbers {
-    user-select: none;
-    text-align: center;
-    color: #888f96;
     position: absolute;
     left: 0;
     width: 30px;
-    background: #1d1f21;
+    color: #636d83;
+    background: #282c34;
+    text-align: center;
+    user-select: none;
 }
 
 .hljs-comment,
 .hljs-quote {
-    color: #888f96;
+    color: #5c6370;
     font-style: italic;
 }
 
@@ -308,7 +687,7 @@
 
 .hljs-built_in,
 .hljs-class .hljs-title {
-    color: #e6c07b;
+    color: #e5c07b;
 }
 
 .hljs-attr,
@@ -317,18 +696,20 @@
 .hljs-selector-class,
 .hljs-selector-pseudo,
 .hljs-template-variable,
-.hljs-type,
-.hljs-variable {
+.hljs-type {
     color: #d19a66;
 }
 
+.hljs-variable,
+.hljs-operator,
+.hljs-function .hljs-title,
 .hljs-bullet,
 .hljs-link,
 .hljs-meta,
 .hljs-selector-id,
 .hljs-symbol,
 .hljs-title {
-    color: #61aeee;
+    color: #61afef;
 }
 
 .hljs-emphasis {
@@ -343,38 +724,125 @@
     text-decoration: underline;
 }
 
-
-/* 表格 */
-.table-wrapper::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
+/* ==========================================================================
+   后台编辑器预览：md-editor-v3 的代码块改为同款 joe2.0 视觉
+   （md-editor 自带 32px 标题栏、10px 彩点、14px 代码；这里对齐 30px/12px/16px）
+   ========================================================================== */
+.editor-shell .md-editor-preview .md-editor-code {
+    margin: 20px 0;
+    overflow: hidden;
+    background: #282c34;
+    border-radius: 8px;
+    box-shadow: 1px 1px 5px 0 var(--shadow-code, #bdbdbd);
 }
 
-.table-wrapper > table {
-    border-collapse: collapse;
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head {
+    height: 30px;
+    background: #282c34;
+    border-radius: 8px 8px 0 0;
 }
 
-.table-wrapper > table th {
-    background-color: rgba(0, 0, 0, 0.1);
+/* 标题分隔线（joe2.0 默认 enable_code_hr=true） */
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    height: 1px;
+    background: #d8d8d8;
+    mix-blend-mode: overlay;
+    pointer-events: none;
 }
 
-.table-wrapper > table tr:nth-child(2n) {
-    background-color: #f8f8f8;
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-code-flag span {
+    width: 12px;
+    height: 12px;
+    margin-block-start: 9px;
 }
 
-.table-wrapper > table td,
-.table-wrapper > table th {
-    padding: 8px 16px;
-    border: 1px solid #dfe2e5;
-    line-height: 1.5;
-    font-size: 90%;
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-code-flag span:nth-of-type(1) {
+    background-color: #fc625d;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-code-flag span:nth-of-type(2) {
+    background-color: #fdbc40;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-code-flag span:nth-of-type(3) {
+    background-color: #35cd4b;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-code-flag span + span {
+    margin-inline-start: 8px;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-code-lang,
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-codetab-lang {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    font-weight: bold;
     text-align: center;
+    color: #999;
+    pointer-events: none;
 }
 
-.table-wrapper > table tbody > tr {
-    transition: all 0.28s ease;
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head {
+    position: sticky;
 }
 
-.table-wrapper > table tbody > tr:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-code-action {
+    position: static;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-copy-button {
+    position: relative;
+    z-index: 2;
+    font-size: 14px;
+    font-weight: bold;
+    color: #999;
+    cursor: pointer;
+    transition: opacity 0.25s;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-head .md-editor-copy-button:hover {
+    filter: brightness(1.2);
+}
+
+.editor-shell .md-editor-preview .md-editor-code pre {
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+.editor-shell .md-editor-preview .md-editor-code pre code {
+    padding: 12px 12px 14px 18px;
+    font-family: "Fira Code", "Fira Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #abb2bf;
+    background: #282c34;
+    border-radius: 0 0 8px 8px;
+    text-shadow: none;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-block-lines {
+    padding: 0;
+}
+
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-line {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 1.5em;
+}
+
+/* joe2.0 默认关闭行号，后台预览同步隐藏 */
+.editor-shell .md-editor-preview .md-editor-code .md-editor-code-line > [rn-wrapper] {
+    display: none;
 }

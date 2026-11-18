@@ -23,19 +23,33 @@ axios.interceptors.request.use(function (config) {
 axios.interceptors.response.use(function (response) {
   if (response.data !== null && response.data.hasOwnProperty("code") && response.data.code !== 200) {
     if (response.data.code === 300) {
-      store.commit("loadCurrentUser", {});
-      localStorage.removeItem("userToken");
-      store.commit("loadCurrentAdmin", {});
-      localStorage.removeItem("adminToken");
-      clearAdminEntry();
-      window.location.href = constant.webURL + "/user";
+      // 只有请求确实携带过 token 才算登录态失效；匿名访客请求到需登录的接口时，
+      // 不能清空登录信息并整站跳转，否则一个访客接口失败就会误伤所有人
+      const authorization = response.config && response.config.headers
+        ? response.config.headers.Authorization
+        : null;
+      if (authorization) {
+        store.commit("loadCurrentUser", {});
+        localStorage.removeItem("userToken");
+        store.commit("loadCurrentAdmin", {});
+        localStorage.removeItem("adminToken");
+        clearAdminEntry();
+        window.location.href = constant.webURL + "/user";
+      }
     }
     return Promise.reject(new Error(response.data.message));
   } else {
     return response;
   }
 }, function (error) {
-  // 对响应错误做点什么
+  // 对响应错误做点什么：把 axios 默认英文错误信息翻译成中文，方便用户理解
+  if (error && error.message) {
+    if (error.message === "Network Error") {
+      error.message = "网络连接失败，请检查网络或稍后重试";
+    } else if (error.code === "ECONNABORTED" || error.message.indexOf("timeout") !== -1) {
+      error.message = "请求超时，请稍后重试";
+    }
+  }
   return Promise.reject(error);
 });
 

@@ -102,6 +102,155 @@ export default {
     return content;
   },
 
+  /**
+   * 净化交给 v-html 的 HTML（文章正文、评论等）：
+   * 保留常见排版标签，去掉脚本类元素与事件属性，并拦截 javascript: 等危险链接。
+   * 代码块、链接、图片、表情图片等正常内容不受影响。
+   */
+  sanitizeHtml(html) {
+    if (this.isEmpty(html) || typeof html !== "string") {
+      return "";
+    }
+    const allowedTags = new Set([
+      "a", "abbr", "audio", "b", "blockquote", "br", "caption", "code", "dd", "del",
+      "details", "div", "dl", "dt", "em", "figcaption", "figure", "h1", "h2",
+      "h3", "h4", "h5", "h6", "hr", "i", "img", "input", "ins", "kbd", "li", "mark",
+      "ol", "p", "pre", "q", "s", "small", "source", "span", "strong", "sub",
+      "summary", "sup", "table", "tbody", "td", "tfoot", "th", "thead", "tr", "u",
+      "ul", "video",
+      // 正文自定义标签（joe2.0 Web Components），仅放行实际注册并渲染的标签
+      "joe-mtitle", "joe-abtn", "joe-anote", "joe-copy", "joe-cloud", "joe-dotted",
+      "joe-progress", "joe-message", "joe-callout", "joe-alert", "joe-card-default",
+      "joe-card-describe", "joe-card-list", "joe-timeline", "joe-collapse", "joe-tabs",
+      "joe-gird", "joe-lamp", "joe-read-limited", "joe-hide", "joe-raw-content",
+      "joe-note", "joe-download",
+      "joe-bilibili", "joe-mp3", "joe-music", "joe-mlist"
+    ]);
+    // 自定义标签只保留组件真正读取的属性，多余的属性（含 style / 事件）一律丢弃
+    const componentAttributes = {
+      "joe-mtitle": ["title"],
+      "joe-abtn": ["icon", "color", "href", "radius", "content"],
+      "joe-anote": ["icon", "href", "type", "content"],
+      "joe-copy": ["title", "content", "color", "bold"],
+      "joe-cloud": ["type", "title", "url", "password"],
+      "joe-dotted": ["startcolor", "endcolor"],
+      "joe-progress": ["percentage", "color"],
+      "joe-message": ["type", "content"],
+      "joe-callout": ["color"],
+      "joe-alert": ["type"],
+      "joe-card-default": ["width", "label"],
+      "joe-card-describe": ["title"],
+      "joe-gird": ["column", "gap"],
+      "joe-raw-content": ["width", "height"],
+      "joe-card-list": [],
+      "joe-timeline": [],
+      "joe-collapse": [],
+      "joe-tabs": [],
+      "joe-lamp": [],
+      "joe-read-limited": [],
+      "joe-hide": [],
+      "joe-note": ["title", "icon"],
+      "joe-download": ["href", "content", "icon"],
+      "joe-bilibili": ["bvid", "page", "width", "height"],
+      "joe-mp3": ["name", "url", "theme", "cover", "autoplay"],
+      "joe-music": ["id", "color", "autoplay"],
+      "joe-mlist": ["id", "color", "autoplay"]
+    };
+    const dropTags = new Set([
+      "script", "style", "iframe", "frame", "frameset", "object", "embed",
+      "applet", "base", "link", "meta", "form", "textarea", "select",
+      "option", "button", "svg", "math", "track",
+      "canvas", "template", "noscript"
+    ]);
+    const urlAttributes = {
+      a: ["href"],
+      img: ["src"],
+      audio: ["src"],
+      video: ["src", "poster"],
+      source: ["src"],
+      "joe-abtn": ["href"],
+      "joe-anote": ["href"],
+      "joe-download": ["href"],
+      "joe-cloud": ["url"],
+      "joe-mp3": ["url", "cover"]
+    };
+    // 音视频地址只放行 http/https 与站内相对路径，避免 javascript: / data: / blob: 等
+    const isSafeMediaUrl = (value) => {
+      const url = String(value).replace(/[\u0000-\u0020\u007f-\u009f]+/g, "");
+      if (!url) {
+        return false;
+      }
+      if (/^https?:\/\//i.test(url)) {
+        return true;
+      }
+      return !/^[a-z][a-z0-9+.\-]*:/i.test(url) && !url.startsWith("//");
+    };
+    const isSafeUrl = (value, allowDataImage) => {
+      // 去掉空白与不可见字符，避免 `java\tscript:` 之类绕过
+      const url = String(value).replace(/[\u0000-\u0020\u007f-\u009f]+/g, "");
+      if (!url) {
+        return false;
+      }
+      const lower = url.toLowerCase();
+      if (lower.startsWith("javascript:") || lower.startsWith("vbscript:") || lower.startsWith("file:")) {
+        return false;
+      }
+      if (lower.startsWith("data:")) {
+        return allowDataImage && /^data:image\/(png|jpe?g|gif|webp|bmp|avif);base64,/.test(lower);
+      }
+      return true;
+    };
+
+    const doc = new DOMParser().parseFromString("<body>" + html + "</body>", "text/html");
+    Array.from(doc.body.querySelectorAll("*")).forEach((element) => {
+      const tag = element.tagName.toLowerCase();
+      if (dropTags.has(tag)) {
+        element.remove();
+        return;
+      }
+      if (!allowedTags.has(tag)) {
+        element.replaceWith(...Array.from(element.childNodes));
+        return;
+      }
+      const urlNames = urlAttributes[tag] || [];
+      const componentAllowed = componentAttributes[tag];
+      Array.from(element.attributes).forEach((attribute) => {
+        const name = attribute.name.toLowerCase();
+        if (componentAllowed && componentAllowed.indexOf(name) === -1) {
+          element.removeAttribute(attribute.name);
+          return;
+        }
+        if (name.startsWith("on") || name === "srcdoc" || name === "formaction" || name === "xlink:href") {
+          element.removeAttribute(attribute.name);
+          return;
+        }
+        if (urlNames.indexOf(name) > -1) {
+          const safe = (tag === "audio" || tag === "video" || tag === "source")
+            ? isSafeMediaUrl(attribute.value)
+            : isSafeUrl(attribute.value, tag === "img" && name === "src");
+          if (!safe) {
+            element.removeAttribute(attribute.name);
+          }
+        }
+      });
+      // 只放行任务列表的只读复选框，其余表单控件（input）仍然丢弃
+      if (tag === "input") {
+        if ((element.getAttribute("type") || "").toLowerCase() !== "checkbox") {
+          element.remove();
+          return;
+        }
+        Array.from(element.attributes).forEach((attribute) => {
+          const name = attribute.name.toLowerCase();
+          if (name !== "type" && name !== "checked" && name !== "disabled") {
+            element.removeAttribute(attribute.name);
+          }
+        });
+        element.setAttribute("disabled", "");
+      }
+    });
+    return doc.body.innerHTML;
+  },
+
   imgShow(select) {
     $(select).click(function () {
       let src = $(this).attr("src");

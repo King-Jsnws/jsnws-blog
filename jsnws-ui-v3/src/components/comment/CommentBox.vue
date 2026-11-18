@@ -27,6 +27,7 @@
 <!--                   style="margin-right: 6px">-->
 <!--        </ProButton>-->
         <ProButton :info="'提交'"
+                   :unified="true"
                    @click="submitComment()"
                    :before="$constant.before_color_2"
                    :after="$constant.after_color_2">

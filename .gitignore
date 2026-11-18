@@ -14,8 +14,25 @@ yarn-error.log*
 # 上传资源（本地落盘）
 resource/
 
-# 截图
+# 截图与本地工作目录
 .screenshots/
+/screenshots/
+/*-screenshots/
+/2026-*/
+
+# 本地运维脚本与临时产物
+/deploy/
+/perf/
+*.tar.gz
+
+# 本地数据库备份（仅忽略仓库根目录，保留 resources/sql 下的建表脚本）
+/*.sql
+
+# 临时文件 / 缓存
+.cache/
+tmp/
+*.tmp
+*.bak
 
 # 本地环境变量
 .env

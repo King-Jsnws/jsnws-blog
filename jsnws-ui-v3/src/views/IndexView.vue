@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :style="{ '--home-bg-zoom': backgroundZoom }">
     <Loader :loading="loading">
       <!-- 加载页面 -->
       <template #loader>
@@ -10,8 +10,7 @@
       <!-- 内容页面 -->
       <template #body>
         <!-- 首页图片 -->
-        <el-image style="animation: header-effect 2s"
-                  class="background-image-index"
+        <el-image class="background-image-index my-animation-hero-fade"
                   v-once
                   lazy
                   :src="indexBackground"
@@ -21,7 +20,7 @@
           </template>
         </el-image>
         <!-- 首页文字 -->
-        <div class="signature-wall myCenter my-animation-hideToShow">
+        <div class="signature-wall myCenter my-animation-slide-top">
           <h1 class="playful" v-if="titleEnabled">
             <span v-for="(a, index) in $store.state.webInfo.webTitle" :key="index">{{a}}</span>
           </h1>
@@ -34,17 +33,34 @@
               </template>
             </Printer>
           </div>
-          <div id="bannerWave1"></div>
-          <div id="bannerWave2"></div>
+          <!-- 首屏底部水波：内联 SVG，不依赖任何图片资源，填充跟随主题页面底色 -->
+          <div class="banner-waves" aria-hidden="true">
+            <svg class="banner-waves-svg"
+                 viewBox="0 24 150 28"
+                 preserveAspectRatio="none"
+                 shape-rendering="geometricPrecision">
+              <defs>
+                <path id="banner-wave-path"
+                      d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18v48h-352z"/>
+              </defs>
+              <g class="banner-waves-parallax">
+                <use href="#banner-wave-path" x="48" y="0"></use>
+                <use href="#banner-wave-path" x="48" y="3"></use>
+                <use href="#banner-wave-path" x="48" y="5"></use>
+                <use href="#banner-wave-path" x="48" y="7"></use>
+              </g>
+            </svg>
+          </div>
           <el-icon class="el-icon-arrow-down" @click="navigation('.page-container-wrap')">
             <ArrowDown />
           </el-icon>
         </div>
         <!-- 首页内容 -->
-        <div class="page-container-wrap">
+        <div class="page-container-wrap my-animation-slide-bottom">
           <div class="page-container">
             <div class="aside-content" v-if="showAside">
-              <MyAside @selectSort="selectSort" @selectArticle="selectArticle"></MyAside>
+              <!-- 日历按参考站放在右栏，左栏关闭同款日历卡 -->
+              <MyAside hide-calendar @selectSort="selectSort" @selectArticle="selectArticle"></MyAside>
             </div>
             <div class="recent-posts">
               <div class="announcement background-opacity">
@@ -59,29 +75,6 @@
               <div v-show="indexType === 1">
                 <div v-for="(sort, index) in sortInfo" :key="index">
                   <div v-if="!$common.isEmpty(sortArticles[sort.id])">
-                    <div class="sort-article-first">
-                      <div>
-                        <svg viewBox="0 0 1024 1024" width="20" height="20"
-                             style="vertical-align: -2px;margin-bottom: -2px">
-                          <path
-                            d="M367.36 482.304H195.9936c-63.3344 0-114.6368-51.3536-114.6368-114.6368V196.2496c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368V367.616c0 63.3344-51.3536 114.688-114.688 114.688zM367.36 938.752H195.9936c-63.3344 0-114.6368-51.3536-114.6368-114.6368v-171.4176c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368v171.4176c0 63.3344-51.3536 114.6368-114.688 114.6368zM828.672 938.752h-171.4176c-63.3344 0-114.6368-51.3536-114.6368-114.6368v-171.4176c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368v171.4176c0 63.3344-51.3024 114.6368-114.6368 114.6368zM828.672 482.304h-171.4176c-63.3344 0-114.6368-51.3536-114.6368-114.6368V196.2496c0-63.3344 51.3536-114.6368 114.6368-114.6368h171.4176c63.3344 0 114.6368 51.3536 114.6368 114.6368V367.616c0 63.3344-51.3024 114.688-114.6368 114.688z"
-                            fill="#FF623E"></path>
-                        </svg>
-                        {{sort.sortName}}
-                      </div>
-                      <div class="article-more" @click="$router.push({path: '/sort', query: {sortId: sort.id}})">
-                        <svg viewBox="0 0 1024 1024" width="20" height="20"
-                             style="vertical-align: -2px;margin-bottom: -2px">
-                          <path
-                            d="M347.3 897.3H142.2c-30.8 0-51.4-31.7-38.9-59.9l136.1-306.1c4.9-11 4.9-23.6 0-34.6L103.3 190.6c-12.5-28.2 8.1-59.9 38.9-59.9h205.1c16.8 0 32.1 9.9 38.9 25.3l151.4 340.7c4.9 11 4.9 23.6 0 34.6L386.3 872.1c-6.9 15.3-22.1 25.2-39 25.2z"
-                            fill="#009F72"></path>
-                          <path
-                            d="M730.4 897.3H525.3c-30.8 0-51.4-31.7-38.9-59.9l136.1-306.1c4.9-11 4.9-23.6 0-34.6L486.4 190.6c-12.5-28.2 8.1-59.9 38.9-59.9h205.1c16.8 0 32.1 9.9 38.9 25.3l151.4 340.7c4.9 11 4.9 23.6 0 34.6L769.3 872.1c-6.8 15.3-22.1 25.2-38.9 25.2z"
-                            fill="#F9DB88"></path>
-                        </svg>
-                        MORE
-                      </div>
-                    </div>
                     <SortArticle :articleList="sortArticles[sort.id]"></SortArticle>
                   </div>
                 </div>
@@ -99,6 +92,11 @@
                 </div>
               </div>
             </div>
+
+            <!-- 右栏：与归档页同一套模块，日历卡按参考站放这里 -->
+            <aside v-if="showAside" class="index-side">
+              <ArchiveSidebar :articles="articles"></ArchiveSidebar>
+            </aside>
           </div>
         </div>
         <!-- 页脚 -->
@@ -176,6 +174,7 @@
   import SortArticle from "../components/common/SortArticle.vue";
   import MyFooter from "../components/common/MyFooter.vue";
   import MyAside from "../components/common/MyAside.vue";
+  import ArchiveSidebar from "../components/common/ArchiveSidebar.vue";
 
   export default {
     components: {
@@ -185,7 +184,8 @@
       ArticleList,
       SortArticle,
       MyFooter,
-      MyAside
+      MyAside,
+      ArchiveSidebar
     },
 
     data() {
@@ -230,12 +230,15 @@
       indexBackground() {
         const webInfo = this.$store.state.webInfo;
         if (!this.$common.isEmpty(webInfo.backgroundImage)) {
-          return webInfo.backgroundImage;
+          // 老配置存的是未压缩的默认图路径，统一换成体积更小的 webp 版本
+          return webInfo.backgroundImage === '/images/home-default-bg.jpg'
+            ? '/images/home-default-bg.webp'
+            : webInfo.backgroundImage;
         }
         if (!this.$common.isEmpty(webInfo.randomCover)) {
           return webInfo.randomCover[Math.floor(Math.random() * webInfo.randomCover.length)];
         }
-        return '/images/home-default-bg.jpg';
+        return '/images/home-default-bg.webp';
       },
       // 首页打字机诗句开关，默认开启
       printerEnabled() {
@@ -244,6 +247,14 @@
       // 首页首屏标题开关，默认开启
       titleEnabled() {
         return this.$store.state.sysConfig.titleEnabled !== '0';
+      },
+      // 首页背景图尺寸：公开配置 homeBackgroundSize 为整数百分比（50-200），空值/格式错误/超范围按默认 100% 处理
+      backgroundZoom() {
+        const value = Number(this.$store.state.sysConfig.homeBackgroundSize);
+        if (!Number.isFinite(value) || value < 50 || value > 200) {
+          return 1;
+        }
+        return value / 100;
       }
     },
 
@@ -376,6 +387,9 @@
   /* 人像头部靠近画面上方，居中裁切容易切头，整体略微下移 */
   .background-image-index :deep(img) {
     object-position: center 40%;
+    /* 后台可调背景图尺寸：缩放聚焦点与裁切聚焦点保持一致，默认 100% 时为 1，不影响现有观感 */
+    transform: scale(var(--home-bg-zoom, 1));
+    transform-origin: center 40%;
   }
 
   .background-image-index::before {
@@ -411,26 +425,6 @@
     font-size: 40px;
   }
 
-  .sort-article-first {
-    margin: 40px auto 20px;
-    display: flex;
-    justify-content: space-between;
-    color: var(--greyFont);
-    border-bottom: 1px dashed var(--lightGray);
-    padding-bottom: 5px;
-  }
-
-  .article-more {
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .article-more:hover {
-    color: var(--lightGreen);
-    font-weight: 700;
-    transform: scale(1.1);
-  }
-
   .printer {
     cursor: pointer;
     color: var(--white);
@@ -440,24 +434,78 @@
     padding-right: 10px;
   }
 
-  #bannerWave1 {
-    height: 84px;
-    background: var(--bannerWave1);
+  /* 首屏底部水波容器：贴底平铺，高度与参考站一致（移动端 10vh，桌面 15vh） */
+  .banner-waves {
     position: absolute;
-    width: 200%;
+    left: 0;
     bottom: 0;
+    width: 100%;
+    height: 10vh;
+    min-height: 50px;
+    max-height: 150px;
     z-index: 10;
-    animation: gradientBG 120s linear infinite;
+    overflow: hidden;
+    pointer-events: none;
+    line-height: 0;
+    transform: translateZ(0);
   }
 
-  #bannerWave2 {
-    height: 100px;
-    background: var(--bannerWave2);
-    position: absolute;
-    width: 400%;
-    bottom: 0;
-    z-index: 5;
-    animation: gradientBG 120s linear infinite;
+  .banner-waves-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 四层同一路径依次下移，透明度递减，叠加出深浅错落的水波 */
+  .banner-waves-parallax > use {
+    fill: var(--background);
+    animation: banner-wave-move 25s cubic-bezier(.55, .5, .45, .5) infinite;
+  }
+
+  .banner-waves-parallax > use:nth-child(1) {
+    opacity: 0.25;
+    animation-delay: -2s;
+    animation-duration: 7s;
+  }
+
+  .banner-waves-parallax > use:nth-child(2) {
+    opacity: 0.5;
+    animation-delay: -3s;
+    animation-duration: 10s;
+  }
+
+  .banner-waves-parallax > use:nth-child(3) {
+    opacity: 0.65;
+    animation-delay: -4s;
+    animation-duration: 13s;
+  }
+
+  .banner-waves-parallax > use:nth-child(4) {
+    opacity: 0.75;
+    animation-delay: -5s;
+    animation-duration: 20s;
+  }
+
+  @keyframes banner-wave-move {
+    0% {
+      transform: translate3d(-90px, 0, 0);
+    }
+    100% {
+      transform: translate3d(85px, 0, 0);
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    .banner-waves {
+      height: 15vh;
+    }
+  }
+
+  /* 关闭动效偏好下水波保持静止，高度、层级与叠层关系不变 */
+  @media (prefers-reduced-motion: reduce) {
+    .banner-waves-parallax > use {
+      animation: none;
+    }
   }
 
   /* 光标 */
@@ -479,15 +527,17 @@
   }
 
   .page-container-wrap {
-    background: var(--background);
+    background: var(--ui-page-bg);
     position: relative;
   }
 
   .page-container {
     display: flex;
     justify-content: center;
-    width: 90%;
-    padding: 0 20px 40px 20px;
+    gap: var(--ui-page-gap);
+    width: var(--ui-page-inline);
+    max-width: var(--ui-page-width);
+    padding: 0 var(--ui-page-gutter) var(--ui-page-bottom);
     margin: 0 auto;
     flex-direction: row;
   }
@@ -506,7 +556,7 @@
   }
 
   .announcement i {
-    color: var(--themeBackground);
+    color: var(--iconColor);
     font-size: 22px;
     margin: auto 0;
     animation: scale 0.8s ease-in-out infinite;
@@ -526,6 +576,38 @@
     float: right;
   }
 
+  /* 右栏默认隐藏，与归档页同一断点：≥1280 才出现第三列 */
+  .index-side {
+    display: none;
+    min-width: 0;
+  }
+
+  @media screen and (min-width: 1280px) {
+    .page-container {
+      display: grid;
+      grid-template-columns: var(--ui-aside-width) minmax(0, 1fr) var(--ui-aside-width);
+      gap: var(--ui-page-gap);
+      align-items: start;
+    }
+
+    .aside-content {
+      width: auto;
+      max-width: none;
+      margin-right: 0;
+      float: none;
+    }
+
+    .recent-posts {
+      width: auto;
+      min-width: 0;
+    }
+
+    .index-side {
+      display: block;
+      margin-top: 40px;
+    }
+  }
+
   .pagination-wrap {
     display: flex;
     justify-content: center;
@@ -533,20 +615,39 @@
   }
 
   .pagination {
-    padding: 13px 15px;
-    border: 1px solid var(--lightGray);
-    border-radius: 3rem;
+    padding: 8px 14px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--ui-btn-border);
+    border-radius: var(--ui-btn-radius);
+    background: var(--ui-btn-bg);
+    box-shadow: var(--ui-btn-shadow);
     color: var(--greyFont);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
     width: 100px;
     user-select: none;
     cursor: pointer;
     text-align: center;
+    transition: var(--ui-btn-transition);
   }
 
   .pagination:hover {
-    border: 1px solid var(--themeBackground);
-    color: var(--themeBackground);
-    box-shadow: 0 0 5px var(--themeBackground);
+    border-style: dashed;
+    border-color: var(--ui-btn-border-hover);
+    box-shadow: var(--ui-btn-shadow-hover);
+    color: var(--ui-accent);
+  }
+
+  /* 按压瞬时缩放，与参考站 active:scale-95 一致 */
+  .pagination:active {
+    border-style: dashed;
+    border-color: var(--ui-btn-border-hover);
+    box-shadow: var(--ui-btn-shadow-hover);
+    scale: 0.95;
   }
 
   .push-title {
@@ -565,12 +666,34 @@
 
   .push-button {
     position: relative;
-    background: var(--lightGreen);
+    background: var(--ui-accent-strong);
     cursor: pointer;
     width: 230px;
-    border-radius: 2rem;
-    line-height: 35px;
+    min-height: 36px;
+    padding: 8px 14px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-btn-radius);
+    box-shadow: var(--ui-btn-shadow);
+    line-height: 20px;
     color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--ui-btn-transition);
+  }
+
+  .push-button:hover {
+    background: var(--ui-accent-strong-hover);
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: var(--ui-btn-shadow-hover);
+  }
+
+  /* 按压瞬时缩放，与参考站 active:scale-95 一致 */
+  .push-button:active {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: var(--ui-btn-shadow-hover);
+    scale: 0.95;
   }
 
   .push-button-title {
@@ -590,7 +713,7 @@
     }
 
     .page-container {
-      width: 100%;
+      width: var(--ui-page-inline);
     }
   }
 

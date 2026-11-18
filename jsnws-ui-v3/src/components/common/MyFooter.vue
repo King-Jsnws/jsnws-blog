@@ -2,23 +2,20 @@
   <div class="myFooter-wrap" v-show="showFooter">
     <div class="myFooter">
       <div class="pets-bar">
-        <img class="pets-img" src="/images/pets-line.png" alt="动物" width="660" height="80">
+        <img class="pets-img" src="/images/pets-line.webp" alt="动物" width="660" height="80">
       </div>
       <div class="footer-body">
         <el-avatar class="footer-avatar" :size="80" shape="circle"
-                   :src="$store.state.webInfo.avatar || '/images/default-avatar.jpg'"></el-avatar>
+                   :src="$store.state.webInfo.avatar || '/images/default-avatar.webp'"></el-avatar>
         <div class="footer-desc">{{$store.state.webInfo.footer}}</div>
       </div>
 
       <!-- 徽章：建站运行时长，起点取站点信息里的 createTime，按秒实时更新；取不到时整块隐藏 -->
       <div class="footer-extra">
         <div class="footer-badge" v-if="hasSiteStart">
-          <svg class="badge-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/>
-            <ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M3.2 9h17.6M3.2 15h17.6" fill="none" stroke="currentColor" stroke-width="1.4"/>
-          </svg>
-          <span class="badge-text">本站已萌萌哒 {{ uptime.days }} 天 {{ uptime.hours }} 小时 {{ uptime.minutes }} 分 {{ uptime.seconds }} 秒</span>
+          <!-- 参考站同款地球：canvas 渲染地球自转 + 月球环绕，按参考站实际显示尺寸 64×64 -->
+          <FooterOrbit></FooterOrbit>
+          <span class="badge-text">本站已运行 {{ uptime.days }} 天 {{ uptime.hours }} 小时 {{ uptime.minutes }} 分 {{ uptime.seconds }} 秒</span>
           <svg class="badge-sparkle" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z" fill="currentColor"/>
           </svg>
@@ -56,18 +53,37 @@
         <div class="footer-meta">
           <span>© {{ currentYear }} {{ siteOwner }}. All Rights Reserved.</span>
           <span class="meta-sep">｜</span>
-          <span class="meta-link">RSS</span>
-          <span class="meta-sep">｜</span>
-          <span class="meta-link">Sitemap</span>
+          <a class="meta-link" :href="rssUrl" target="_blank" rel="noopener" title="订阅本站 RSS">
+            <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="5" cy="19" r="2.6" fill="currentColor"/>
+              <path d="M3 10.4a10.6 10.6 0 0 1 10.6 10.6" fill="none" stroke="currentColor"
+                    stroke-width="2.8" stroke-linecap="round"/>
+              <path d="M3 4.6a16.4 16.4 0 0 1 16.4 16.4" fill="none" stroke="currentColor"
+                    stroke-width="2.8" stroke-linecap="round"/>
+            </svg>
+            <span>RSS</span>
+          </a>
+          <span class="meta-sep meta-sep--bar" aria-hidden="true"></span>
+          <a class="meta-link" :href="sitemapUrl" target="_blank" rel="noopener" title="查看本站 Sitemap">
+            <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="9" y="2" width="6" height="5.6" rx="1" fill="currentColor"/>
+              <rect x="11.25" y="7.6" width="1.5" height="3.9" fill="currentColor"/>
+              <rect x="3.2" y="11.3" width="17.6" height="1.5" fill="currentColor"/>
+              <rect x="3.25" y="11.3" width="1.5" height="3.2" fill="currentColor"/>
+              <rect x="19.25" y="11.3" width="1.5" height="3.2" fill="currentColor"/>
+              <rect x="1.2" y="14.4" width="6.5" height="5.6" rx="1" fill="currentColor"/>
+              <rect x="16.3" y="14.4" width="6.5" height="5.6" rx="1" fill="currentColor"/>
+            </svg>
+            <span>Sitemap</span>
+          </a>
         </div>
         <div class="footer-powered">Powered by Vue 3 &amp; Spring Boot</div>
       </div>
       <div class="icp" v-if="$store.state.sysConfig.beian">
-        <svg class="beian-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
-          <circle cx="12" cy="12" r="11" fill="#c9302c"/>
-          <path d="M12 5l2.1 4.3 4.7.7-3.4 3.3.8 4.7-4.2-2.2-4.2 2.2.8-4.7L5.2 10l4.7-.7z" fill="#fff"/>
-        </svg>
-        <a :href="$store.state.sysConfig.beianUrl || 'http://beian.miit.gov.cn/'" target="_blank">{{$store.state.sysConfig.beian}}</a>
+        <a :href="$store.state.sysConfig.beianUrl || 'http://beian.miit.gov.cn/'" target="_blank" rel="noopener">
+          <img class="beian-icon" src="/images/beian-icp.png" width="16" height="16" alt="">
+          <span>{{$store.state.sysConfig.beian}}</span>
+        </a>
       </div>
       <div class="icp" v-if="$store.state.sysConfig.policeBeian">
         <svg class="beian-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
@@ -81,7 +97,12 @@
 </template>
 
 <script>
+  import FooterOrbit from "./FooterOrbit.vue";
+
   export default {
+    components: {
+      FooterOrbit
+    },
     props: {
       showFooter: {
         type: Boolean,
@@ -93,7 +114,7 @@
         // 运行时长（秒），每秒刷新一次
         uptimeSeconds: 0,
         uptimeTimer: null,
-        // 访问统计：后端 getHistoryInfo 只提供今日访客与本站访客
+        // 访问统计：改走公开摘要接口，只包含聚合计数
         historyInfo: {
           ip_count_today: null,
           ip_history_count: null
@@ -115,6 +136,14 @@
       },
       currentYear() {
         return new Date().getFullYear()
+      },
+      // 站点 RSS 订阅地址：使用正式域名的绝对地址，与 feed 内文章链接保持一致
+      rssUrl() {
+        return 'https://jsnws.com/rss.xml'
+      },
+      // 站点 Sitemap 地址：同样使用正式域名
+      sitemapUrl() {
+        return 'https://jsnws.com/sitemap.xml'
       },
       // 站点起始时间：取 /webInfo/getWebInfo 返回的 web_info.create_time
       // （单行站点记录，不受文章分页/排序影响，每次进页面结果一致）
@@ -160,7 +189,7 @@
       },
       // 统计接口公开可读；失败时保持空位，不显示假数据
       getHistoryInfo() {
-        this.$http.get(this.$constant.baseURL + '/webInfo/getHistoryInfo').then((res) => {
+        this.$http.get(this.$constant.baseURL + '/webInfo/getVisitSummary').then((res) => {
           if (!this.$common.isEmpty(res.data)) {
             this.historyInfo = res.data
           }
@@ -186,30 +215,36 @@
     padding-bottom: 18px;
   }
 
+  /* 贴图 80px 高，图内爪子实心下沿在 70px 处。这一行只占 10px 高，
+     贴图自下而上溢出 70px；.pets-img 再下移 12.3px，
+     爪子下沿压到页脚顶边线下方 12.3px，贴合更自然 */
   .pets-bar {
     position: sticky;
     bottom: 0;
     z-index: 30;
     display: flex;
     justify-content: center;
+    align-items: flex-end;
     width: 100%;
-    transform: translateY(25px);
+    height: 10px;
   }
 
-  /* 图片底部向上的白色渐变，让内容淡入页脚 */
+  /* 渐变收在这一行的 10px 内（页脚顶边以下），不再越过边线形成白雾 */
   .pets-bar::after {
     content: "";
     position: absolute;
     left: 0;
-    bottom: 25px;
+    bottom: 0;
     width: 100%;
-    height: 60%;
+    height: 100%;
     background: linear-gradient(to top, var(--cardBg), transparent);
     pointer-events: none;
   }
 
   .pets-img {
     position: relative;
+    /* 相对原位置整体下移 12.3px：爪子下沿由压在线条上改为略低于线条 */
+    top: 12.3px;
     z-index: 40;
     width: 660px;
     height: 80px;
@@ -223,7 +258,7 @@
     justify-content: center;
     align-items: center;
     max-width: 900px;
-    margin: 50px auto 0;
+    margin: 16px auto 0;
     padding: 16px 20px;
   }
 
@@ -263,23 +298,21 @@
   }
 
   .footer-badge {
+    position: relative;
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     max-width: 100%;
-    padding: 6px 16px;
+    /* 轨道环画在 64×64 的地球画布内，胶囊至少要和画布同高才能把环完整包住 */
+    box-sizing: border-box;
+    min-height: 68px;
+    padding: 6px 18px 6px 94px;
     border: 1px solid var(--borderColor);
     border-radius: 999px;
     background: var(--cardBg);
     font-size: 13px;
     line-height: 1.6;
-    color: var(--maxGreyFont);
-  }
-
-  .badge-icon {
-    flex-shrink: 0;
-    width: 15px;
-    height: 15px;
-    margin-right: 7px;
     color: var(--maxGreyFont);
   }
 
@@ -381,8 +414,47 @@
     opacity: 0.45;
   }
 
+  /* RSS 与 Sitemap 之间的竖线分隔符：1px 浅蓝细线，替代原来的全角竖线 */
+  .meta-sep--bar {
+    flex-shrink: 0;
+    align-self: center;
+    width: 1px;
+    height: 18px;
+    margin: 0 16px;
+    background: #b4d9ed;
+    opacity: 1;
+  }
+
   .meta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
     cursor: default;
+  }
+
+  .meta-icon {
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+  }
+
+  /* RSS / Sitemap 为真实链接：主题蓝文字 + 前置图标（与全站主色同一令牌） */
+  a.meta-link {
+    color: var(--themeBackground);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  a.meta-link:hover {
+    color: var(--themeBackgroundDeep);
+  }
+
+  html.dark .meta-sep--bar {
+    background: rgba(255, 255, 255, 0.18);
   }
 
   .footer-powered {
@@ -406,15 +478,30 @@
     margin-top: 8px;
   }
 
-  .beian-icon {
-    margin-right: 5px;
-  }
-
   .icp a {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
     color: var(--maxGreyFont);
     font-size: 12px;
     text-decoration: none;
     transition: all 0.3s;
+  }
+
+  img.beian-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+    flex: none;
+  }
+
+  svg.beian-icon {
+    margin-right: 5px;
+  }
+
+  html.dark .beian-icon {
+    filter: brightness(1.08);
   }
 
   .icp a:hover {
@@ -426,8 +513,9 @@
       display: none;
     }
 
+    /* 窄屏贴图隐藏后，外边距会与页脚塌陷出页面背景空白带，改用内边距留出同样的 16px */
     .footer-body {
-      margin-top: 20px;
+      margin: 0 auto;
       padding: 16px 14px;
     }
 
@@ -445,7 +533,10 @@
     }
 
     .footer-badge {
-      padding: 5px 12px;
+      /* 窄屏同样按 64px 画布撑高，避免轨道环探出上下描边 */
+      box-sizing: border-box;
+      min-height: 68px;
+      padding: 5px 12px 5px 94px;
       font-size: 12px;
     }
 

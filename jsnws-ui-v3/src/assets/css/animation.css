@@ -18,6 +18,11 @@
     animation-name: hideToShow
 }
 
+/* 整屏固定背景的入场：与横幅同一节奏，只渐显不位移，避免位移露出页面底色边缘 */
+.my-animation-hero-fade {
+    animation-name: heroFadeIn
+}
+
 
 /* 上移 */
 @keyframes slide-top {
@@ -77,6 +82,29 @@
 
     to {
         opacity: 1;
+    }
+}
+
+/* 整屏背景渐显（不位移，参数与 slide-top / slide-bottom 一致） */
+@keyframes heroFadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 浏览器回退/前进、同页锚点：本次导航不重播页面级入场动画，直接呈现稳定态 */
+.page-stage--instant [class*=my-animation-] {
+    animation: none !important;
+}
+
+/* 系统「减少动态效果」：页面级入场动画停用，内容静态可读 */
+@media (prefers-reduced-motion: reduce) {
+    [class*=my-animation-] {
+        animation: none !important;
     }
 }
 

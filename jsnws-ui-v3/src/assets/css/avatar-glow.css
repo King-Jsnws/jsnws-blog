@@ -1,0 +1,93 @@
+/* 头像呼吸光环
+   由后台「网站设置 → 头像呼吸光环」控制（sys_config.avatarGlowEnabled，默认关闭）。
+   只在 html 带 .avatar-glow 时生效；关闭时页面不会注册任何相关 animation / transition。 */
+
+@keyframes light {
+  0% {
+    box-shadow: 0 0 4px #f00;
+  }
+  25% {
+    box-shadow: 0 0 16px #0f0;
+  }
+  50% {
+    box-shadow: 0 0 4px #00f;
+  }
+  75% {
+    box-shadow: 0 0 16px #0f0;
+  }
+  100% {
+    box-shadow: 0 0 4px #f00;
+  }
+}
+
+/* 覆盖位置：导航头像、下拉/抽屉头像、个人中心、侧栏与关于页站点头像、评论与留言列表、关于页最近评论 */
+html.avatar-glow .nav-avatar,
+html.avatar-glow .nav-user-avatar,
+html.avatar-glow .drawer-user-avatar,
+html.avatar-glow .user-avatar,
+html.avatar-glow .profile-avatar,
+html.avatar-glow .art-avatar,
+html.avatar-glow .analytics-comment__avatar {
+  border-radius: 50%;
+  overflow: hidden;
+  transform-origin: center;
+  animation: light 4s ease-in-out infinite;
+  transition: 0.5s;
+}
+
+html.avatar-glow .nav-avatar:hover,
+html.avatar-glow .nav-user-avatar:hover,
+html.avatar-glow .drawer-user-avatar:hover,
+html.avatar-glow .user-avatar:hover,
+html.avatar-glow .profile-avatar:hover,
+html.avatar-glow .art-avatar:hover,
+html.avatar-glow .analytics-comment__avatar:hover {
+  transform: scale(1.15) rotate(720deg);
+}
+
+/* 导航栏登录按钮：光环放在伪元素上，沿按钮自身 border-radius 走，
+   按钮原有的 hover 背景/阴影与过渡保持不变 */
+html.avatar-glow .login-circle {
+  position: relative;
+}
+
+html.avatar-glow .login-circle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: light 4s ease-in-out infinite;
+  transition: 0.5s;
+}
+
+/* 系统开启「减少动效」时降级为不动的静态光环，并取消放大旋转 */
+@media (prefers-reduced-motion: reduce) {
+  html.avatar-glow .nav-avatar,
+  html.avatar-glow .nav-user-avatar,
+  html.avatar-glow .drawer-user-avatar,
+  html.avatar-glow .user-avatar,
+  html.avatar-glow .profile-avatar,
+  html.avatar-glow .art-avatar,
+  html.avatar-glow .analytics-comment__avatar {
+    animation: none;
+    transition: none;
+    box-shadow: 0 0 10px rgba(64, 158, 255, 0.9);
+  }
+
+  html.avatar-glow .nav-avatar:hover,
+  html.avatar-glow .nav-user-avatar:hover,
+  html.avatar-glow .drawer-user-avatar:hover,
+  html.avatar-glow .user-avatar:hover,
+  html.avatar-glow .profile-avatar:hover,
+  html.avatar-glow .art-avatar:hover,
+  html.avatar-glow .analytics-comment__avatar:hover {
+    transform: none;
+  }
+
+  html.avatar-glow .login-circle::after {
+    animation: none;
+    transition: none;
+    box-shadow: 0 0 10px rgba(64, 158, 255, 0.9);
+  }
+}

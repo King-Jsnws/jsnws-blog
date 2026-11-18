@@ -3,11 +3,34 @@
     box-sizing: border-box;
 }
 
+:root {
+    /* 全站字体：与参考站 rainzt.cn 同款 LXGW WenKai Screen，自托管于 public/fonts/lxgw-wenkai-screen。
+       字体按 unicode-range 拆成 97 个子集，浏览器只下载页面实际用到的子集；
+       整包 4.87MB，单页首屏实测约 15-16 个子集、0.27-0.89MB。
+       末尾必须是通用族（sans-serif），字体未就绪时由系统字体接管，避免无字可渲。 */
+    --font-sans: "LXGW WenKai Screen", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+}
+
 body {
     color: var(--fontColor);
     background: var(--background);
-    font-family: var(--globalFont), serif;
+    font-family: var(--font-sans);
     word-break: break-word;
+}
+
+/* 表单控件默认不继承 body 字体，与参考站一致统一到同一栈 */
+button,
+input,
+textarea,
+select {
+    font-family: var(--font-sans);
+}
+
+/* 图标默认色：单色图标用 currentColor 继承所在容器颜色，未单独指定时统一落到 --iconColor（主题色）。
+   新增图标加 class="icon-default" 或让容器继承 --iconColor 即可，不必再写色值。
+   注意：不要给 svg / i.fa 加全局 color 规则，否则导航白、统计灰、友链蓝等既有语义色会被一并覆盖。 */
+.icon-default {
+    color: var(--iconColor);
 }
 
 
@@ -142,27 +165,112 @@ body {
     box-shadow: 0 5px 10px 5px var(--borderHoverColor);
 }
 
-/* el弹出框样式 */
-.el-message {
+/* el弹出框样式：透明玻璃底 + 语义色浅描边（浅色模式）
+   选择器统一加 body 前缀提升优先级，避免 Element Plus 按需样式 / HMR 重新注入时
+   同优先级的实色 background-color 覆盖本项目覆写 */
+body .el-message {
     top: 80px !important;
-    border: 0;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    /* 极低透明度白玻璃底 + 轻模糊，保证在图片背景上仍可读 */
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.10);
 }
 
-.el-message * {
-    color: var(--white) !important;
+body .el-message .el-message__content,
+body .el-message .el-message__icon {
     font-weight: 600;
+    color: #475569;
 }
 
-.el-message--success {
-    background: var(--themeBackground);
+/* 成功：浅薄荷描边 + 深绿文字/图标 */
+body .el-message--success {
+    border-color: #6ee7b7;
 }
 
-.el-message--warning {
-    background: var(--gradientBG);
+body .el-message--success .el-message__content,
+body .el-message--success .el-message__icon {
+    color: #15803d;
 }
 
-.el-message--error {
-    background: var(--gradualRed);
+/* 警告：浅琥珀描边 + 深琥珀文字/图标 */
+body .el-message--warning {
+    border-color: #fcd34d;
+}
+
+body .el-message--warning .el-message__content,
+body .el-message--warning .el-message__icon {
+    color: #b45309;
+}
+
+/* 错误：浅红描边 + 深红文字/图标 */
+body .el-message--error {
+    border-color: #fca5a5;
+}
+
+body .el-message--error .el-message__content,
+body .el-message--error .el-message__icon {
+    color: #dc2626;
+}
+
+/* 信息：浅蓝描边 + 深蓝文字/图标 */
+body .el-message--info {
+    border-color: #93c5fd;
+}
+
+body .el-message--info .el-message__content,
+body .el-message--info .el-message__icon {
+    color: #1d4ed8;
+}
+
+/* 黑夜模式：深色玻璃底 + 提亮的语义色描边与文字，避免糊在深色背景里 */
+html.dark body .el-message {
+    background-color: rgba(17, 34, 31, 0.55);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+html.dark body .el-message .el-message__content,
+html.dark body .el-message .el-message__icon {
+    color: #cbd5e1;
+}
+
+html.dark body .el-message--success {
+    border-color: rgba(74, 222, 128, 0.6);
+}
+
+html.dark body .el-message--success .el-message__content,
+html.dark body .el-message--success .el-message__icon {
+    color: #86efac;
+}
+
+html.dark body .el-message--warning {
+    border-color: rgba(251, 191, 36, 0.6);
+}
+
+html.dark body .el-message--warning .el-message__content,
+html.dark body .el-message--warning .el-message__icon {
+    color: #fcd34d;
+}
+
+html.dark body .el-message--error {
+    border-color: rgba(248, 113, 113, 0.6);
+}
+
+html.dark body .el-message--error .el-message__content,
+html.dark body .el-message--error .el-message__icon {
+    color: #fca5a5;
+}
+
+html.dark body .el-message--info {
+    border-color: rgba(96, 165, 250, 0.6);
+}
+
+html.dark body .el-message--info .el-message__content,
+html.dark body .el-message--info .el-message__icon {
+    color: #93c5fd;
 }
 
 /* 图标旋转 */
@@ -324,7 +432,7 @@ body {
 }
 
 .user-dialog .el-dialog__headerbtn:hover .el-dialog__close {
-    color: #409eff;
+    color: var(--themeBackground);
 }
 
 .user-dialog .el-dialog__body {
@@ -340,7 +448,7 @@ body {
 }
 
 .user-dialog .el-input__wrapper.is-focus {
-    box-shadow: 0 0 0 1px #409eff inset;
+    box-shadow: 0 0 0 1px var(--themeBackground) inset;
 }
 
 .user-dialog .el-input__inner {
@@ -355,5 +463,78 @@ body {
 @media screen and (max-width: 560px) {
     .user-dialog {
         width: calc(100% - 32px) !important;
+    }
+}
+
+/* ===== 前台统一页面外壳 =====
+   所有内容页优先复用这里的类；页面内只保留业务布局差异，不再各写一套宽度、圆角、描边与阴影。 */
+.ui-page {
+    width: 100%;
+    max-width: var(--ui-page-width);
+    margin: 0 auto;
+    padding: var(--ui-page-top) var(--ui-page-gutter) var(--ui-page-bottom);
+    background: var(--ui-page-bg);
+}
+
+.ui-page--banner {
+    padding-top: var(--ui-page-top-banner);
+}
+
+/* 内容页栅格：默认单列；--aside 两栏；--aside-right 在 ≥1280 时三栏 */
+.ui-page-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ui-page-gap);
+    align-items: start;
+}
+
+.ui-page-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ui-page-gap);
+    align-content: start;
+    min-width: 0;
+}
+
+.ui-card {
+    background: var(--ui-card-bg);
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
+    box-shadow: var(--ui-card-shadow);
+}
+
+.ui-card--pad {
+    padding: var(--ui-card-padding-y) var(--ui-card-padding-x);
+}
+
+.ui-page-title {
+    margin: 0;
+    font-size: var(--ui-title-size);
+    font-weight: var(--ui-title-weight);
+    line-height: 1.25;
+    color: var(--ui-title-color);
+}
+
+.ui-page-subtitle {
+    margin: 0;
+    font-size: var(--ui-subtitle-size);
+    line-height: 1.5;
+    color: var(--ui-subtitle-color);
+}
+
+@media screen and (min-width: 768px) {
+    .ui-page {
+        width: var(--ui-page-inline);
+    }
+
+    .ui-page-shell--aside,
+    .ui-page-shell--aside-right {
+        grid-template-columns: var(--ui-aside-width) minmax(0, 1fr);
+    }
+}
+
+@media screen and (min-width: 1280px) {
+    .ui-page-shell--aside-right {
+        grid-template-columns: var(--ui-aside-width) minmax(0, 1fr) var(--ui-aside-width);
     }
 }

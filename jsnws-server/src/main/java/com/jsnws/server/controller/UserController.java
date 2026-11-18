@@ -7,10 +7,12 @@ import com.jsnws.server.common.AesUtil;
 import com.jsnws.server.common.ApiException;
 import com.jsnws.server.common.Result;
 import com.jsnws.server.common.TokenUtil;
+import com.jsnws.server.common.UserRole;
 import com.jsnws.server.entity.SysUser;
 import com.jsnws.server.entity.WebInfo;
 import com.jsnws.server.mapper.SysUserMapper;
 import com.jsnws.server.mapper.WebInfoMapper;
+import com.jsnws.server.service.MailService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,12 +40,13 @@ public class UserController extends BaseController {
     private final TokenUtil tokenUtil;
     private final AesUtil aesUtil;
     private final ObjectMapper objectMapper;
-
-    @Value("${jsnws.mail-enabled}")
-    private boolean mailEnabled;
+    private final MailService mailService;
 
     @Value("${jsnws.boss-user-id}")
     private Long bossUserId;
+
+    @Value("${jsnws.boss-username}")
+    private String bossUsername;
 
     /** 验证码缓存：key = flag + ":" + place */
     private final Map<String, CodeEntry> codeCache = new ConcurrentHashMap<>();
@@ -58,12 +61,14 @@ public class UserController extends BaseController {
     }
 
     public UserController(SysUserMapper userMapper, WebInfoMapper webInfoMapper,
-                          TokenUtil tokenUtil, AesUtil aesUtil, ObjectMapper objectMapper) {
+                          TokenUtil tokenUtil, AesUtil aesUtil, ObjectMapper objectMapper,
+                          MailService mailService) {
         this.userMapper = userMapper;
         this.webInfoMapper = webInfoMapper;
         this.tokenUtil = tokenUtil;
         this.aesUtil = aesUtil;
         this.objectMapper = objectMapper;
+        this.mailService = mailService;
     }
 
     /** 登录（表单提交，密码为前端 AES 加密后的密文，直接密文比对） */
@@ -84,7 +89,7 @@ public class UserController extends BaseController {
         if (user.getUserStatus() == null || !user.getUserStatus()) {
             throw new ApiException("账号已被禁用！");
         }
-        if (Boolean.TRUE.equals(isAdmin) && (user.getUserType() == null || user.getUserType() != 1)) {
+        if (Boolean.TRUE.equals(isAdmin) && !canLoginAdmin(user)) {
             throw new ApiException("该账号没有管理员权限！");
         }
         Map<String, Object> data = safeUser(user);
@@ -121,7 +126,7 @@ public class UserController extends BaseController {
         user.setEmail(account);
         user.setSubscribe("");
         user.setUserStatus(true);
-        user.setUserType(0);
+        user.setUserType(4);
         user.setCreateTime(new Date());
         userMapper.insert(user);
 
@@ -143,6 +148,9 @@ public class UserController extends BaseController {
         if (body.containsKey("username")) {
             String username = str(body.get("username"));
             if (username != null && !username.isEmpty()) {
+                if (bossUserId.equals(user.getId()) && !username.equals(user.getUsername())) {
+                    throw new ApiException("主理人账号名不可修改，请修改昵称！");
+                }
                 Long count = userMapper.selectCount(new QueryWrapper<SysUser>()
                         .eq("username", username).ne("id", user.getId()));
                 if (count > 0) {
@@ -210,7 +218,7 @@ public class UserController extends BaseController {
         return Result.ok();
     }
 
-    /** 发送找回密码验证码（未配置邮件服务时验证码打印到控制台，且校验放行） */
+    /** 发送找回密码验证码（目前仅支持邮箱；配置缺失或发送失败时返回明确提示） */
     @GetMapping("/getCodeForForgetPassword")
     public Result<Void> getCodeForForgetPassword(@RequestParam("flag") Integer flag,
                                                  @RequestParam("place") String place) {
@@ -249,22 +257,36 @@ public class UserController extends BaseController {
     }
 
     private Result<Void> sendCode(Integer flag, String place) {
-        String code = String.format("%06d", new Random().nextInt(1000000));
-        codeCache.put(flag + ":" + place, new CodeEntry(code));
-        if (mailEnabled) {
-            // 未接入邮件服务，如实告知（如需启用，可自行接入 spring-boot-starter-mail）
-            throw new ApiException("邮件服务未接入，请在 application.yml 中保持 mail-enabled 为 false");
+        if (flag != null && flag == 1) {
+            throw new ApiException("暂不支持短信验证码，请使用邮箱验证！");
         }
-        // 开发模式：验证码打印到控制台，校验时放行
-        System.out.println("[验证码] flag=" + flag + " place=" + place + " code=" + code);
+        if (place == null || !place.trim().matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new ApiException("请输入正确的邮箱地址！");
+        }
+        if (!mailService.isEnabled()) {
+            throw new ApiException("邮件服务已关闭，暂不支持验证码相关操作，请联系站长！");
+        }
+        String to = place.trim();
+        String code = String.format("%06d", new Random().nextInt(1000000));
+        // 站点名称每次发送时现读，后台改名后无需重启，邮件标题立即跟着变
+        String siteName = mailService.siteName();
+        // 配置缺失 / 认证失败时由 MailService 抛出明确提示，验证码只在发送成功后写入缓存
+        mailService.send(to, "【" + siteName + "】验证码",
+                "您正在「" + siteName + "」进行邮箱验证，验证码是：" + code + "，5 分钟内有效。\n如非本人操作，请忽略本邮件。");
+        codeCache.put(flag + ":" + to, new CodeEntry(code));
         return Result.ok();
     }
 
     private void checkCode(Integer flag, String place, String code) {
-        if (!mailEnabled) {
-            return; // 开发模式放行
+        if (!mailService.isEnabled()) {
+            // 安全兜底：邮件服务关闭时拒绝，不再“开发模式放行”
+            throw new ApiException("邮件服务未启用，暂不支持验证码校验！");
         }
-        CodeEntry entry = codeCache.get(flag + ":" + place);
+        if (flag != null && flag == 1) {
+            throw new ApiException("暂不支持短信验证码，请使用邮箱验证！");
+        }
+        String key = flag + ":" + (place == null ? "" : place.trim());
+        CodeEntry entry = codeCache.get(key);
         if (entry == null || System.currentTimeMillis() - entry.createAt > 5 * 60 * 1000L
                 || !entry.code.equals(code)) {
             throw new ApiException("验证码错误！");
@@ -299,14 +321,23 @@ public class UserController extends BaseController {
         map.put("subscribe", user.getSubscribe());
         map.put("userStatus", user.getUserStatus());
         map.put("userType", user.getUserType());
-        // 后台侧边栏据此显示站长菜单
-        map.put("isBoss", user.getId() != null && user.getId().equals(bossUserId));
+        // 后台侧边栏据此显示站长菜单：必须同时匹配固定 id 与账号名
+        boolean isBoss = user.getId() != null && user.getId().equals(bossUserId)
+                && bossUsername.equals(user.getUsername());
+        map.put("isBoss", isBoss);
+        map.put("userTypeLabel", isBoss ? "本站主理人" : UserRole.label(user.getUserType()));
         map.put("createTime", user.getCreateTime());
         return map;
     }
 
     private String str(Object value) {
         return value == null ? null : String.valueOf(value);
+    }
+
+    /** 允许登录后台的角色：旧管理员(1)、管理员(2)、作者(3)、AI 站长(5) */
+    private boolean canLoginAdmin(SysUser user) {
+        Integer type = user.getUserType();
+        return type != null && (type == 1 || type == 2 || type == 3 || type == UserRole.AI_OWNER);
     }
 
     private Integer intVal(Object value) {

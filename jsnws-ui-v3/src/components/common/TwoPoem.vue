@@ -4,9 +4,8 @@
     <!-- 背景图片 -->
     <el-image class="my-el-image poem-image"
               style="position: absolute;margin-top: -50px"
-              v-once
               lazy
-              :src="$store.state.webInfo.randomCover[Math.floor(Math.random() * $store.state.webInfo.randomCover.length)]"
+              :src="poemBackground"
               fit="cover">
       <template #error>
         <div class="image-slot"></div>
@@ -60,6 +59,23 @@
         this.hitokoto.from = "";
         this.hitokoto.from_who = "";
         this.sendShehui();
+      }
+    },
+
+    computed: {
+      // 与首页保持一致：后台指定的背景图 > 后台随机封面 > 本地默认背景图
+      poemBackground() {
+        const webInfo = this.$store.state.webInfo || {};
+        if (!this.$common.isEmpty(webInfo.backgroundImage)) {
+          // 老配置存的是未压缩的默认图路径，统一换成体积更小的 webp 版本
+          return webInfo.backgroundImage === '/images/home-default-bg.jpg'
+            ? '/images/home-default-bg.webp'
+            : webInfo.backgroundImage;
+        }
+        if (!this.$common.isEmpty(webInfo.randomCover)) {
+          return webInfo.randomCover[Math.floor(Math.random() * webInfo.randomCover.length)];
+        }
+        return '/images/home-default-bg.webp';
       }
     },
 

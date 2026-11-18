@@ -1,13 +1,21 @@
 <template>
   <div>
+    <!-- 网站灰度：到设定时间后整体去色，后台页面不受影响 -->
+    <div v-if="siteGrayActive" class="site-gray-overlay" aria-hidden="true"></div>
     <!-- el过渡动画 -->
     <transition name="el-fade-in-linear">
       <!-- 导航栏 -->
       <div v-show="toolbar.visible || ($common.mobile() || mobile)"
            class="toolbar-content myBetween">
-        <!-- 网站名称（导航只显示站点名称，与头像卡片上的站长名称分开） -->
-        <div class="toolbar-title">
-          <h2 @click="$router.push({path: '/'})">{{ siteName }}</h2>
+        <!-- 站点标识：后台「网站设置 → 站点 LOGO」独立配置，配置了就显示图片，否则回退文字站名 -->
+        <div class="toolbar-title" @click="$router.push({path: '/'})">
+          <img v-if="siteLogo && !logoError"
+               :src="siteLogo"
+               :alt="siteName"
+               class="toolbar-logo"
+               :class="{ 'toolbar-logo--mobile': $common.mobile() || mobile }"
+               @error="logoError = true">
+          <h2 v-else>{{ siteName }}</h2>
         </div>
 
         <!-- 手机导航按钮 -->
@@ -20,49 +28,57 @@
         <!-- 导航列表 -->
         <div v-else>
           <ul class="scroll-menu">
-            <li class="nav-pill-cell" @click="$router.push({path: '/'})">
-              <div class="nav-pill" :class="{ 'is-active': $route.path === '/' }">
-                <i class="fa fa-home" aria-hidden="true"></i> <span>主页</span>
-              </div>
-            </li>
+            <!-- 导航项由后台「导航管理」控制显示与排序 -->
+            <template v-for="navKey in visibleNavKeys" :key="navKey">
+              <!-- 主页 -->
+              <li v-if="navKey === 'home'" class="nav-pill-cell" @click="$router.push({path: '/'})">
+                <div class="nav-pill" :class="{ 'is-active': $route.path === '/' }">
+                  <i class="fa fa-home" aria-hidden="true"></i> <span>主页</span>
+                </div>
+              </li>
 
-            <!-- 文章：文章列表 / 图谱 / 归档 -->
-            <li class="article-menu-cell">
-              <NavDropdown label="文章"
-                           :trigger-icon="icons.list"
-                           :items="articleMenuItems"></NavDropdown>
-            </li>
+              <!-- 文章：文章列表 / 分类 / 图谱 / 归档 -->
+              <li v-else-if="navKey === 'article'" class="article-menu-cell">
+                <NavDropdown label="文章"
+                             variant="article"
+                             :trigger-icon="icons.list"
+                             :items="articleMenuItems"></NavDropdown>
+              </li>
 
-            <!-- 追番 -->
-            <li class="nav-pill-cell" @click="$router.push({path: '/anime'})">
-              <div class="nav-pill" :class="{ 'is-active': $route.path === '/anime' }">
-                <svg class="anime-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <rect x="1.5" y="5" width="21" height="14" rx="2.5" fill="currentColor"></rect>
-                  <path d="M9.6 8.8 16 12l-6.4 3.2V8.8Z" fill="#1f1f1f"></path>
-                </svg>
-                <span>追番</span>
-              </div>
-            </li>
+              <!-- 追番 -->
+              <li v-else-if="navKey === 'anime'" class="nav-pill-cell" @click="$router.push({path: '/anime'})">
+                <div class="nav-pill" :class="{ 'is-active': $route.path === '/anime' }">
+                  <svg class="anime-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <rect x="1.5" y="5" width="21" height="14" rx="2.5" fill="currentColor"></rect>
+                    <path d="M9.6 8.8 16 12l-6.4 3.2V8.8Z" fill="#1f1f1f"></path>
+                  </svg>
+                  <span>追番</span>
+                </div>
+              </li>
 
-            <!-- 动态：随笔 / 相册 / 留言 -->
-            <li class="article-menu-cell">
-              <NavDropdown label="动态"
-                           :trigger-icon="icons.dynamic"
-                           :items="dynamicMenuItems"
-                           :active="dynamicActive"></NavDropdown>
-            </li>
+              <!-- 动态：随笔 / 相册 / 留言 -->
+              <li v-else-if="navKey === 'dynamic'" class="article-menu-cell">
+                <NavDropdown label="动态"
+                             :trigger-icon="icons.dynamic"
+                             :items="dynamicMenuItems"
+                             :active="dynamicActive"></NavDropdown>
+              </li>
 
-            <!-- 关于：关于我 / 友链 / 打赏 -->
-            <li class="article-menu-cell">
-              <NavDropdown label="关于"
-                           :trigger-icon="icons.info"
-                           :items="aboutMenuItems"></NavDropdown>
-            </li>
+              <!-- 关于：关于我 / 友链 / 打赏 / 站点统计 -->
+              <li v-else-if="navKey === 'about'" class="article-menu-cell">
+                <NavDropdown label="关于"
+                             :trigger-icon="icons.info"
+                             :items="aboutMenuItems"></NavDropdown>
+              </li>
+            </template>
 
             <!-- 后台（仅管理员登录后显示） -->
             <li v-if="adminLoggedIn" class="nav-pill-cell" @click="goAdmin()">
               <div class="nav-pill">
-                <span>💻️</span> <span>后台</span>
+                <svg class="admin-nav-icon" viewBox="0 0 1024 1024" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M544 768v128h192a32 32 0 1 1 0 64H288a32 32 0 1 1 0-64h192V768H192A128 128 0 0 1 64 640V256a128 128 0 0 1 128-128h640a128 128 0 0 1 128 128v384a128 128 0 0 1-128 128zM192 192a64 64 0 0 0-64 64v384a64 64 0 0 0 64 64h640a64 64 0 0 0 64-64V256a64 64 0 0 0-64-64z"/>
+                </svg>
+                <span>后台</span>
               </div>
             </li>
 
@@ -78,13 +94,23 @@
                            :hide-timeout="280"
                            :popper-options="navUserPopperOptions"
                            @visible-change="onAvatarCardVisibleChange">
-                <el-avatar ref="navAvatar" class="nav-avatar" :size="40" :src="userAvatar"
-                           :alt="userName + '的头像'" fit="inherit"></el-avatar>
+                <span class="identity-v-wrap">
+                  <el-avatar ref="navAvatar" class="nav-avatar" :size="40" :src="userAvatar"
+                             :alt="userName + '的头像'" fit="inherit"></el-avatar>
+                  <span class="identity-v-badge" v-if="userHasIdentity" title="认证身份">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffffff" d="M6.2 4.5h3.3l2.5 9.6 2.5-9.6h3.3L13.9 20h-3.8z"/></svg>
+                  </span>
+                </span>
 
                 <template #dropdown>
                   <div class="nav-user-card">
                     <div class="nav-user-head">
-                      <el-avatar class="nav-user-avatar" :size="64" :src="userAvatar"></el-avatar>
+                      <span class="identity-v-wrap">
+                        <el-avatar class="nav-user-avatar" :size="64" :src="userAvatar"></el-avatar>
+                        <span class="identity-v-badge" v-if="userHasIdentity" title="认证身份">
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffffff" d="M6.2 4.5h3.3l2.5 9.6 2.5-9.6h3.3L13.9 20h-3.8z"/></svg>
+                        </span>
+                      </span>
                       <div class="nav-user-name">{{ ownerName }}</div>
                     </div>
 
@@ -109,7 +135,7 @@
       </div>
     </transition>
 
-    <div id="main-container">
+    <div id="main-container" :class="{ 'page-stage--instant': pageOpenInstant }">
       <router-view></router-view>
     </div>
 
@@ -160,54 +186,61 @@
 
     <el-drawer v-model="toolbarDrawer"
                :show-close="false"
-               size="65%"
+               size="86%"
                class="toolbarDrawer"
                title="欢迎光临"
                direction="ltr">
       <div>
         <ul class="small-menu">
-          <li class="nav-pill-cell" @click="smallMenu({path: '/'})">
-            <div class="nav-pill" :class="{ 'is-active': $route.path === '/' }">
-              <i class="fa fa-home" aria-hidden="true"></i> <span>主页</span>
-            </div>
-          </li>
+          <!-- 导航项由后台「导航管理」控制显示与排序 -->
+          <template v-for="navKey in visibleNavKeys" :key="navKey">
+            <li v-if="navKey === 'home'" class="nav-pill-cell" @click="smallMenu({path: '/'})">
+              <div class="nav-pill" :class="{ 'is-active': $route.path === '/' }">
+                <i class="fa fa-home" aria-hidden="true"></i> <span>主页</span>
+              </div>
+            </li>
 
-          <li class="drawer-article-menu">
-            <NavDropdown label="文章" inline
-                         :trigger-icon="icons.list"
-                         :items="articleMenuItems"></NavDropdown>
-          </li>
+            <li v-else-if="navKey === 'article'" class="drawer-article-menu">
+              <NavDropdown label="文章" inline
+                           variant="article"
+                           :trigger-icon="icons.list"
+                           :items="articleMenuItems"></NavDropdown>
+            </li>
 
-          <!-- 追番 -->
-          <li class="nav-pill-cell" @click="smallMenu({path: '/anime'})">
-            <div class="nav-pill" :class="{ 'is-active': $route.path === '/anime' }">
-              <svg class="anime-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <rect x="1.5" y="5" width="21" height="14" rx="2.5" fill="currentColor"></rect>
-                <path d="M9.6 8.8 16 12l-6.4 3.2V8.8Z" fill="#1f1f1f"></path>
-              </svg>
-              <span>追番</span>
-            </div>
-          </li>
+            <!-- 追番 -->
+            <li v-else-if="navKey === 'anime'" class="nav-pill-cell" @click="smallMenu({path: '/anime'})">
+              <div class="nav-pill" :class="{ 'is-active': $route.path === '/anime' }">
+                <svg class="anime-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <rect x="1.5" y="5" width="21" height="14" rx="2.5" fill="currentColor"></rect>
+                  <path d="M9.6 8.8 16 12l-6.4 3.2V8.8Z" fill="#1f1f1f"></path>
+                </svg>
+                <span>追番</span>
+              </div>
+            </li>
 
-          <!-- 动态：随笔 / 相册 / 留言 -->
-          <li class="drawer-article-menu">
-            <NavDropdown label="动态" inline
-                         :trigger-icon="icons.dynamic"
-                         :items="dynamicMenuItems"
-                         :active="dynamicActive"></NavDropdown>
-          </li>
+            <!-- 动态：随笔 / 相册 / 留言 -->
+            <li v-else-if="navKey === 'dynamic'" class="drawer-article-menu">
+              <NavDropdown label="动态" inline
+                           :trigger-icon="icons.dynamic"
+                           :items="dynamicMenuItems"
+                           :active="dynamicActive"></NavDropdown>
+            </li>
 
-          <!-- 关于：关于我 / 友链 / 打赏 -->
-          <li class="drawer-article-menu">
-            <NavDropdown label="关于" inline
-                         :trigger-icon="icons.info"
-                         :items="aboutMenuItems"></NavDropdown>
-          </li>
+            <!-- 关于：关于我 / 友链 / 打赏 -->
+            <li v-else-if="navKey === 'about'" class="drawer-article-menu">
+              <NavDropdown label="关于" inline
+                           :trigger-icon="icons.info"
+                           :items="aboutMenuItems"></NavDropdown>
+            </li>
+          </template>
 
           <!-- 后台（仅管理员登录后显示） -->
           <li v-if="adminLoggedIn" class="nav-pill-cell" @click="goAdmin()">
             <div class="nav-pill">
-              <span>💻️</span> <span>后台</span>
+              <svg class="admin-nav-icon" viewBox="0 0 1024 1024" aria-hidden="true" focusable="false">
+                <path fill="currentColor" d="M544 768v128h192a32 32 0 1 1 0 64H288a32 32 0 1 1 0-64h192V768H192A128 128 0 0 1 64 640V256a128 128 0 0 1 128-128h640a128 128 0 0 1 128 128v384a128 128 0 0 1-128 128zM192 192a64 64 0 0 0-64 64v384a64 64 0 0 0 64 64h640a64 64 0 0 0 64-64V256a64 64 0 0 0-64-64z"/>
+              </svg>
+              <span>后台</span>
             </div>
           </li>
 
@@ -218,8 +251,13 @@
           </template>
           <template v-else>
             <li class="drawer-user-head">
-              <el-avatar class="drawer-user-avatar" :size="56" :src="userAvatar"
-                         :alt="userName + '的头像'" fit="inherit"></el-avatar>
+              <span class="identity-v-wrap">
+                <el-avatar class="drawer-user-avatar" :size="56" :src="userAvatar"
+                           :alt="userName + '的头像'" fit="inherit"></el-avatar>
+                <span class="identity-v-badge" v-if="userHasIdentity" title="认证身份">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffffff" d="M6.2 4.5h3.3l2.5 9.6 2.5-9.6h3.3L13.9 20h-3.8z"/></svg>
+                </span>
+              </span>
               <div class="nav-user-name">{{ ownerName }}</div>
             </li>
             <li class="nav-user-item" @click="smallMenu({path: '/user'})">
@@ -241,10 +279,12 @@
 
 <script>
   import mousedown from '../utils/mousedown'
+  import { h } from 'vue'
   import { allowAdminEntry, clearAdminEntry } from '../utils/adminEntry'
+  import { pageOpenState } from '../utils/pageOpen'
   import NavDropdown from '../components/common/NavDropdown.vue'
   import ThemeToggle from '../components/common/ThemeToggle.vue'
-  import { ArrowRight, Box, Camera, ChatDotRound, Connection, EditPen, InfoFilled, List, Picture, Present, Share, SwitchButton, User } from '@element-plus/icons-vue'
+  import { ArrowRight, Camera, ChatDotRound, DataAnalysis, EditPen, InfoFilled, List, Picture, Present, SwitchButton, User } from '@element-plus/icons-vue'
 
   // 下拉项与图标放在模块作用域，避免图标组件被 Vue 的响应式包装
   const NAV_ICONS = {
@@ -253,16 +293,173 @@
     dynamic: Camera
   }
 
+  // 文章下拉的实心图标：归档（圆角方块 + 下载箭头）、分类（实心文件夹）、标签（#）
+  const ArchiveSolidIcon = {
+    name: 'ArchiveSolidIcon',
+    render() {
+      return h('svg', {
+        viewBox: '0 0 24 24',
+        width: '1em',
+        height: '1em',
+        fill: 'none',
+        'aria-hidden': 'true'
+      }, [
+        h('rect', {x: 3, y: 3, width: 18, height: 18, rx: 5, fill: 'currentColor'}),
+        h('path', {
+          d: 'M12 6.8v5.6',
+          stroke: 'var(--panelBg, #ffffff)',
+          'stroke-width': 1.9,
+          'stroke-linecap': 'round'
+        }),
+        h('path', {
+          d: 'm9.3 10 2.7 2.7L14.7 10',
+          stroke: 'var(--panelBg, #ffffff)',
+          'stroke-width': 1.9,
+          'stroke-linecap': 'round',
+          'stroke-linejoin': 'round'
+        }),
+        h('path', {
+          d: 'M8.6 16.2h6.8',
+          stroke: 'var(--panelBg, #ffffff)',
+          'stroke-width': 1.9,
+          'stroke-linecap': 'round'
+        })
+      ])
+    }
+  }
+
+  const FolderSolidIcon = {
+    name: 'FolderSolidIcon',
+    render() {
+      return h('svg', {
+        viewBox: '0 0 24 24',
+        width: '1em',
+        height: '1em',
+        fill: 'none',
+        'aria-hidden': 'true'
+      }, [
+        h('path', {
+          d: 'M3.2 7.2A2.2 2.2 0 0 1 5.4 5h3.9l2.1 2.5h7.2a2.2 2.2 0 0 1 2.2 2.2v7.6a2.2 2.2 0 0 1-2.2 2.2H5.4a2.2 2.2 0 0 1-2.2-2.2z',
+          fill: 'currentColor'
+        })
+      ])
+    }
+  }
+
+  const HashSolidIcon = {
+    name: 'HashSolidIcon',
+    render() {
+      return h('svg', {
+        viewBox: '0 0 24 24',
+        width: '1em',
+        height: '1em',
+        fill: 'none',
+        'aria-hidden': 'true'
+      }, [
+        h('path', {
+          d: 'M9.4 4.2 7.8 19.8M16.2 4.2l-1.6 15.6M4.8 9.4h14.6M4.2 14.6h14.6',
+          stroke: 'currentColor',
+          'stroke-width': 2.2,
+          'stroke-linecap': 'round'
+        })
+      ])
+    }
+  }
+
+  // 文章：按参考图只保留 归档 / 分类 / 标签，图标用实心风格
   const ARTICLE_MENU_ITEMS = [
-    {label: '文章列表', to: '/sort', icon: List},
-    {label: '图谱', to: '/graph', icon: Share},
-    {label: '归档', to: '/archive', icon: Box}
+    {label: '归档', to: '/archive', icon: ArchiveSolidIcon},
+    {label: '分类', to: '/categories', icon: FolderSolidIcon},
+    {label: '标签', to: '/tags', icon: HashSolidIcon}
   ]
 
+  // 关于下拉：博客日志用「时钟 + 逆时针箭头」的历史回溯图标
+  const HistoryIcon = {
+    name: 'HistoryIcon',
+    render() {
+      return h('svg', {
+        viewBox: '0 0 24 24',
+        width: '1em',
+        height: '1em',
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.8,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        'aria-hidden': 'true'
+      }, [
+        h('path', {d: 'M3.6 12a8.4 8.4 0 1 0 2.5-6'}),
+        h('path', {d: 'M3.6 4.6v4h4'}),
+        h('path', {d: 'M12 8v4.2l2.8 1.7'})
+      ])
+    }
+  }
+
+  // 项目更新日志：卷轴 + 笔
+  const ScrollPenIcon = {
+    name: 'ScrollPenIcon',
+    render() {
+      return h('svg', {
+        viewBox: '0 0 24 24',
+        width: '1em',
+        height: '1em',
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': 1.8,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        'aria-hidden': 'true'
+      }, [
+        h('path', {d: 'M6.4 3.8h8.2l3.6 3.8v12.6H6.4z'}),
+        h('path', {d: 'M14.6 3.8v3.8h3.6'}),
+        h('path', {d: 'm3.4 20.4.7-3 6.5-6.5 2.3 2.3-6.5 6.5z'}),
+        h('path', {d: 'm9.9 12.1 2.3 2.3'})
+      ])
+    }
+  }
+
+  // 关于下拉：单人实心（关于我）与双人实心（友链），与关于页 tab 同一套图形
+  const UserSolidIcon = {
+    name: 'UserSolidIcon',
+    render() {
+      return h('svg', {
+        viewBox: '0 0 24 24',
+        width: '1em',
+        height: '1em',
+        fill: 'currentColor',
+        'aria-hidden': 'true'
+      }, [
+        h('path', {
+          d: 'M12 12.4c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4Zm0 1.8c-2.7 0-8 1.35-8 4v1.6h16v-1.6c0-2.65-5.3-4-8-4Z'
+        })
+      ])
+    }
+  }
+
+  const UsersSolidIcon = {
+    name: 'UsersSolidIcon',
+    render() {
+      return h('svg', {
+        viewBox: '0 0 24 24',
+        width: '1em',
+        height: '1em',
+        fill: 'currentColor',
+        'aria-hidden': 'true'
+      }, [
+        h('path', {
+          d: 'M16 11.2c1.6 0 2.9-1.3 2.9-2.9S17.6 5.4 16 5.4s-2.9 1.3-2.9 2.9 1.3 2.9 2.9 2.9Zm-8 0c1.6 0 2.9-1.3 2.9-2.9S9.6 5.4 8 5.4 5.1 6.7 5.1 8.3 6.4 11.2 8 11.2Zm0 1.7c-2.3 0-6.9 1.15-6.9 3.4v1.7h13.8v-1.7c0-2.25-4.6-3.4-6.9-3.4Zm8 0c-.3 0-.6 0-.95.05 1.15.8 1.95 1.9 1.95 3.35v1.7h5.9v-1.7c0-2.25-4.6-3.4-6.9-3.4Z'
+        })
+      ])
+    }
+  }
+
   const ABOUT_MENU_ITEMS = [
-    {label: '关于我', to: '/about', icon: User},
-    {label: '友链', to: '/favorite', icon: Connection},
-    {label: '打赏', to: '/sponsor', icon: Present}
+    {label: '关于我', to: '/about', icon: UserSolidIcon},
+    {label: '友链', to: '/favorite', icon: UsersSolidIcon},
+    {label: '打赏', to: '/sponsor', icon: Present},
+    {label: '站点统计', to: '/analytics', icon: DataAnalysis},
+    {label: '项目更新日志', to: '/changelog', icon: ScrollPenIcon},
+    {label: '博客日志', to: '/blog-log', icon: HistoryIcon}
   ]
 
   const DYNAMIC_MENU_ITEMS = [
@@ -279,11 +476,14 @@
     },
     data() {
       return {
+        grayNow: Date.now(),
         toolButton: false,
         mouseAnimation: false,
         scrollTop: 0,
         toolbarDrawer: false,
         mobile: false,
+        // 站点 LOGO 加载失败时回退文字站名，避免出现破图
+        logoError: false,
         resizeHandler: null,
         // 导航头像 40px 居中在 60px 导航里，底边在 50px；默认 offset 12 会让卡片顶边落在 62px，紧贴导航底边。
         // 改成 32px 后卡片顶边稳定落在 82px（导航底边 60px 以下 22px），卡片本体不再与导航重叠。
@@ -297,14 +497,47 @@
         mousedown()
       }
       window.addEventListener('scroll', this.onScrollPage)
+      // 记录首次进入的页面访问
+      this.reportVisit()
+      // 定时刷新当前时间，使灰度在设定时间点自动生效
+      this.grayTimer = setInterval(() => {
+        this.grayNow = Date.now()
+      }, 30000)
     },
     unmounted() {
       window.removeEventListener('scroll', this.onScrollPage)
+      clearInterval(this.grayTimer)
       if (this.resizeHandler) {
         window.removeEventListener('resize', this.resizeHandler)
       }
+      // 离开公开页时清除光环类，避免后台等页面残留动画
+      document.documentElement.classList.remove('avatar-glow')
     },
     watch: {
+      // 前台路由切换时上报一次访问（站点统计的页面排行、设备与来源依赖该数据）
+      '$route.path'() {
+        this.reportVisit()
+      },
+      // 站点 LOGO 地址变更后重新尝试加载图片
+      siteLogo() {
+        this.logoError = false
+      },
+      // 头像呼吸光环：后台开关默认关闭，只有开启时才在 html 上挂类
+      avatarGlowEnabled: {
+        immediate: true,
+        handler(enabled) {
+          document.documentElement.classList.toggle('avatar-glow', !!enabled)
+        }
+      },
+      // 浏览器标签标题：后台可单独配置（web_info.tab_title），不与站点名称共用
+      documentTitle: {
+        immediate: true,
+        handler(title) {
+          if (!this.$common.isEmpty(title)) {
+            document.title = title
+          }
+        }
+      },
       scrollTop(scrollTop, oldScrollTop) {
         //如果滑动距离超过屏幕高度三分之一视为进入页面，背景改为白色
         let enter = scrollTop > window.innerHeight / 2
@@ -353,6 +586,88 @@
       window.addEventListener('resize', this.resizeHandler)
     },
     computed: {
+      // 本次导航是否跳过页面级入场动画（回退/前进、同页锚点）
+      pageOpenInstant() {
+        return pageOpenState.instant
+      },
+      // 导航项：默认展示全部并保持原有顺序，后台「导航管理」可调整显示与顺序
+      navItems() {
+        const meta = [
+          {key: "home", title: "主页"},
+          {key: "article", title: "文章"},
+          {key: "anime", title: "追番"},
+          {key: "dynamic", title: "动态"},
+          {key: "about", title: "关于"}
+        ];
+        const config = {};
+        const raw = this.$store.state.sysConfig.navConfig;
+        if (!this.$common.isEmpty(raw)) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+              parsed.forEach((item, index) => {
+                if (item && item.key) {
+                  config[item.key] = {visible: item.visible !== false, order: index};
+                }
+              });
+            }
+          } catch (e) {
+            // 配置格式异常时回落到默认导航，不影响前台展示
+          }
+        }
+        return meta.map((item) => {
+          const saved = config[item.key];
+          return {
+            key: item.key,
+            title: item.title,
+            visible: saved ? saved.visible : true,
+            order: saved ? saved.order : meta.length
+          };
+        }).sort((a, b) => a.order - b.order);
+      },
+      visibleNavKeys() {
+        return this.navItems.filter((item) => item.visible).map((item) => item.key);
+      },
+      // 网站灰度：仅首页生效；到设定日期（当天 0 点）后自动变灰
+      siteGrayActive() {
+        if (this.$route.path !== "/") {
+          return false;
+        }
+        const raw = this.$store.state.sysConfig.grayMode;
+        if (this.$common.isEmpty(raw)) {
+          return false;
+        }
+        let config;
+        try {
+          config = JSON.parse(raw);
+        } catch (e) {
+          return false;
+        }
+        if (!config.enabled) {
+          return false;
+        }
+        let dates = [];
+        if (Array.isArray(config.dates)) {
+          // 保存的是「月-日」，每年循环生效
+          dates = config.dates.map((date) => String(date).slice(-5));
+        } else if (config.startTime) {
+          // 兼容旧版单日期配置
+          dates = [String(config.startTime).slice(-5)];
+        }
+        // 未设置日期时，开启开关即立即灰度
+        if (!dates.length) {
+          return true;
+        }
+        const now = new Date(this.grayNow);
+        const pad = (value) => (value < 10 ? "0" + value : "" + value);
+        const today = pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+        return dates.indexOf(today) > -1;
+      },
+      // 头像呼吸光环开关（sys_config.avatarGlowEnabled）：缺省/关闭时为 false
+      avatarGlowEnabled() {
+        const raw = this.$store.state.sysConfig.avatarGlowEnabled
+        return raw === '1' || raw === 'true' || raw === true
+      },
       toolbar() {
         return this.$store.state.toolbar
       },
@@ -381,19 +696,50 @@
         }
         return this.$store.state.webInfo.avatar
       },
+      // 头像认证角标：仅主理人 / AI 站长 / 管理员显示
+      userHasIdentity() {
+        const user = this.$store.state.currentUser
+        if (this.$common.isEmpty(user)) {
+          return false
+        }
+        const type = Number(user.userType)
+        return user.isBoss === true || type === 1 || type === 2 || type === 5
+      },
       // 导航里代表当前登录用户（头像 alt 等）
       userName() {
         const user = this.$store.state.currentUser
         return this.$common.isEmpty(user.username) ? '用户' : user.username
       },
-      // 导航标题：只取站点字段（网站名称 webName，缺失退回网站标题 webTitle）
+      // 浏览器标签页标题：独立配置 tabTitle → 站点名称 webName → 通用名
+      documentTitle() {
+        const info = this.$store.state.webInfo || {}
+        if (!this.$common.isEmpty(info.tabTitle)) {
+          return info.tabTitle
+        }
+        if (!this.$common.isEmpty(info.webName)) {
+          return info.webName
+        }
+        return '博客'
+      },
+      // 导航标题：只取站点字段（网站名称 webName，缺失退回网站标题 webTitle，再退回通用名称）
       siteName() {
         const info = this.$store.state.webInfo || {}
         if (!this.$common.isEmpty(info.webName)) {
           return info.webName
         }
         const title = Array.isArray(info.webTitle) ? info.webTitle.join('') : info.webTitle
-        return this.$common.isEmpty(title) ? 'King' : title
+        return this.$common.isEmpty(title) ? '博客' : title
+      },
+      // 站点 LOGO：优先用后台「网站设置 → 站点 LOGO」（web_info.logo），与头像 avatar 分开存储；
+      // 未配置时回退到内置 C 版品牌图标，按当前主题取深/浅两版；图片加载失败仍由 logoError 回退文字站名
+      siteLogo() {
+        const info = this.$store.state.webInfo || {}
+        if (!this.$common.isEmpty(info.logo)) {
+          return String(info.logo).trim()
+        }
+        return this.$store.state.theme === 'dark'
+          ? '/images/brand/jsnws-icon-dark.svg'
+          : '/images/brand/jsnws-icon-light.svg'
       },
       // 卡片里代表站长（站点主人）：取站长账号（sys_user 中 bossUserId 对应用户）的名称，
       // 站点信息表 web_info 没有这个字段；缺失时兜底站点名称，绝不回落到登录用户名
@@ -421,10 +767,12 @@
       },
 
       goAdmin() {
-        // 仅此处放行：先写入本次导航进入标记，再打开后台
+        // 仅此处放行：先写入本次导航进入标记，再进入后台
         allowAdminEntry()
-        // 跟随当前访问地址，避免 dev（8080）/ 生产环境的端口差异
-        window.open(window.location.origin + '/admin')
+        // 必须同标签页跳转：sessionStorage 不会随 window.open 的新标签页继承，
+        // 新标签页里拿不到进入标记会被路由守卫打回首页（表现为点了没反应）
+        this.toolbarDrawer = false
+        this.$router.push({path: '/admin'})
       },
 
       // 头像卡片展开/收起：展开时导航小头像「飞入」卡片头像位，收起时飞回
@@ -545,6 +893,9 @@
           target.style.transition = 'transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1)'
           target.style.transform = 'translate(0, 0) scale(1)'
           this._avatarTimer = window.setTimeout(() => {
+            // 飞行结束后清掉内联过渡与 transform，避免覆盖 CSS 里的 hover 过渡/变换
+            target.style.transition = ''
+            target.style.transform = ''
             // 卡片展开期间导航头像保持隐藏，否则会和卡片头像同时在场（两处都看到头像）；收起时再淡入
             this.clearNavAvatarTransition(0)
             // 记录卡片头像的最终位置，收起时用克隆头像飞回
@@ -606,6 +957,27 @@
         clearAdminEntry()
         this.$router.push({ path: '/' })
       },
+      // 访问上报：路径 + 站外来源主机名（直接访问留空，由服务端记为「直接」）
+      reportVisit() {
+        const path = this.$route.path
+        if (!path || path.indexOf('/admin') === 0) {
+          return
+        }
+        let referrer = ''
+        if (document.referrer) {
+          try {
+            const host = new URL(document.referrer).host
+            if (host && host !== window.location.host) {
+              referrer = host
+            }
+          } catch (e) {
+            referrer = ''
+          }
+        }
+        this.$http.post(this.$constant.baseURL + '/webInfo/recordVisit', {path, referrer})
+          .catch(() => {
+          })
+      },
       getWebInfo() {
         this.$http.get(this.$constant.baseURL + '/webInfo/getWebInfo')
           .then((res) => {
@@ -654,13 +1026,11 @@
         root.style.setProperty('--springBg', 'url(' + webStaticResourcePrefix + 'assets/springBg.png)')
         root.style.setProperty('--admireImage', 'url(' + webStaticResourcePrefix + 'assets/admireImage.jpg)')
         root.style.setProperty('--toTop', 'url(' + webStaticResourcePrefix + 'assets/toTop.png)')
-        root.style.setProperty('--bannerWave1', 'url(' + webStaticResourcePrefix + 'assets/bannerWave1.png) repeat-x')
-        root.style.setProperty('--bannerWave2', 'url(' + webStaticResourcePrefix + 'assets/bannerWave2.png) repeat-x')
+        // 首页首屏两层波浪改用项目内本地 SVG（color.css 中按深浅模式切换），不再从静态资源前缀取图
         root.style.setProperty('--backgroundPicture', 'url(' + webStaticResourcePrefix + 'assets/backgroundPicture.jpg)')
         root.style.setProperty('--toolbar', 'url(' + webStaticResourcePrefix + 'assets/toolbar.jpg)')
-        const font = new FontFace('King-font', 'url(' + webStaticResourcePrefix + 'assets/font.woff2)')
-        font.load()
-        document.fonts.add(font)
+        // 全站字体已改为自托管的 LXGW WenKai Screen（见 public/index.html 与 index.css 的 --font-sans），
+        // 不再从静态资源加载旧的 King-font，避免多下载一份用不到的字库
       },
       getSortInfo() {
         this.$http.get(this.$constant.baseURL + '/webInfo/getSortInfo')
@@ -731,8 +1101,40 @@
   .toolbar-title {
     margin-left: 30px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
     /* 用文字投影代替底色，保证白字压在亮色内容上仍可读 */
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55), 0 0 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 顶部站点 LOGO：高度固定、宽度等比，contain 保证不裁切不拉伸；flex 不参与压缩 */
+  .toolbar-logo {
+    display: block;
+    height: 32px;
+    width: auto;
+    max-width: 180px;
+    max-height: 32px;
+    flex: 0 0 auto;
+    object-fit: contain;
+    object-position: center;
+    overflow: visible;
+    border-radius: 8px;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
+  }
+
+  /* 顶栏是半透明遮罩，首页横幅又是深色图：浅色主题的深色图标下半部会和深底糊在一起，
+     看起来像被裁掉；加一圈浅色描边把整枚图形勾出来（移动端有白色药丸底，不参与） */
+  @media screen and (min-width: 768px) {
+    html:not(.dark) .toolbar-logo {
+      filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.95))
+              drop-shadow(0 0 2px rgba(255, 255, 255, 0.6))
+              drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
+    }
+  }
+
+  /* 移动端（与导航折叠同一判断）LOGO 高度降为 26px，宽度 auto 等比不变形 */
+  .toolbar-logo--mobile {
+    height: 26px;
   }
 
   .toolbar-mobile-menu {
@@ -766,6 +1168,14 @@
     width: 18px;
     height: 18px;
     display: block;
+  }
+
+  /* 后台入口图标：显示器轮廓，尺寸与 14px 文字等高，flex 居中即与文字居中对齐 */
+  .admin-nav-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+    flex-shrink: 0;
   }
 
   .article-menu-cell,
@@ -843,7 +1253,7 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: #409eff;
+    background: var(--themeBackground);
     color: #ffffff;
     font-size: 15px;
     font-weight: 400;
@@ -1070,7 +1480,8 @@
     top: 0;
     left: 0;
     background: rgba(0, 0, 0, 0.6);
-    z-index: 10;
+    /* 与 fancybox 灯箱同层级：必须盖住头部导航（z-index:100）与侧栏 */
+    z-index: 99999;
     width: 100%;
     height: 100%;
     display: none;
@@ -1148,5 +1559,15 @@
     .nav-user-popper .nav-user-avatar {
       visibility: hidden;
     }
+  }
+
+  /* 网站灰度遮罩：用 backdrop-filter 去色，避免 filter 影响页面内 fixed 背景定位 */
+  .site-gray-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+    -webkit-backdrop-filter: grayscale(1);
+    backdrop-filter: grayscale(1);
   }
 </style>

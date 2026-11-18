@@ -308,4 +308,14 @@
     font-weight: 500;
     color: var(--admin-text-soft);
   }
+
+  .handle-input {
+    width: 160px;
+    display: inline-block;
+  }
+
+  .mrb10 {
+    margin-right: 10px;
+    margin-bottom: 10px;
+  }
 </style>

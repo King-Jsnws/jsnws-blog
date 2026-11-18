@@ -8,6 +8,7 @@ import com.jsnws.server.common.TokenUtil;
 import com.jsnws.server.entity.SysUser;
 import com.jsnws.server.mapper.SysUserMapper;
 import com.jsnws.server.mapper.WebInfoMapper;
+import com.jsnws.server.service.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,8 +60,8 @@ class UserControllerLoginTest {
         AesUtil aesUtil = new AesUtil();
         ReflectionTestUtils.setField(aesUtil, "key", "sarasarasarasara");
 
-        UserController controller = new UserController(userMapper, webInfoMapper, tokenUtil, aesUtil, OBJECT_MAPPER);
-        ReflectionTestUtils.setField(controller, "mailEnabled", false);
+        UserController controller = new UserController(userMapper, webInfoMapper, tokenUtil, aesUtil,
+                OBJECT_MAPPER, new MailService(null, null, OBJECT_MAPPER, false));
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())

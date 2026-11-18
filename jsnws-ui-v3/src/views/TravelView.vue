@@ -212,14 +212,16 @@
 <style scoped>
 
   .travel-container {
-    padding: 25px;
-    background: var(--favoriteBg);
+    width: var(--ui-page-inline);
+    max-width: var(--ui-page-width);
+    margin: 0 auto;
+    padding: var(--ui-page-top) var(--ui-page-gutter) var(--ui-page-bottom);
+    background: var(--ui-page-bg);
   }
 
-  /* 去掉封面后，内容需自行避开顶部固定导航（60px） */
   .travel-content {
-    margin: 90px auto 0;
-    max-width: 1200px;
+    margin: 0 auto;
+    max-width: 100%;
   }
 
   /* 分类筛选：与导航胶囊同一套观感 */
@@ -228,7 +230,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 12px;
-    margin: 40px auto 30px;
+    margin: 0 auto var(--ui-page-gap);
   }
 
   .gallery-tab {
@@ -236,24 +238,39 @@
     align-items: center;
     gap: 8px;
     height: 36px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 999px;
-    background: var(--hoverBg);
+    padding: 0 14px;
+    border: 1px dashed var(--ui-btn-border);
+    border-radius: var(--ui-btn-radius);
+    background: var(--ui-btn-bg);
+    box-shadow: var(--ui-btn-shadow);
     color: var(--fontColor);
     font-size: 14px;
+    font-weight: 500;
     letter-spacing: 0.5px;
+    line-height: 20px;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: var(--ui-btn-transition);
   }
 
   .gallery-tab:hover {
-    background: var(--subtleBg);
+    border-style: dashed;
+    border-color: var(--ui-btn-border-hover);
+    background: var(--hoverBg);
+    box-shadow: var(--ui-btn-shadow-hover);
+  }
+
+  /* 按压瞬时缩放，与参考站 active:scale-95 一致 */
+  .gallery-tab:active {
+    border-style: dashed;
+    border-color: var(--ui-btn-border-hover);
+    box-shadow: var(--ui-btn-shadow-hover);
+    scale: 0.95;
   }
 
   .gallery-tab.is-active {
-    background: var(--fontColor);
-    color: var(--background);
+    background: var(--ui-accent-strong);
+    border-color: transparent;
+    color: #fff;
   }
 
   .gallery-tab .tab-count {
@@ -264,16 +281,18 @@
   /* 瀑布流：三栏，按图片原始比例排布 */
   .gallery-masonry {
     column-count: 3;
-    column-gap: 18px;
+    column-gap: var(--ui-page-gap);
   }
 
   .gallery-item {
     position: relative;
     break-inside: avoid;
-    margin-bottom: 18px;
-    border-radius: 14px;
+    margin-bottom: var(--ui-page-gap);
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
     overflow: hidden;
-    background: var(--background);
+    background: var(--ui-card-bg);
+    box-shadow: var(--ui-card-shadow);
     cursor: zoom-in;
   }
 
@@ -360,11 +379,13 @@
     max-width: 760px;
     margin: 20px auto;
     padding: 46px 24px;
-    border-radius: 14px;
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-card-bg);
+    box-shadow: var(--ui-card-shadow);
     text-align: center;
     font-size: 15px;
     color: var(--greyFontColor);
-    background: var(--background);
   }
 
   .gallery-state .state-icon {
@@ -407,7 +428,7 @@
     }
 
     .travel-container {
-      padding: 14px;
+      padding: var(--ui-page-top) var(--ui-page-gutter) var(--ui-page-bottom);
     }
   }
 

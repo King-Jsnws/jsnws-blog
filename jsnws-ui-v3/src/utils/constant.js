@@ -1,13 +1,11 @@
-export default {
-  // 测试环境
-  baseURL: "http://localhost:8081",
-  imBaseURL: "http://localhost:81/im",
-  webURL: "http://localhost",
+const isProduction = process.env.NODE_ENV === "production";
+const webOrigin = location.protocol + "//" + location.hostname + (location.port ? ":" + location.port : "");
 
-  // 生产环境
-  // webURL: location.protocol + "//" + location.hostname + (location.port ? ':' + location.port : ''),
-  // baseURL: location.protocol + "//" + location.hostname + (location.port ? ':' + location.port : '') + "/api",
-  // imBaseURL: location.protocol + "//" + location.hostname + (location.port ? ':' + location.port : '') + "/im",
+export default {
+  // 开发环境直连本机 8081；生产环境走同源 /api（由 nginx 反代到后端 8081）
+  baseURL: isProduction ? webOrigin + "/api" : "http://localhost:8081",
+  imBaseURL: isProduction ? webOrigin + "/im" : "http://localhost:81/im",
+  webURL: isProduction ? webOrigin : "http://localhost",
 
   host: location.hostname + (location.port ? ':' + location.port : ''),
 
@@ -24,8 +22,11 @@ export default {
 
   friendWebName: "King",
   friendUrl: location.protocol + "//" + location.hostname + (location.port ? ':' + location.port : ''),
-  friendAvatar: "https://s1.ax1x.com/2022/11/10/z9E7X4.jpg",
-  friendIntroduction: "这是一个 Vue2 Vue3 与 SpringBoot 结合的产物～",
+  // 友链卡「头像链接」的默认值：没有真实上传头像时显示
+  friendAvatar: "https://jsnws.com/images/default-avatar.webp",
+  // 友链卡「RSS 地址」的默认值：配置为空或无效时显示
+  friendRss: "https://jsnws.com/rss.xml",
+  friendIntroduction: "这是一个 Vue3 + Spring Boot 的产物",
   friendCover: "https://s1.ax1x.com/2022/11/10/z9VlHs.png",
 
   before_color_list: ["black", "rgb(131, 123, 199)", "#ee7752", "#e73c7e", "#23a6d5", "#23d5ab"],

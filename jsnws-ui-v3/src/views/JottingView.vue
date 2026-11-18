@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div id="jotting" class="jotting-page">
+    <div id="jotting" class="jotting-page my-animation-slide-bottom">
       <div class="jotting-head">
         <div class="jotting-head-row">
           <div class="jotting-head-text">
@@ -59,9 +59,19 @@
                  v-for="jotting in jottingList"
                  :key="jotting.id">
           <div class="jotting-meta">
-            <el-avatar shape="square" :size="38" :src="authorAvatar"></el-avatar>
+            <el-avatar shape="circle" :size="38" :src="authorAvatar"></el-avatar>
             <div class="meta-text">
-              <span class="author-name">{{ authorName }}</span>
+              <div class="author-row">
+                <span class="author-name">{{ authorName }}</span>
+                <span class="site-badge" v-if="siteName" :title="siteName">
+                  <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                  {{ siteName }}
+                </span>
+                <span class="boss-badge" title="本站主理人">
+                  <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm0 2h14v2H5z"/></svg>
+                  主理人
+                </span>
+              </div>
               <span class="jotting-time">{{ jotting.createTime }}</span>
             </div>
           </div>
@@ -69,7 +79,7 @@
           <div class="jotting-content" v-html="jotting.html"></div>
 
           <div class="jotting-foot">
-            <span class="jotting-date">😃 {{ jotting.createTime }}</span>
+            <span class="jotting-date">{{ jotting.createTime }}</span>
             <span class="jotting-delete"
                   v-if="canDelete(jotting)"
                   @click="deleteJotting(jotting.id)">删除</span>
@@ -131,8 +141,22 @@
         return this.$common.isEmpty(user) ? '' : user.avatar
       },
       authorName() {
+        // 随笔作者展示站长昵称（无昵称时后端回退账号），缺失再兜底站点名称
+        const boss = this.$store.state.bossInfo || {}
+        if (!this.$common.isEmpty(boss.username)) {
+          return boss.username
+        }
         const webInfo = this.$store.state.webInfo
         return this.$common.isEmpty(webInfo.webName) ? '站长' : webInfo.webName
+      },
+      // 站点名称徽章：取 webName，缺失退回 webTitle
+      siteName() {
+        const info = this.$store.state.webInfo || {}
+        if (!this.$common.isEmpty(info.webName)) {
+          return info.webName
+        }
+        const title = Array.isArray(info.webTitle) ? info.webTitle.join('') : info.webTitle
+        return this.$common.isEmpty(title) ? '' : title
       },
       // 站长登录判断：与 HomeLayout 导航栏「后台」入口完全一致
       adminLoggedIn() {
@@ -326,32 +350,80 @@
     min-width: 0;
   }
 
-  /* 站长发布入口：与随笔卡片同色系，描边 + 悬停主题色 */
+  /* 随笔页局部覆盖：对齐友链页 .friend-btn（透明底 + 中性灰 1px 实线，hover 才转虚线），不动全局 token */
   .jotting-compose-btn {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
     margin-top: 2px;
     margin-left: 16px;
-    padding: 8px 16px;
-    border: 1px solid var(--borderColor);
-    border-radius: 3rem;
-    background: var(--background);
-    color: var(--fontColor);
-    font-size: 13px;
-    line-height: 1;
+    padding: 6px 12px;
+    min-height: 34px;
+    border: 1px solid rgba(120, 120, 120, 0.16);
+    border-radius: 10px;
+    background-color: transparent;
+    color: var(--themeBackground);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    box-shadow:
+      0 2px 5px rgba(38, 38, 38, 0.07),
+      0 1px 2px rgba(38, 38, 38, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.1);
+    transition: color 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
   }
 
   .jotting-compose-btn .el-icon {
     margin-right: 6px;
   }
 
-  .jotting-compose-btn:hover {
-    border-color: var(--themeBackground);
+  .jotting-compose-btn:hover,
+  .jotting-compose-btn:focus-visible {
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
     color: var(--themeBackground);
-    box-shadow: 0 0 5px var(--themeBackground);
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
+  }
+
+  /* 按压瞬时缩放（transition 不含 scale） */
+  .jotting-compose-btn:active {
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
+    scale: 0.95;
+  }
+
+  html.dark .jotting-compose-btn {
+    border-color: rgba(255, 255, 255, 0.16);
+    color: var(--themeBackground);
+    box-shadow:
+      0 2px 5px rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  html.dark .jotting-compose-btn:hover,
+  html.dark .jotting-compose-btn:focus-visible,
+  html.dark .jotting-compose-btn:active {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.4);
+    color: var(--themeBackground);
+    box-shadow:
+      0 3px 6px rgba(0, 0, 0, 0.38),
+      0 1px 2px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.34);
   }
 
   /* 内嵌编辑器：与随笔列表卡片同一套圆角与底色 */
@@ -405,35 +477,141 @@
     align-items: center;
   }
 
+  /* 编辑器「取消」：与「删除」「发布」同一套描边与几何，文字沿用原来的灰色 */
   .composer-cancel {
+    display: inline-flex;
+    align-items: center;
     margin-right: 16px;
-    font-size: 13px;
+    padding: 6px 12px;
+    min-height: 34px;
+    border: 1px solid rgba(120, 120, 120, 0.16);
+    border-radius: 10px;
+    background-color: transparent;
     color: var(--greyFontColor);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
     cursor: pointer;
+    user-select: none;
+    box-shadow:
+      0 2px 5px rgba(38, 38, 38, 0.07),
+      0 1px 2px rgba(38, 38, 38, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.1);
+    transition: color 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
   }
 
   .composer-cancel:hover {
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
     color: var(--fontColor);
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
   }
 
+  .composer-cancel:active {
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
+    scale: 0.95;
+  }
+
+  html.dark .composer-cancel {
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow:
+      0 2px 5px rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  html.dark .composer-cancel:hover,
+  html.dark .composer-cancel:active {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow:
+      0 3px 6px rgba(0, 0, 0, 0.38),
+      0 1px 2px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.34);
+  }
+
+  /* 编辑区「发布」：与「收起」同属友链页那一套（透明底 + 中性灰实线，hover 转虚线），几何节奏一致 */
   .composer-submit {
-    padding: 6px 20px;
-    border: none;
-    border-radius: 3rem;
-    background: var(--themeBackground);
-    color: var(--white);
-    font-size: 13px;
-    line-height: 1.6;
+    padding: 6px 12px;
+    min-height: 34px;
+    border: 1px solid rgba(120, 120, 120, 0.16);
+    border-radius: 10px;
+    background-color: transparent;
+    color: var(--themeBackground);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
     cursor: pointer;
-    transition: opacity 0.25s ease;
+    box-shadow:
+      0 2px 5px rgba(38, 38, 38, 0.07),
+      0 1px 2px rgba(38, 38, 38, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.1);
+    transition: color 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
   }
 
-  .composer-submit:hover {
-    opacity: 0.85;
+  .composer-submit:hover:not(:disabled),
+  .composer-submit:focus-visible:not(:disabled) {
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
+    color: var(--themeBackground);
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
+  }
+
+  /* 按压瞬时缩放（transition 不含 scale） */
+  .composer-submit:active:not(:disabled) {
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
+    scale: 0.95;
+  }
+
+  html.dark .composer-submit {
+    border-color: rgba(255, 255, 255, 0.16);
+    color: var(--themeBackground);
+    box-shadow:
+      0 2px 5px rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  html.dark .composer-submit:hover:not(:disabled),
+  html.dark .composer-submit:focus-visible:not(:disabled),
+  html.dark .composer-submit:active:not(:disabled) {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.4);
+    color: var(--themeBackground);
+    box-shadow:
+      0 3px 6px rgba(0, 0, 0, 0.38),
+      0 1px 2px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.34);
   }
 
   .composer-submit:disabled {
     opacity: 0.55;
+    box-shadow: none;
     cursor: not-allowed;
   }
 
@@ -455,20 +633,139 @@
   }
 
   .jotting-meta .el-avatar {
-    border-radius: 4px;
+    border-radius: 50%;
   }
 
   .meta-text {
     display: flex;
     flex-direction: column;
     margin-left: 10px;
+    min-width: 0;
   }
 
+  .author-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* 主理人用户名流光：与留言区完全一致的扫光节奏与色值 */
   .author-name {
     font-size: 14px;
-    font-weight: 600;
-    color: var(--fontColor);
+    font-weight: 700;
     line-height: 1.4;
+    word-break: break-all;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(100deg,
+      rgb(230, 0, 18) 0%,
+      rgb(230, 0, 18) 42%,
+      rgb(255, 255, 255) 50%,
+      rgb(230, 0, 18) 58%,
+      rgb(230, 0, 18) 100%);
+    background-size: 250% 100%;
+    background-repeat: no-repeat;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: jotting-name-shimmer 3s linear infinite;
+  }
+
+  @keyframes jotting-name-shimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: 0% 0;
+    }
+  }
+
+  /* 主理人徽章与站点名称徽章：复用留言区主理人正红色系 */
+  .boss-badge,
+  .site-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 16px;
+    user-select: none;
+  }
+
+  .boss-badge {
+    border: 1px solid rgba(230, 0, 18, 0.52);
+    background: rgba(230, 0, 18, 0.18);
+    color: rgb(230, 0, 18);
+    box-shadow: 0 1px 3px rgba(230, 0, 18, 0.16);
+  }
+
+  .site-badge {
+    border: 1px solid rgba(230, 0, 18, 0.46);
+    background: rgba(230, 0, 18, 0.12);
+    color: rgb(230, 0, 18);
+    box-shadow: 0 1px 3px rgba(230, 0, 18, 0.12);
+  }
+
+  .boss-badge svg,
+  .site-badge svg {
+    color: rgb(230, 0, 18);
+    filter: drop-shadow(0 0 1.92px rgba(230, 0, 18, 0.25));
+  }
+
+  /* 徽章流光：白色高光从左滑到右 */
+  .boss-badge::before,
+  .site-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: jotting-badge-shine 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes jotting-badge-shine {
+    to {
+      left: 150%;
+    }
+  }
+
+  html.dark .author-name {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(100deg,
+      rgb(255, 120, 130) 0%,
+      rgb(255, 120, 130) 42%,
+      rgb(255, 255, 255) 50%,
+      rgb(255, 120, 130) 58%,
+      rgb(255, 120, 130) 100%);
+  }
+
+  html.dark .boss-badge {
+    border-color: rgba(255, 120, 130, 0.52);
+    background: rgba(255, 120, 130, 0.18);
+    color: rgb(255, 120, 130);
+    box-shadow: 0 1px 3px rgba(255, 59, 74, 0.24);
+  }
+
+  html.dark .site-badge {
+    border-color: rgba(255, 59, 74, 0.46);
+    background: rgba(255, 59, 74, 0.14);
+    color: rgb(255, 120, 130);
+    box-shadow: 0 1px 3px rgba(255, 59, 74, 0.18);
+  }
+
+  html.dark .boss-badge svg,
+  html.dark .site-badge svg {
+    color: rgb(255, 120, 130);
+    filter: drop-shadow(0 0 1.92px rgba(255, 120, 130, 0.25));
   }
 
   .jotting-time {
@@ -502,13 +799,70 @@
     color: var(--greyFontColor);
   }
 
+  /* 随笔「删除」：补按钮外观（友链那一套描边与几何），文字沿用原来的警示红 */
   .jotting-delete {
-    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    min-height: 34px;
+    border: 1px solid rgba(120, 120, 120, 0.16);
+    border-radius: 10px;
+    background-color: transparent;
     color: #f56c6c;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow:
+      0 2px 5px rgba(38, 38, 38, 0.07),
+      0 1px 2px rgba(38, 38, 38, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.1);
+    transition: color 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background-color 0.22s ease;
   }
 
   .jotting-delete:hover {
-    text-decoration: underline;
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
+    color: #f56c6c;
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
+  }
+
+  .jotting-delete:active {
+    border-style: dashed;
+    border-color: rgba(120, 120, 120, 0.42);
+    box-shadow:
+      0 3px 6px rgba(38, 38, 38, 0.1),
+      0 1px 2px rgba(38, 38, 38, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(112, 112, 112, 0.16);
+    scale: 0.95;
+  }
+
+  html.dark .jotting-delete {
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #f56c6c;
+    box-shadow:
+      0 2px 5px rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  html.dark .jotting-delete:hover,
+  html.dark .jotting-delete:active {
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #f56c6c;
+    box-shadow:
+      0 3px 6px rgba(0, 0, 0, 0.38),
+      0 1px 2px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.34);
   }
 
   .jotting-state {
@@ -573,12 +927,28 @@
 
     .jotting-compose-btn {
       margin-left: 10px;
-      padding: 7px 12px;
+      padding: 6px 12px;
       font-size: 12px;
     }
 
     .jotting-composer {
       padding: 12px 12px 10px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jotting-compose-btn,
+    .composer-submit,
+    .composer-cancel,
+    .jotting-delete {
+      transition: none;
+    }
+
+    .jotting-compose-btn:active,
+    .composer-submit:active:not(:disabled),
+    .composer-cancel:active,
+    .jotting-delete:active {
+      scale: 1;
     }
   }
 </style>

@@ -2,23 +2,48 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8">
-    <!-- 站点图标：King 头像（favicon.png，v=2 用于刷新浏览器缓存） -->
-    <link rel="icon" type="image/png" href="<%= BASE_URL %>favicon.png?v=2" sizes="64x64">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- 站点图标：C 版品牌标识。ico 内含多尺寸，32 PNG 给现代浏览器，apple-touch-icon 给 iOS 添加到主屏 -->
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="<%= BASE_URL %>favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= BASE_URL %>apple-touch-icon.png">
+    <!-- 全站正文字体：LXGW WenKai Screen 自托管（97 个 unicode-range 子集，按需下载，整包 4.87MB）。
+         每个 @font-face 都是 font-display: swap，字体未就绪时先用回退栈渲染，避免白屏与布局卡顿；
+         回退栈定义见 src/assets/css/index.css 的 --font-sans。
+         这里用 media=print + onload 异步加载样式表，避免字体 CSS 与首屏 JS/CSS 抢占关键路径 -->
+    <link rel="stylesheet" href="<%= BASE_URL %>fonts/lxgw-wenkai-screen/lxgw-wenkai-screen.css"
+          media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="<%= BASE_URL %>fonts/lxgw-wenkai-screen/lxgw-wenkai-screen.css">
+    </noscript>
+    <!-- 动画样式只服务于 WOW 入场动画，同样异步加载，不阻塞首屏 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+          media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    </noscript>
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>King</title>
-    <meta name="keywords" content="King,Sara,生活倒影,最美博客,个人博客,个人网站,生活笔记,记录生活,Java,SpringBoot,Vue,Vue2,Vue3,IM,聊天室">
-    <meta name="description" content="King：作诗，有诗意地描写。这是我的个人网站，我的生活倒影，有诗意地记录自己的生活。">
-    <meta name="author" content="Sara">
+    <!-- 站点标识：标签页标题由页面数据里的站点名称动态覆盖，这里只放通用占位，不写站长昵称 -->
+    <title>博客</title>
+    <!-- SEO：站点关键词与简介，全站仅此一份，不要在其他模板里再写同名 meta -->
+    <meta name="keywords" content="金生观澜,jsnws,个人博客,个人网站,生活笔记,记录生活,技术博客,Java,SpringBoot,Vue3,MySQL,前端开发">
+    <meta name="description" content="金生观澜（jsnws）的个人网站，记录生活与技术的点滴。这里有日常随笔、阅读笔记与项目复盘，也有 Java、SpringBoot、Vue3、MySQL 的开发实践，把值得留存的片段安静写下来。">
+    <meta name="author" content="jsnws">
 
-    <!-- 旧项目依赖的全局脚本，迁移阶段保持同一套运行时依赖 -->
-    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/wow/1.1.2/wow.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/clipboard.js/2.0.8/clipboard.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qiniu-js/3.4.0/qiniu.min.js"></script>
+    <!-- 社交分享：og 基础标签，title 与 description 和上面的 SEO 两项保持一致，og:url 为站点正式域名 -->
+    <meta property="og:title" content="金生观澜 | jsnws 的个人博客">
+    <meta property="og:description" content="金生观澜（jsnws）的个人网站，记录生活与技术的点滴。这里有日常随笔、阅读笔记与项目复盘，也有 Java、SpringBoot、Vue3、MySQL 的开发实践，把值得留存的片段安静写下来。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jsnws.com/">
+
+    <!-- 旧项目依赖的全局脚本，迁移阶段保持同一套运行时依赖。
+         全部加 defer：不阻塞 HTML 解析与首屏渲染，按原顺序在 DOMContentLoaded 前执行 -->
+    <script defer src="https://cdn.bootcdn.net/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script defer src="https://cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+    <script defer src="https://cdn.bootcdn.net/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <script defer src="https://cdn.bootcdn.net/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <script defer src="https://cdn.bootcdn.net/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+    <script defer src="https://cdn.bootcdn.net/ajax/libs/clipboard.js/2.0.8/clipboard.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qiniu-js/3.4.0/qiniu.min.js"></script>
     <style>
       body {
         margin: 0;
@@ -45,7 +70,12 @@
     <noscript>请启用 JavaScript 后再访问本应用。</noscript>
     <div id="app"></div>
     <script>
-      new WOW().init();
+      // WOW 改为 defer 加载，这里等 DOM 解析完成、defer 脚本执行后再初始化
+      document.addEventListener('DOMContentLoaded', function () {
+        if (window.WOW) {
+          new WOW().init();
+        }
+      });
     </script>
   </body>
 </html>

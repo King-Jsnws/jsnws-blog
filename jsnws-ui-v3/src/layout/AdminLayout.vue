@@ -36,9 +36,11 @@
     "/photoList": "相片管理",
     "/commentList": "评论管理",
     "/treeHoleList": "留言管理",
+    "/barrageList": "弹幕管理",
     "/userList": "用户管理",
     "/webEdit": "网站设置",
     "/configList": "配置管理",
+    "/navManage": "导航管理",
     "/emailConfig": "邮箱配置"
   };
 
@@ -69,9 +71,8 @@
         let root = document.querySelector(":root");
         let webStaticResourcePrefix = sysConfig['webStaticResourcePrefix'];
         root.style.setProperty("--backgroundPicture", "url(" + webStaticResourcePrefix + "assets/backgroundPicture.jpg)");
-        const font = new FontFace("King-font", "url(" + webStaticResourcePrefix + "assets/font.woff2)");
-        font.load();
-        document.fonts.add(font);
+        // 全站字体已改为自托管的 LXGW WenKai Screen（见 public/index.html 与 index.css 的 --font-sans），
+        // 后台不再加载旧的 King-font
       }
 
       this.mediaQuery = window.matchMedia("(max-width: 991px)");

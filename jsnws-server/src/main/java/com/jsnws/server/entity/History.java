@@ -16,6 +16,9 @@ public class History {
     private Long userId;
     private String username;
     private String avatar;
+    private String path;
+    private String userAgent;
+    private String referrer;
     private Date createTime;
 
     public Long getId() { return id; }
@@ -30,6 +33,12 @@ public class History {
     public void setUsername(String username) { this.username = username; }
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
+    public String getPath() { return path; }
+    public void setPath(String path) { this.path = path; }
+    public String getUserAgent() { return userAgent; }
+    public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
+    public String getReferrer() { return referrer; }
+    public void setReferrer(String referrer) { this.referrer = referrer; }
     public Date getCreateTime() { return createTime; }
     public void setCreateTime(Date createTime) { this.createTime = createTime; }
 }

@@ -54,12 +54,18 @@
   .emoji-item {
     cursor: pointer;
     display: inline-block;
+    border-radius: var(--ui-btn-radius);
+    transition: background-color 0.22s ease;
   }
 
   .emoji-item:hover {
-    transition: all 0.2s;
-    border-radius: 0.25rem;
+    border-radius: var(--ui-btn-radius);
     background: var(--lightGray);
+  }
+
+  /* 表情格子按压：与前台按钮同一套瞬时缩放 */
+  .emoji-item:active {
+    scale: 0.95;
   }
 
   .emoji {

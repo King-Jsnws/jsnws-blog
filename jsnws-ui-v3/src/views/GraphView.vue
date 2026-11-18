@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="graph-page">
+    <div class="graph-page my-animation-slide-bottom">
       <div class="graph-head">
         <h1>文章图谱</h1>
         <p v-if="!loading && !error && groups.length > 0">
@@ -182,39 +182,46 @@
 <style scoped>
   .graph-page {
     min-height: calc(100vh - 60px);
-    padding: 120px 20px 60px;
-    background: var(--background);
+    width: var(--ui-page-inline);
+    max-width: var(--ui-page-width);
+    margin: 0 auto;
+    padding: var(--ui-page-top) var(--ui-page-gutter) var(--ui-page-bottom);
+    background: var(--ui-page-bg);
   }
 
   .graph-head {
     max-width: 980px;
-    margin: 0 auto 28px;
+    margin: 0 auto var(--ui-page-gap);
   }
 
   .graph-head h1 {
     margin: 0 0 8px;
-    font-size: 26px;
+    font-size: var(--ui-title-size);
+    font-weight: var(--ui-title-weight);
     letter-spacing: 2px;
-    color: var(--fontColor);
+    color: var(--ui-title-color);
   }
 
   .graph-head p {
     margin: 0;
-    font-size: 14px;
-    color: var(--greyFontColor);
+    font-size: var(--ui-subtitle-size);
+    color: var(--ui-subtitle-color);
   }
 
   .graph-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    gap: var(--ui-page-gap);
     max-width: 980px;
     margin: 0 auto;
   }
 
   .graph-card {
-    padding: 16px 18px 12px;
-    border-radius: 14px;
+    padding: 18px 20px 14px;
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-card-bg);
+    box-shadow: var(--ui-card-shadow);
   }
 
   .graph-card-head {
@@ -236,8 +243,8 @@
     font-size: 12px;
     line-height: 18px;
     border-radius: 9px;
-    color: #409eff;
-    background: rgba(64, 158, 255, 0.12);
+    color: var(--themeBackground);
+    background: color-mix(in srgb, var(--themeBackground) 14%, transparent);
   }
 
   .graph-svg {
@@ -269,9 +276,12 @@
     max-width: 980px;
     margin: 0 auto;
     padding: 70px 20px;
-    border-radius: 14px;
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-card-bg);
+    box-shadow: var(--ui-card-shadow);
     text-align: center;
-    color: var(--greyFontColor);
+    color: var(--ui-subtitle-color);
   }
 
   .state-icon {

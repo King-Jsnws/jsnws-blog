@@ -64,6 +64,10 @@ public class FamilyController extends BaseController {
                 .eq("user_id", userId).orderByDesc("create_time").last("LIMIT 1"));
         if (existing != null) {
             family.setId(existing.getId());
+            // 归属与审核状态只能由服务端决定，忽略客户端传入的 userId/status
+            family.setUserId(userId);
+            family.setStatus(false);
+            family.setCreateTime(existing.getCreateTime());
             familyMapper.updateById(family);
         } else {
             family.setId(null);

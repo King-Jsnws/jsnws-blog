@@ -7,10 +7,17 @@ spring:
   application:
     name: jsnws-server
   datasource:
-    # MySQL 连接信息，按实际情况修改（默认连接本机 3306 的 jsnws 库）
-    url: jdbc:mysql://localhost:3306/jsnws?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    # MySQL 连接信息。默认连接本机 3306 的 jsnws 库（root/root），
+    # 部署时可直接改下面的默认值，或用环境变量覆盖（不改包）：
+    #   JSNWS_DB_HOST      数据库地址，默认 localhost
+    #   JSNWS_DB_PORT      端口，默认 3306
+    #   JSNWS_DB_NAME      库名，默认 jsnws
+    #   JSNWS_DB_USERNAME  账号，默认 root
+    #   JSNWS_DB_PASSWORD  密码，默认 root
+    #   JSNWS_DB_TIMEZONE  时区，默认 Asia/Shanghai
+    url: jdbc:mysql://${JSNWS_DB_HOST:localhost}:${JSNWS_DB_PORT:3306}/${JSNWS_DB_NAME:jsnws}?useUnicode=true&characterEncoding=utf8&serverTimezone=${JSNWS_DB_TIMEZONE:Asia/Shanghai}&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${JSNWS_DB_USERNAME:root}
+    password: ${JSNWS_DB_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
   servlet:
     multipart:
@@ -24,7 +31,9 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 用 slf4j 输出 SQL：默认 INFO 级别下不会打印绑定参数与结果行，
+    # 避免 SESSDATA 等敏感配置被写进日志；排查 SQL 时把 logging.level.com.jsnws.server.mapper 调成 debug
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 jsnws:
   # 上传文件在磁盘上的根目录（/resource/upload 落盘位置），会自动创建
@@ -33,11 +42,64 @@ jsnws:
   upload-url-prefix: http://localhost:8081/resource/file
   # 登录密码 AES 密钥（与前端 utils/constant.js 中 cryptojs_key 一致，不要修改）
   crypto-key: sarasarasarasara
-  # 登录 token 签名密钥
-  token-secret: jsnws-blog-token-secret-2026
+  # 登录 token 签名密钥（生产环境请通过环境变量 JSNWS_TOKEN_SECRET 覆盖并定期轮换）
+  # 迁移说明：默认值与旧配置保持一致，未设置环境变量时行为不变；设置后已签发 token 会全部失效
+  token-secret: ${JSNWS_TOKEN_SECRET:jsnws-blog-token-secret-2026}
   # token 有效期（毫秒），默认 30 天
   token-expire: 2592000000
   # 站长用户 id（前端 constant.js 的 userId 与此对应）
   boss-user-id: 1
-  # 邮件验证码：未配置邮件服务时为 false，此时验证码仅打印到控制台且校验放行
-  mail-enabled: false
+  # 站长账号名：与 boss-user-id 同时匹配才授予主理人权限，避免 id 被复用后自动获得权限
+  boss-username: ${JSNWS_BOSS_USERNAME:jsnws}
+  # 维护模式兜底：为 true 时忽略 web_info.status，站点始终对外服务（用于误关站点后的紧急恢复）
+  maintenance-force-open: ${JSNWS_MAINTENANCE_FORCE_OPEN:false}
+  # 邮件验证码总开关的兜底值：后台「邮箱配置-启用邮件服务」优先，
+  # 后台未配置该项时才使用这里的值；也可用环境变量 JSNWS_MAIL_ENABLED 覆盖。
+  # SMTP 账号密码不在这里配置，统一存后台 sys_config（mailHost/mailPort/...）。
+  mail-enabled: ${JSNWS_MAIL_ENABLED:true}
+  # 友链响应时间/可用性探测：默认开启，只探测公网 http(s)
+  friend-probe:
+    enabled: true
+    # 单个站点超时（毫秒）
+    timeout-ms: 5000
+    # 轮询间隔：30 分钟
+    interval-ms: 1800000
+    # 启动后首次执行延迟：1 分钟
+    initial-delay-ms: 60000
+    # 首次失败后持续多久才标记“短暂失联”：30 分钟
+    offline-threshold-ms: 1800000
+  # 友链 RSS 最近文章：默认开启，未配置 RSS 的友链直接跳过
+  friend-rss:
+    enabled: true
+    timeout-ms: 8000
+    # 轮询间隔：2 小时
+    interval-ms: 7200000
+    initial-delay-ms: 120000
+  # 追番数据同步：拉取指定 B 站账号的追番列表（全部可覆盖）
+  bilibili:
+    enabled: true
+    # B 站数字 UID；留空时同步任务直接跳过，前台继续使用手工数据
+    uid: "335349376"
+    # B 站登录 Cookie 中的 SESSDATA；账号追番隐私未公开时必须配置
+    # 建议通过环境变量 BILI_SESSDATA 注入，避免把凭证写进仓库
+    sessdata: ${BILI_SESSDATA:}
+    # 同步间隔：6 小时
+    interval-ms: 21600000
+    # 启动后首次同步延迟：2 分钟
+    initial-delay-ms: 120000
+    # 拉取类型：0=追番+追剧（全部） 1=追番（含番剧/国创） 2=追剧（电影/纪录片/电视剧等）
+    type: 0
+    # 追番状态过滤：0=全部 1=想看 2=在看 3=看过
+    follow-status: 0
+    # 每页数量，B 站上限 30
+    page-size: 30
+    # 是否按 season_id 补全评分与题材
+    detail-enrich: true
+    # 单轮最多补全多少部，避免请求过多触发风控
+    detail-limit: 30
+    # 单次请求超时（毫秒）
+    timeout-ms: 10000
+    # 列表分页之间的等待（毫秒）
+    page-delay-ms: 1000
+    # 详情请求之间的等待（毫秒）
+    detail-delay-ms: 600

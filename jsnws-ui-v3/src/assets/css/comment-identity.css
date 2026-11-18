@@ -1,0 +1,496 @@
+/* 评论区身份样式：用户名配色与身份徽章（主理人 / 管理员 / 作者 / 正式会员 / 站点标识）
+ * 原定义在 components/comment/Comment.vue 的 scoped 样式中，改为全局共享，
+ * 供文章评论区与站点统计「最近评论」复用同一套规则，避免两处配色漂移。 */
+
+/* 头像右下角实名角标：与 V 认证角标共用同一套几何规则
+ * （26% 等比、最小 10px、最大 30px、右下内收 2%、外圈 2px 与页面底色一致的描边）。
+ * 二者互斥：模板中仅在 hasIdentityV(...) 为 false 时才渲染实名角标，
+ * 同一头像不会同时出现实名角标与 V 角标。语义色保持绿色，不随认证角标变红。 */
+.art-badge {
+  position: absolute;
+  right: 2%;
+  bottom: 2%;
+  z-index: 3;
+  width: 26%;
+  height: 26%;
+  min-width: 10px;
+  min-height: 10px;
+  max-width: 30px;
+  max-height: 30px;
+  border-radius: 50%;
+  background: #2ed573;
+  box-shadow: 0 0 0 2px #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.art-badge svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 深色页面用深色描边分隔，尺寸与浅色完全一致 */
+html.dark .art-badge {
+  box-shadow: 0 0 0 2px #17181c;
+}
+
+/* 用户名：普通访客底色 */
+.art-name {
+  display: inline-block;
+  color: #0f766e;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+/* 主理人用户名：高饱和正红；其他访客沿用上面的常规色，不参与动效 */
+/* 扫光高光取友链主理人档（tier-2）的 --fc-shimmer：rgb(255, 196, 202) */
+.art-name.art-name-boss {
+  --name-shine: rgb(255, 196, 202);
+  position: relative;
+  color: rgb(230, 0, 18);
+  -webkit-text-fill-color: rgb(230, 0, 18);
+}
+
+/* 作者用户名：优秀友链档蓝色，扫光高光取同档浅蓝 */
+.art-name.art-name-author {
+  --name-shine: rgb(190, 226, 255);
+  position: relative;
+  color: rgb(23, 139, 192);
+  -webkit-text-fill-color: rgb(23, 139, 192);
+}
+
+/* 管理员用户名：推荐友链档金色，扫光高光取同档浅金 */
+.art-name.art-name-admin {
+  --name-shine: rgb(255, 224, 138);
+  position: relative;
+  color: rgb(150, 112, 20);
+  -webkit-text-fill-color: rgb(150, 112, 20);
+}
+
+/* 正式会员用户名：普通友链档中性色，扫光高光取同档浅灰 */
+.art-name.art-name-member {
+  --name-shine: rgb(198, 207, 215);
+  position: relative;
+  color: rgb(54, 72, 88);
+  -webkit-text-fill-color: rgb(54, 72, 88);
+}
+
+/* AI 站长用户名：淡紫扁平色（取自参考图文字色），不做扫光，只服务 user_type=5 */
+.art-name.art-name-ai {
+  color: #5c49c7;
+  -webkit-text-fill-color: #5c49c7;
+}
+
+/* 复制一层名字，用 115deg 遮罩把亮带裁到字形上：
+   mask-size 238%、mask-position 100% → 0%、3s 线性无延迟，参数与留言页一致 */
+.art-name.art-name-boss::after,
+.art-name.art-name-author::after,
+.art-name.art-name-admin::after,
+.art-name.art-name-member::after {
+  content: attr(data-name);
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  color: var(--name-shine);
+  -webkit-text-fill-color: var(--name-shine);
+  -webkit-mask-image: linear-gradient(115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.5) 46%,
+    #fff 48%,
+    #fff 52%,
+    rgba(255, 255, 255, 0.5) 54%,
+    transparent 58%);
+  mask-image: linear-gradient(115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.5) 46%,
+    #fff 48%,
+    #fff 52%,
+    rgba(255, 255, 255, 0.5) 54%,
+    transparent 58%);
+  -webkit-mask-size: 238% 100%;
+  mask-size: 238% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  opacity: 0.9;
+  pointer-events: none;
+  animation: art-name-shimmer 3s linear 0s infinite;
+}
+
+@keyframes art-name-shimmer {
+  0% {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  100% {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
+}
+
+/* 深色模式：基底换成亮化红，高光取友链同档深色 --fc-shimmer */
+html.dark .art-name {
+  color: #5eead4;
+}
+
+html.dark .art-name.art-name-boss {
+  --name-shine: rgb(255, 206, 210);
+  color: rgb(255, 120, 130);
+  -webkit-text-fill-color: rgb(255, 120, 130);
+}
+
+/* 深色作者用户名：亮化蓝，高光仍为白色 */
+html.dark .art-name.art-name-author {
+  --name-shine: #fff;
+  color: rgb(147, 205, 255);
+  -webkit-text-fill-color: rgb(147, 205, 255);
+}
+
+/* 深色管理员用户名：亮化金，高光仍为白色 */
+html.dark .art-name.art-name-admin {
+  --name-shine: #fff;
+  color: rgb(240, 210, 140);
+  -webkit-text-fill-color: rgb(240, 210, 140);
+}
+
+/* 深色正式会员用户名：亮化中性色，高光仍为白色 */
+html.dark .art-name.art-name-member {
+  --name-shine: #fff;
+  color: rgb(230, 232, 234);
+  -webkit-text-fill-color: rgb(230, 232, 234);
+}
+
+/* 深色 AI 站长用户名：提亮紫，保证深底可读 */
+html.dark .art-name.art-name-ai {
+  color: #cfc7ff;
+  -webkit-text-fill-color: #cfc7ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-name.art-name-boss::after,
+  .art-name.art-name-author::after,
+  .art-name.art-name-admin::after,
+  .art-name.art-name-member::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* 主理人徽章 */
+.art-boss {
+  /* 扫光高光取友链主理人档徽标：color-mix(主理人红 62%, #fff) ≈ rgb(240, 97, 108) */
+  --badge-sheen: rgb(240, 97, 108);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px;
+  border: 1px solid rgba(230, 0, 18, 0.52);
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(230, 0, 18, 0.18);
+  color: rgb(230, 0, 18);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(230, 0, 18, 0.16);
+}
+
+.art-site-badge {
+  /* 扫光高光取友链主理人档徽标：color-mix(主理人红 62%, #fff) ≈ rgb(240, 97, 108) */
+  --badge-sheen: rgb(240, 97, 108);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px;
+  border: 1px solid rgba(230, 0, 18, 0.46);
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(230, 0, 18, 0.14);
+  color: rgb(230, 0, 18);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(230, 0, 18, 0.12);
+}
+
+/* 正式会员徽章：沿用普通友链档（tier-0）中性配色，规格与主理人徽章保持一致 */
+.art-member {
+  --badge-sheen: rgb(198, 207, 215);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px;
+  border: 1px solid rgba(90, 106, 122, 0.46);
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(90, 106, 122, 0.14);
+  color: rgb(54, 72, 88);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(54, 72, 88, 0.12);
+}
+
+.art-member svg {
+  color: rgb(54, 72, 88);
+  filter: drop-shadow(0 0 1.92px rgba(54, 72, 88, 0.2));
+}
+
+/* 作者徽章：沿用优秀友链档（tier-3）蓝色配色，固定宽度与主理人徽章对齐 */
+.art-author {
+  --badge-sheen: rgb(150, 211, 255);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 66px;
+  padding: 1px 0;
+  border: 1px solid color-mix(in srgb, var(--themeBackground) 46%, transparent);
+  border-radius: 5px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--themeBackground) 14%, transparent);
+  color: rgb(23, 139, 192);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(23, 139, 192, 0.12);
+}
+
+.art-author svg {
+  color: rgb(23, 139, 192);
+  filter: drop-shadow(0 0 1.92px rgba(23, 139, 192, 0.2));
+}
+
+/* 管理员徽章：沿用推荐友链档（tier-1）金色配色 */
+.art-admin {
+  --badge-sheen: rgb(255, 224, 138);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px;
+  border: 1px solid rgba(232, 173, 37, 0.46);
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(232, 173, 37, 0.14);
+  color: rgb(150, 112, 20);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(150, 112, 20, 0.12);
+}
+
+.art-admin svg {
+  color: rgb(150, 112, 20);
+  filter: drop-shadow(0 0 1.92px rgba(150, 112, 20, 0.2));
+}
+
+/* AI 站长徽章：淡紫底 + 紫字 + 全圆角胶囊 + 浅紫细描边（色值取自参考图），
+   仅 user_type=5 使用；扁平样式，不参与其它角色徽章的扫光 */
+.art-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 9px;
+  border: 1px solid #c3b9ff;
+  border-radius: 999px;
+  background: #e5e2ff;
+  color: #5c49c7;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.art-ai svg {
+  flex: none;
+  color: #5c49c7;
+}
+
+html.dark .art-ai {
+  border-color: #6e5fd0;
+  background: #2b2456;
+  color: #cfc7ff;
+}
+
+html.dark .art-ai svg {
+  color: #cfc7ff;
+}
+
+/* 身份认证角标：固定红底 + 白色 V（颜色取自参考图），
+   仅主理人/站长、AI 站长、管理员显示，不随主题变色。
+   直径约头像 1/4（下限 10px、上限 30px），压在右下圆弧上并略微内收 */
+.identity-v-wrap {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.identity-v-badge {
+  position: absolute;
+  right: 2%;
+  bottom: 2%;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26%;
+  height: 26%;
+  min-width: 10px;
+  min-height: 10px;
+  max-width: 30px;
+  max-height: 30px;
+  border-radius: 50%;
+  background: #c9302c;
+  box-shadow: 0 0 0 2px #fff;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.identity-v-badge svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 深色页面用深色描边分隔，尺寸与浅色完全一致 */
+html.dark .identity-v-badge {
+  box-shadow: 0 0 0 2px #17181c;
+}
+
+/* 管理员 / 作者 / 正式会员徽章流光：沿用主理人名字同款 115deg 遮罩扫光
+   （mask-size 238%、mask-position 100%→0%、3s 线性循环），颜色由 --badge-sheen 提供 */
+.art-member::after,
+.art-author::after,
+.art-admin::after,
+.art-boss::after,
+.art-site-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--badge-sheen);
+  -webkit-mask-image: linear-gradient(115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.5) 46%,
+    #fff 48%,
+    #fff 52%,
+    rgba(255, 255, 255, 0.5) 54%,
+    transparent 58%);
+  mask-image: linear-gradient(115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.5) 46%,
+    #fff 48%,
+    #fff 52%,
+    rgba(255, 255, 255, 0.5) 54%,
+    transparent 58%);
+  -webkit-mask-size: 238% 100%;
+  mask-size: 238% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  opacity: 0.55;
+  pointer-events: none;
+  animation: member-badge-shimmer 3s linear 0s infinite;
+}
+
+@keyframes member-badge-shimmer {
+  0% {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  100% {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .art-member::after,
+  .art-author::after,
+  .art-admin::after,
+  .art-boss::after,
+  .art-site-badge::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* 深色徽章：扫光颜色由徽章自身的 --badge-sheen 深色值提供 */
+
+html.dark .art-boss {
+  /* 深色同档高光：color-mix(rgb(255, 120, 130) 62%, #fff) ≈ rgb(255, 171, 178) */
+  --badge-sheen: rgb(255, 171, 178);
+  border-color: rgba(255, 120, 130, 0.52);
+  background: rgba(255, 120, 130, 0.18);
+  color: rgb(255, 120, 130);
+}
+
+html.dark .art-site-badge {
+  /* 深色同档高光：color-mix(rgb(255, 120, 130) 62%, #fff) ≈ rgb(255, 171, 178) */
+  --badge-sheen: rgb(255, 171, 178);
+  border-color: rgba(255, 59, 74, 0.42);
+  background: rgba(255, 59, 74, 0.16);
+  color: rgb(255, 120, 130);
+}
+
+/* 深色正式会员徽章：取友链普通档深色中性配色 */
+html.dark .art-member {
+  --badge-sheen: rgb(188, 197, 206);
+  border-color: rgba(170, 178, 186, 0.46);
+  background: rgba(170, 178, 186, 0.14);
+  color: rgb(230, 232, 234);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+html.dark .art-member svg {
+  color: rgb(230, 232, 234);
+  filter: drop-shadow(0 0 1.92px rgba(230, 232, 234, 0.2));
+}
+
+/* 深色作者徽章：取友链优秀档深色蓝色配色 */
+html.dark .art-author {
+  --badge-sheen: rgb(214, 240, 255);
+  border-color: rgba(99, 179, 255, 0.46);
+  background: rgba(99, 179, 255, 0.14);
+  color: rgb(147, 205, 255);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+html.dark .art-author svg {
+  color: rgb(147, 205, 255);
+  filter: drop-shadow(0 0 1.92px rgba(147, 205, 255, 0.2));
+}
+
+/* 深色管理员徽章：取友链推荐档深色金色配色 */
+html.dark .art-admin {
+  --badge-sheen: rgb(255, 236, 186);
+  border-color: rgba(232, 173, 37, 0.46);
+  background: rgba(232, 173, 37, 0.14);
+  color: rgb(240, 210, 140);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+html.dark .art-admin svg {
+  color: rgb(240, 210, 140);
+  filter: drop-shadow(0 0 1.92px rgba(240, 210, 140, 0.2));
+}

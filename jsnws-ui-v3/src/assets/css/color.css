@@ -5,33 +5,47 @@
     --favoriteBg: #f7f9fe;
 
     /* 字体 */
-    --fontColor: black;
+    --fontColor: #1a222b;
     /* 边框 */
     --borderColor: rgba(0, 0, 0, 0.5);
     /* 边框 */
     --borderHoverColor: rgba(110, 110, 110, 0.4);
-    /* 文章字体 */
-    --articleFontColor: #1f1f1f;
-    /* 文章灰色字体 */
-    --articleGreyFontColor: #616161;
+    /* 文章正文：参考站正文实测色 oklch(.373 .034 259.733) = #364153 */
+    --articleFontColor: #364153;
+    /* 文章次级文字：参考站 prose lead 实测色 oklch(44.6% .03 256.802) = #4a5565 */
+    --articleGreyFontColor: #4a5565;
     /* 评论背景颜色 */
     --commentContent: #F7F9FE;
 
 
-    /* 主题背景 */
-    --themeBackground: orange;
+    /* 主题色：与参考站 rainzt.cn 完全一致（--primary: oklch(.7 .14 250) = #53a3f2）。
+       白底对比度 2.66:1，参考站本身就是这个值，已按确认保留原值，不压深、不派生。
+       图标/控件场景低于 3:1 的问题见下方 --themeBackgroundDeep 的说明。 */
+    --themeBackground: #53a3f2;
+    /* 图标默认色：全站单色图标统一取主题色，新增图标继承 --iconColor 即可，不要在组件里写死色值。
+       语义色图标（危险红 / 成功绿 / 导航白等）请在自身或容器上显式 color 覆盖。
+       深色模式随 --themeBackground 自动切到 #63b3ff */
+    --iconColor: var(--themeBackground);
+    /* 灰底（--maxLightGray #eee）上的图标 / 徽标：主色 #53a3f2 在 #eee 上只有 2.29:1，
+       取参考站已有的深一档同色相令牌 --title-active（oklch(.6 .1 250) = #4f84ba），
+       属于参考站原生取值而非新派生色：#eee 上 3.39:1、白底 3.93:1。
+       深色主题下直接沿用主色 #63b3ff（#333 上 5.67:1）。 */
+    --themeBackgroundDeep: #4f84ba;
     /* 主题悬停背景 */
     --gradualRed: linear-gradient(to right, #ff4b2b, #ff416c);
 
     /* 导航栏字体 */
-    --toolbarFont: #333333;
+    --toolbarFont: #1a222b;
     /* 导航栏背景 */
     --toolbarBackground: rgba(255, 255, 255, 1);
-    /* 灰色字体 */
-    --greyFont: #797979;
-    --maxGreyFont: #595A5A;
-    /* 次级灰字：比 --greyFont 再浅一档，用于时间、字数、说明等 */
-    --greyFontColor: #8c8c8c;
+    /* 灰色字体：参考站次级文字 text-50（rgba(0,0,0,.5)）在白底上的等效实色 #808080（3.95:1） */
+    --greyFont: #808080;
+    /* 灰底中性文字：同一档灰在 #eee 上 3.40:1，参考站未单独派生更深的灰，保持一致 */
+    --greyFontOnGray: #808080;
+    /* 较重灰字：参考站 text-75（rgba(0,0,0,.75)）白底等效色 #404040（10.37:1） */
+    --maxGreyFont: #404040;
+    /* 次级灰字：参考站只有 50% / 75% 两档，最浅一档并入 #808080（不再另造色值） */
+    --greyFontColor: #808080;
     /* footer背景 */
     --gradientBG: linear-gradient(-90deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
     /* 白色遮罩 */
@@ -40,7 +54,7 @@
     --maxWhiteMask: rgba(255, 255, 255, 0.5);
     --maxMaxWhiteMask: rgba(255, 255, 255, 0.7);
     /* 后台登录页背景图：给全局兜底值，不依赖布局组件写入 */
-    --backgroundPicture: url('/images/login-bg.webp');
+    --backgroundPicture: url('/images/login-bg.4f8a16.webp');
     /* mini白色遮罩 */
     --miniWhiteMask: rgba(255, 255, 255, 0.15);
     /* 透明 */
@@ -75,7 +89,9 @@
     --black: black;
     --lightYellow: #F4E1C0;
 
-    --globalFont: King-font;
+    /* 全站字体统一入口：完整回退栈定义在 index.css 的 --font-sans，此处仅做别名，
+       不要再写具体字体名，避免两处不一致 */
+    --globalFont: var(--font-sans);
 
     /* 首页 / 留言页大图遮罩：同一套暗度，黑夜模式加深保证白字对比度 */
     --heroMask: rgba(0, 0, 0, 0.35);
@@ -89,12 +105,14 @@
     /* 导航下拉面板 / 头像卡片 */
     --panelBg: #ffffff;
     --panelBorder: #1f1f1f;
-    --panelText: #303133;
-    --panelTextSecondary: #4e5969;
+    --panelText: #1a222b;
+    --panelTextSecondary: #4a5565;
     --panelHoverBg: #f5f7fa;
     --panelDivider: #f0f0f0;
     --panelIconBg: #f3f4f6;
     --panelIconHoverBg: #e9ebef;
+    /* 下拉面板：悬停项 / 当前项浅蓝底 */
+    --panelActiveBg: #dbeafe;
     /* 首页左侧卡片统计项描边 */
     --statBorder: #dcdfe6;
     /* 蓝色弱底（音乐播放器等） */
@@ -108,26 +126,64 @@
     /* 登录 / 注册毛玻璃卡片 */
     --glassBg: rgba(255, 255, 255, 0.88);
     --glassInputBg: rgba(255, 255, 255, 0.95);
+    /* 浮动标签压在边框上时的聚焦强调色（与主色一致） */
+    --floatAccent: #53a3f2;
+
+    /* ===== 前台统一页面外壳：所有内容页共用这一组变量，页面内不要再写死宽度/圆角/描边/阴影 ===== */
+    --ui-page-width: 112rem;
+    --ui-page-inline: 92vw;
+    --ui-page-gutter: 16px;
+    --ui-page-gap: 16px;
+    /* 无诗句横幅的内容页需避让固定导航；有横幅的页面从横幅下方 24px 开始 */
+    --ui-page-top: 76px;
+    --ui-page-top-banner: 24px;
+    --ui-page-bottom: clamp(48px, 5vw, 72px);
+    --ui-aside-width: 280px;
+    --ui-card-bg: var(--cardBg);
+    --ui-card-border-color: var(--cardBorder);
+    --ui-card-border: 1px solid var(--ui-card-border-color);
+    --ui-card-radius: 16px;
+    --ui-card-padding-y: 24px;
+    --ui-card-padding-x: 32px;
+    --ui-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --ui-card-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.08);
+    --ui-title-size: 24px;
+    --ui-title-weight: 700;
+    --ui-title-color: var(--themeBackground);
+    --ui-subtitle-size: 14px;
+    --ui-subtitle-color: var(--greyFont);
+    --ui-page-bg: var(--favoriteBg);
 }
 
 /* 黑夜模式：同一套变量整体替换，页面无需感知主题 */
 html.dark {
+    /* 主题蓝（深色版）：参考站深色主题实测 --primary: oklch(.75 .14 250) = #63b3ff */
+    --themeBackground: #63b3ff;
+    /* 灰底图标/徽标：深色 #63b3ff 在 #333 上 5.67:1，直接沿用主题蓝 */
+    --themeBackgroundDeep: #63b3ff;
+
     --background: #272727;
     --favoriteBg: #1e1e1e;
 
-    --fontColor: #e6e6e6;
+    --fontColor: #dde6ee;
     /* 暗色下用低透明度白色同时充当分隔线与柔光投影，避免黑色投影不可见 */
     --borderColor: rgba(255, 255, 255, 0.1);
     --borderHoverColor: rgba(255, 255, 255, 0.16);
-    --articleFontColor: #e4e4e4;
-    --articleGreyFontColor: #c9c9c9;
+    /* 文章正文：参考站深色 prose 正文 oklch(.872 .01 258.338) = #d1d5dc */
+    --articleFontColor: #d1d5dc;
+    /* 文章次级文字：参考站深色 prose lead oklch(70.7% .022 261.325) = #99a1af */
+    --articleGreyFontColor: #99a1af;
     --commentContent: #242424;
 
-    --toolbarFont: #e6e6e6;
-    --greyFont: #a8a8a8;
-    --maxGreyFont: #c4c4c4;
-    /* 次级灰字：比 --greyFont 再暗一档，保持与正文的层级差 */
-    --greyFontColor: #999999;
+    --toolbarFont: #dde6ee;
+    /* 灰色字体：参考站深色次级文字取白色 50%（此处按本站 #272727 背景合成实色 #939393） */
+    --greyFont: #939393;
+    /* 灰底中性文字：白色 50% 在 #333 上的合成实色 #999999 */
+    --greyFontOnGray: #999999;
+    /* 较重灰字：白色 75% 在 #272727 上的合成实色 #c9c9c9 */
+    --maxGreyFont: #c9c9c9;
+    /* 次级灰字：与 --greyFont 同档（参考站深色只有 50% / 75% 两档） */
+    --greyFontColor: #939393;
 
     --lightGray: #3c3c3c;
     --maxLightGray: #333333;
@@ -142,12 +198,14 @@ html.dark {
 
     --panelBg: #222222;
     --panelBorder: #4b4b4b;
-    --panelText: #e6e6e6;
-    --panelTextSecondary: #b9bfc9;
+    --panelText: #dde6ee;
+    --panelTextSecondary: #99a1af;
     --panelHoverBg: #2e2f33;
     --panelDivider: #34363a;
     --panelIconBg: #2c2d31;
     --panelIconHoverBg: #383a3f;
+    /* 深色下低饱和蓝，避免整块亮蓝刺眼 */
+    --panelActiveBg: rgba(96, 165, 250, 0.16);
 
     --statBorder: #3a3a3a;
 
@@ -161,9 +219,14 @@ html.dark {
 
     --glassBg: rgba(24, 24, 27, 0.9);
     --glassInputBg: rgba(40, 40, 45, 0.95);
+    --floatAccent: #63b3ff;
 
     /* 后台登录卡片：深色下换成深色面板，避免半透明白块 */
     --maxWhiteMask: rgba(24, 24, 27, 0.9);
 
     --heroMask: rgba(0, 0, 0, 0.5);
+
+    /* 深色下卡片阴影改用黑色，避免低透明度白影不可见 */
+    --ui-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --ui-card-shadow-hover: 0 4px 14px rgba(0, 0, 0, 0.45);
 }

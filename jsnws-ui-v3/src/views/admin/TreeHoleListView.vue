@@ -4,14 +4,34 @@
       <h2>留言列表</h2>
       <p>查看站点收到的留言，可删除不当内容。</p>
     </div>
-    <el-table :data="treeHoles" border class="table" header-cell-class-name="table-header">
+    <el-table :data="messages" border class="table" header-cell-class-name="table-header">
       <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
-      <el-table-column prop="message" label="留言内容" align="center"></el-table-column>
-      <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
-      <el-table-column label="操作" width="180" align="center">
+      <el-table-column label="留言用户" width="140" align="center">
+        <template #default="scope">
+          <span v-if="scope.row.isAnonymous === 1">匿名网友</span>
+          <span v-else>{{ scope.row.nickname || scope.row.username }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="commentContent" label="留言内容" min-width="200" align="center">
+        <template #default="scope">
+          <span class="content-cell" :title="scope.row.commentContent">{{ scope.row.commentContent }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="IP地址" width="140" align="center">
+        <template #default="scope">
+          <span>{{ scope.row.ipAddress || '—' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="置顶" width="70" align="center">
+        <template #default="scope">
+          <span v-if="scope.row.isTop === 1" class="top-tag">置顶</span>
+          <span v-else>—</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="createTime" label="创建时间" width="160" align="center"></el-table-column>
+      <el-table-column label="操作" width="120" align="center">
         <template #default="scope">
           <el-button type="text" style="color: var(--orangeRed)" @click="handleDelete(scope.row)">
-            <el-icon><Delete /></el-icon>
             删除
           </el-button>
         </template>
@@ -33,32 +53,30 @@
   export default {
     data() {
       return {
+        // AI 站长沿用站长的全量视图
+        isBoss: this.$store.state.currentAdmin.isBoss ||
+          Number(this.$store.state.currentAdmin.userType) === 5,
         pagination: {
           current: 1,
           size: 10,
-          total: 0
+          total: 0,
+          commentType: "message"
         },
-        treeHoles: []
+        messages: []
       }
     },
 
-    computed: {},
-
-    watch: {},
-
     created() {
-      this.getTreeHoles()
-    },
-
-    mounted() {
+      this.getMessages()
     },
 
     methods: {
-      getTreeHoles() {
-        this.$http.post(this.$constant.baseURL + "/admin/treeHole/boss/list", this.pagination, true)
+      getMessages() {
+        let url = this.isBoss ? "/admin/comment/boss/list" : "/admin/comment/user/list";
+        this.$http.post(this.$constant.baseURL + url, this.pagination, true)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
-              this.treeHoles = res.data.records;
+              this.messages = res.data.records;
               this.pagination.total = res.data.total;
             }
           })
@@ -71,19 +89,20 @@
       },
       handlePageChange(val) {
         this.pagination.current = val;
-        this.getTreeHoles();
+        this.getMessages();
       },
       handleDelete(item) {
-        this.$confirm('确认删除？', '提示', {
+        let url = this.isBoss ? "/admin/comment/boss/deleteComment" : "/admin/comment/user/deleteComment";
+        this.$confirm('删除留言后，其所有回复将一并删除。确认删除？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'success',
           center: true
         }).then(() => {
-          this.$http.get(this.$constant.baseURL + "/webInfo/deleteTreeHole", {id: item.id}, true)
-            .then((res) => {
+          this.$http.get(this.$constant.baseURL + url, {id: item.id}, true)
+            .then(() => {
               this.pagination.current = 1;
-              this.getTreeHoles();
+              this.getMessages();
               this.$message({
                 message: "删除成功！",
                 type: "success"
@@ -107,9 +126,25 @@
 </script>
 
 <style scoped>
-
   .pagination {
     margin: 18px 0 0;
     text-align: right;
+  }
+
+  .content-cell {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-all;
+  }
+
+  .top-tag {
+    padding: 1px 7px;
+    border-radius: 4px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
   }
 </style>

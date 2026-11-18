@@ -181,7 +181,7 @@
         if (this.classifyFilter !== "") {
           params.classify = this.classifyFilter;
         }
-        this.$http.post(this.$constant.baseURL + "/webInfo/listResourcePath", params, true)
+        this.$http.post(this.$constant.baseURL + "/webInfo/listAdminResourcePath", params, true)
           .then((res) => {
             if (this.$common.isEmpty(res.data)) {
               this.photoList = [];

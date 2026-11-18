@@ -1,186 +1,210 @@
 <template>
   <div>
     <div v-if="!$common.isEmpty(article)">
-      <!-- 封面 -->
-      <div class="article-head my-animation-slide-top">
-        <!-- 背景图片 -->
-        <el-image class="article-image my-el-image"
-                  v-once
-                  lazy
-                  :src="article.articleCover"
-                  fit="cover">
-          <template #error>
-            <div class="image-slot">
-              <div class="article-image"></div>
+      <div class="post-page my-animation-slide-bottom">
+        <div class="post-main">
+          <!-- 面包屑 -->
+          <nav class="post-crumb">
+            <span class="post-crumb-icon">
+              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                <path fill="currentColor" d="M4 5h5.2l2 2H20v12H4z" opacity=".85"/>
+              </svg>
+            </span>
+            <span class="post-crumb-link" @click="$router.push('/archive')">文章列表</span>
+            <span class="post-crumb-sep">›</span>
+            <span class="post-crumb-pill"
+                  @click="$router.push({path: '/archive', query: {category: article.sort && article.sort.sortName}})">
+              {{ article.sort.sortName }}
+              <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+                <path fill="currentColor" d="m7 10 5 5 5-5z"/>
+              </svg>
+            </span>
+            <span class="post-crumb-sep">›</span>
+            <span class="post-crumb-current">此文章</span>
+          </nav>
+
+          <!-- 标题与元信息 -->
+          <header class="post-hero">
+            <h1 class="post-hero-title">{{ article.articleTitle }}</h1>
+            <div class="post-hero-meta">
+              <span>{{ article.createTime }}</span>
+              <span class="post-meta-dot">·</span>
+              <span class="post-meta-tag post-meta-tag--link"
+                    @click="$router.push({path: '/archive', query: {tag: article.label.labelName}})">#{{ article.label.labelName }}</span>
+              <span class="post-meta-tag">{{ article.sort.sortName }}</span>
+              <span class="post-meta-dot">·</span>
+              <span>{{ wordCount }} 字 {{ readMinutes }} 分钟</span>
             </div>
-          </template>
-        </el-image>
-        <!-- 文章信息 -->
-        <div class="article-info-container">
-          <div class="article-title">{{ article.articleTitle }}</div>
-          <div class="article-info">
-            <svg viewBox="0 0 1024 1024" width="14" height="14" style="vertical-align: -2px;">
-              <path
-                d="M510.4 65.5l259.69999999 0 1e-8 266.89999999c0 147.50000001-116.2 266.89999999-259.7 266.90000001-143.4 0-259.7-119.5-259.7-266.90000001 0.1-147.5 116.3-266.9 259.7-266.89999999z"
-                fill="#FF9FCF"></path>
-              <path
-                d="M698.4 525.2l-13 0c53-48.4 86.5-117.8 86.5-195.20000001 0-10.2-0.7-20.3-1.8-30.19999999C613.8 377.50000001 438.6 444.9 266 437.7c15 33.4 36.7 63.1 63.5 87.5l-5.3 0c-122.6 0-225.5 88.1-248.8 204.1C340 677.2 597.7 609.2 862.2 585.7c-44.3-37.6-101.5-60.5-163.8-60.5z"
-                fill="#FF83BB"></path>
-              <path
-                d="M862.2 585.7C597.7 609.2 340 677.2 75.4 729.3c-3.2 16.1-5 32.6-5 49.6 0 99.8 81.7 181.5 181.5 181.5l518.6 0c99.8 0 181.5-81.7 181.5-181.5 0.1-77.2-35-146.5-89.8-193.2z"
-                fill="#FF5390"></path>
-              <path
-                d="M770.1 299.8C755.1 168 643.3 65.5 507.4 65.5c-146.1 0-264.5 118.4-264.5 264.5 0 38.4 8.3 74.8 23.1 107.7 172.6 7.2 347.8-60.2 504.1-137.9z"
-                fill="#FF9FCF"></path>
-              <path
-                d="M436.4 282.1c0 24.1-19.6 43.7-43.7 43.7S349 306.2 349 282.1s19.6-43.7 43.7-43.7c24.19999999 0 43.7 19.6 43.7 43.7z"
-                fill="#FFFFFF"></path>
-              <path d="M625 282.1m-43.7 0a43.7 43.7 0 1 0 87.4 0 43.7 43.7 0 1 0-87.4 0Z" fill="#FFFFFF"></path>
-            </svg>
-            <span>&nbsp;{{ article.username }}</span>
-            <span>·</span>
-            <svg viewBox="0 0 1024 1024" width="14" height="14" style="vertical-align: -2px;">
-              <path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#409EFF"></path>
-              <path
-                d="M654.222222 256c-17.066667 0-28.444444 11.377778-28.444444 28.444444v56.888889c0 17.066667 11.377778 28.444444 28.444444 28.444445s28.444444-11.377778 28.444445-28.444445v-56.888889c0-17.066667-11.377778-28.444444-28.444445-28.444444zM369.777778 256c-17.066667 0-28.444444 11.377778-28.444445 28.444444v56.888889c0 17.066667 11.377778 28.444444 28.444445 28.444445s28.444444-11.377778 28.444444-28.444445v-56.888889c0-17.066667-11.377778-28.444444-28.444444-28.444444z"
-                fill="#FFFFFF"></path>
-              <path
-                d="M725.333333 312.888889H711.111111v28.444444c0 31.288889-25.6 56.888889-56.888889 56.888889s-56.888889-25.6-56.888889-56.888889v-28.444444h-170.666666v28.444444c0 31.288889-25.6 56.888889-56.888889 56.888889s-56.888889-25.6-56.888889-56.888889v-28.444444h-14.222222c-22.755556 0-42.666667 19.911111-42.666667 42.666667v341.333333c0 22.755556 19.911111 42.666667 42.666667 42.666667h426.666666c22.755556 0 42.666667-19.911111 42.666667-42.666667v-341.333333c0-22.755556-19.911111-42.666667-42.666667-42.666667zM426.666667 654.222222h-56.888889c-17.066667 0-28.444444-11.377778-28.444445-28.444444s11.377778-28.444444 28.444445-28.444445h56.888889c17.066667 0 28.444444 11.377778 28.444444 28.444445s-11.377778 28.444444-28.444444 28.444444z m227.555555 0h-56.888889c-17.066667 0-28.444444-11.377778-28.444444-28.444444s11.377778-28.444444 28.444444-28.444445h56.888889c17.066667 0 28.444444 11.377778 28.444445 28.444445s-11.377778 28.444444-28.444445 28.444444z m0-113.777778h-56.888889c-17.066667 0-28.444444-11.377778-28.444444-28.444444s11.377778-28.444444 28.444444-28.444444h56.888889c17.066667 0 28.444444 11.377778 28.444445 28.444444s-11.377778 28.444444-28.444445 28.444444z"
-                fill="#FFFFFF"></path>
-            </svg>
-            <span>&nbsp;{{ article.createTime }}</span>
-            <span>·</span>
-            <svg viewBox="0 0 1024 1024" width="14" height="14" style="vertical-align: -2px;">
-              <path d="M14.656 512a497.344 497.344 0 1 0 994.688 0 497.344 497.344 0 1 0-994.688 0z"
-                    fill="#FF0000"></path>
-              <path
-                d="M374.976 872.64c-48.299-100.032-22.592-157.44 14.421-211.37 40.448-58.966 51.115-117.611 51.115-117.611s31.659 41.386 19.115 106.005c56.149-62.72 66.816-162.133 58.325-200.405 127.317 88.746 181.59 281.002 108.181 423.381C1016 652.501 723.093 323.2 672.277 285.867c16.939 37.333 20.054 100.032-14.101 130.474-58.027-219.84-201.664-265.002-201.664-265.002 16.96 113.536-61.781 237.397-137.344 330.24-2.816-45.163-5.632-76.544-29.483-119.808-5.333 82.176-68.373 149.269-85.29 231.445-22.912 111.637 17.237 193.173 170.581 279.424z"
-                fill="#FFFFFF"></path>
-            </svg>
-            <span>&nbsp;{{ article.viewCount }}</span>
-            <span>·</span>
-            <svg viewBox="0 0 1024 1024" width="14" height="14" style="vertical-align: -2px;">
-              <path
-                d="M113.834667 291.84v449.194667a29.013333 29.013333 0 0 0 28.842666 29.013333h252.928v90.453333l160.597334-90.453333h252.928a29.013333 29.013333 0 0 0 29.013333-29.013333V291.84a29.013333 29.013333 0 0 0-29.013333-29.013333h-665.6a29.013333 29.013333 0 0 0-29.696 29.013333z"
-                fill="#FFDEAD"></path>
-              <path
-                d="M809.130667 262.826667h-665.6a29.013333 29.013333 0 0 0-28.842667 29.013333v40.106667a29.013333 29.013333 0 0 1 28.842667-29.013334h665.6a29.013333 29.013333 0 0 1 29.013333 29.013334V291.84a29.013333 29.013333 0 0 0-29.013333-29.013333z"
-                fill="#FFF3DB"></path>
-              <path
-                d="M556.202667 770.048h252.928a29.013333 29.013333 0 0 0 29.013333-29.013333V362.837333s-59.733333 392.533333-724.309333 314.709334v63.488a29.013333 29.013333 0 0 0 28.842666 29.013333h253.098667v90.453333z"
-                fill="#F2C182"></path>
-              <path
-                d="M619.008 632.32l101.888-35.157333-131.754667-76.117334 29.866667 111.274667zM891.904 148.992a61.44 61.44 0 0 0-84.138667 22.528l-19.968 34.133333 106.666667 61.610667 19.968-34.133333a61.781333 61.781333 0 0 0-22.528-84.138667z"
-                fill="#69BAF9"></path>
-              <path d="M775.338667 198.775467l131.669333 76.032-186.026667 322.218666-131.6864-76.032z"
-                    fill="#F7FBFF"></path>
-              <path
-                d="M775.168 198.826667l-5.290667 9.216 59.221334 34.133333a34.133333 34.133333 0 0 1 12.458666 46.592l-139.946666 242.346667a34.133333 34.133333 0 0 1-46.762667 12.629333l-59.050667-34.133333-6.656 11.434666 88.746667 51.2L720.896 597.333333l186.026667-322.56z"
-                fill="#D8E3F0"></path>
-              <path
-                d="M616.448 622.592l2.56 9.728 101.888-35.157333-44.885333-25.941334-59.562667 51.370667zM891.904 148.992c-1.024 0-2.218667-0.853333-3.242667-1.536A61.610667 61.610667 0 0 1 887.466667 204.8l-19.968 34.133333-73.728-42.496-5.12 8.704 106.666666 61.610667 19.968-34.133333a61.781333 61.781333 0 0 0-23.381333-83.626667z"
-                fill="#599ED4"></path>
-              <path
-                d="M265.898667 417.621333H494.933333a17.066667 17.066667 0 1 0 0-34.133333H265.898667a17.066667 17.066667 0 1 0 0 34.133333zM265.898667 533.504H494.933333a17.066667 17.066667 0 0 0 0-34.133333H265.898667a17.066667 17.066667 0 0 0 0 34.133333z"
-                fill="#3D3D63"></path>
-              <path
-                d="M959.488 354.645333a99.84 99.84 0 0 0-23.722667-127.488 78.677333 78.677333 0 0 0-142.848-64.170666l-11.605333 20.138666a17.066667 17.066667 0 0 0-20.821333 7.168l-32.085334 55.466667H142.677333a46.250667 46.250667 0 0 0-45.909333 46.08v449.194667a46.08 46.08 0 0 0 45.909333 46.08h236.032v73.386666a17.066667 17.066667 0 0 0 8.362667 14.848 17.066667 17.066667 0 0 0 8.704 2.218667 17.066667 17.066667 0 0 0 8.362667-2.218667l156.672-88.234666h248.32a46.08 46.08 0 0 0 46.08-46.08V398.677333L921.6 283.306667a17.066667 17.066667 0 0 0-4.266667-21.504l1.877334-3.413334a65.365333 65.365333 0 0 1 10.410666 79.189334l-53.077333 91.989333a56.832 56.832 0 0 0 20.821333 77.653333 17.066667 17.066667 0 0 0 24.234667-6.314666 17.066667 17.066667 0 0 0-6.997333-23.04 23.04 23.04 0 0 1-8.362667-31.061334z m-138.410667 386.389334a11.946667 11.946667 0 0 1-11.946666 11.946666H556.202667a17.066667 17.066667 0 0 0-8.362667 2.218667l-134.997333 76.117333v-61.269333a17.066667 17.066667 0 0 0-17.066667-17.066667H142.677333a11.946667 11.946667 0 0 1-11.776-11.946666V291.84a11.946667 11.946667 0 0 1 11.776-11.946667h565.930667L574.464 512a17.066667 17.066667 0 0 0-1.706667 12.970667L597.333333 615.253333H265.898667a17.066667 17.066667 0 1 0 0 34.133334h352.938666a17.066667 17.066667 0 0 0 5.802667 0l102.4-35.328a17.066667 17.066667 0 0 0 9.216-7.509334l85.333333-147.968z m-204.8-184.661334l63.829334 36.864-49.322667 17.066667z m206.848-170.666666v1.365333l-108.373333 186.709333-102.4-59.050666L781.482667 221.866667l102.4 59.050666z m76.458667-161.28L887.466667 244.224l-76.970667-44.373333 11.264-19.797334a44.544 44.544 0 1 1 77.141333 44.544z"
-                fill="#3D3D63"></path>
-            </svg>
-            <span>&nbsp;{{ article.commentCount }}</span>
-            <span>·</span>
-            <svg viewBox="0 0 1024 1024" width="14" height="14" style="vertical-align: -2px;">
-              <path
-                d="M510.671749 348.792894S340.102978 48.827055 134.243447 254.685563C-97.636714 486.565724 510.671749 913.435858 510.671749 913.435858s616.107079-419.070494 376.428301-658.749272c-194.095603-194.096626-376.428302 94.106308-376.428301 94.106308z"
-                fill="#FF713C"></path>
-              <path
-                d="M510.666632 929.674705c-3.267417 0-6.534833-0.983397-9.326413-2.950192-16.924461-11.872399-414.71121-293.557896-435.220312-529.448394-5.170766-59.482743 13.879102-111.319341 56.643068-154.075121 51.043536-51.043536 104.911398-76.930113 160.095231-76.930114 112.524796 0 196.878996 106.48115 228.475622 153.195078 33.611515-45.214784 122.406864-148.20646 234.04343-148.20646 53.930283 0 105.46603 24.205285 153.210428 71.941496 45.063335 45.063335 64.954361 99.200326 59.133795 160.920016C935.306982 641.685641 536.758893 915.327952 519.80271 926.859589a16.205077 16.205077 0 0 1-9.136078 2.815116zM282.857183 198.75574c-46.25344 0-92.396363 22.682605-137.127124 67.413365-36.149315 36.157501-51.614541 78.120218-47.25321 128.291898 17.575284 202.089671 352.199481 455.119525 412.332023 499.049037 60.434417-42.86732 395.406538-289.147446 414.567947-492.458945 4.933359-52.344159-11.341303-96.465029-49.759288-134.88199-41.431621-41.423435-85.24243-62.424748-130.242319-62.424748-122.041544 0-220.005716 152.203494-220.989114 153.742547-3.045359 4.806469-8.53335 7.883551-14.101159 7.534603a16.257266 16.257266 0 0 1-13.736863-8.184403c-0.902556-1.587148-91.569532-158.081365-213.690893-158.081364z"
-                fill="#885F44"></path>
-            </svg>
-            <span>&nbsp;{{ article.likeCount }}</span>
-          </div>
-        </div>
-
-        <div class="article-info-news"
-             @click="weiYanDialogVisible = true"
-             v-if="!$common.isEmpty($store.state.currentUser) && $store.state.currentUser.id === article.userId">
-          <svg width="30" height="30" viewBox="0 0 1024 1024">
-            <path d="M0 0h1024v1024H0V0z" fill="#202425" opacity=".01"></path>
-            <path
-              d="M989.866667 512c0 263.918933-213.947733 477.866667-477.866667 477.866667S34.133333 775.918933 34.133333 512 248.081067 34.133333 512 34.133333s477.866667 213.947733 477.866667 477.866667z"
-              fill="#FF7744"></path>
-            <path
-              d="M512 221.866667A51.2 51.2 0 0 1 563.2 273.066667v187.733333H750.933333a51.2 51.2 0 0 1 0 102.4h-187.733333V750.933333a51.2 51.2 0 0 1-102.4 0v-187.733333H273.066667a51.2 51.2 0 0 1 0-102.4h187.733333V273.066667A51.2 51.2 0 0 1 512 221.866667z"
-              fill="#FFFFFF"></path>
-          </svg>
-        </div>
-      </div>
-      <!-- 文章 -->
-      <div style="background: var(--background);">
-        <div class="article-container my-animation-slide-bottom">
-          <div v-if="!$common.isEmpty(article.videoUrl)" style="margin-bottom: 20px">
-            <VideoPlayer :url="{src: $common.decrypt(article.videoUrl)}"
-                         :cover="article.articleCover">
-            </VideoPlayer>
-          </div>
-
-          <!-- 最新进展 -->
-          <div v-if="!$common.isEmpty(treeHoleList)" class="process-wrap">
-            <el-collapse accordion model-value="1">
-              <el-collapse-item title="最新进展" name="1">
-                <Process :treeHoleList="treeHoleList" @deleteTreeHole="deleteTreeHole"></Process>
-              </el-collapse-item>
-            </el-collapse>
-
-            <hr>
-          </div>
-
-          <!-- 文章内容 -->
-          <div v-html="articleContentHtml" class="entry-content"></div>
-          <!-- 最后更新时间 -->
-          <div class="article-update-time">
-            <span>文章最后更新于 {{ article.updateTime }}</span>
-          </div>
-          <!-- 分类 -->
-          <div class="article-sort">
-            <span @click="$router.push({path: '/sort', query: {sortId: article.sortId, labelId: article.labelId}})">{{ article.sort.sortName +" ▶ "+ article.label.labelName}}</span>
-          </div>
-          <!-- 作者信息 -->
-          <blockquote>
-            <div>
-              作者：{{article.username}}
+            <div class="post-hero-extra">
+              <span class="post-views">浏览量 {{ article.viewCount }}</span>
+              <span class="post-meta-dot">·</span>
+              <span class="post-comments-count">{{ article.commentCount }} 评论</span>
             </div>
-            <div>
-              <span>版权&许可请详阅</span>
-              <span style="color: #38f;cursor: pointer"
-                    @click="copyrightDialogVisible = true">
-                版权声明
-              </span>
+          </header>
+
+          <!-- 简介卡：更新提示 + AI 摘要 + 封面图 -->
+          <div class="post-intro-card"
+               v-if="article.updateTime || articleSummary || (!coverError && !$common.isEmpty(article.articleCover))">
+            <div class="post-intro-outdated" v-if="article.updateTime">
+              <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+                <path fill="currentColor"
+                      d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2zm0-8h-2V7h2z"/>
+              </svg>
+              <span class="post-intro-outdated-text">最后更新于 {{ article.updateTime }}，部分内容可能已过时</span>
             </div>
-          </blockquote>
-          <!-- 订阅 -->
-          <div class="myCenter" id="article-like" @click="subscribeLabel()">
-            <el-icon class="article-like-icon" :class="{'article-like': subscribe}">
-              <Pointer />
-            </el-icon>
+
+            <div class="post-intro-divider" v-if="article.updateTime && articleSummary"></div>
+
+            <details class="post-intro-details" v-if="articleSummary" open>
+              <summary class="post-intro-summary">
+                <span class="post-intro-summary-title">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor"
+                          d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9z"/>
+                    <path fill="currentColor" d="M18.5 15l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/>
+                  </svg>
+                  AI 摘要<span class="post-intro-model">- 自动提取</span>
+                </span>
+                <svg class="post-intro-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/>
+                </svg>
+              </summary>
+              <div class="post-intro-section">
+                <p class="post-intro-desc">{{ articleSummary }}</p>
+              </div>
+            </details>
+
+            <div class="post-intro-divider"
+                 v-if="articleSummary && !coverError && !$common.isEmpty(article.articleCover)"></div>
+
+            <details class="post-intro-details"
+                     v-if="!coverError && !$common.isEmpty(article.articleCover)">
+              <summary class="post-intro-summary">
+                <span class="post-intro-summary-title">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill="currentColor"
+                          d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 12 3-4 2 2.6 3-4.1L19 17H7z"/>
+                  </svg>
+                  封面图
+                </span>
+                <svg class="post-intro-arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="currentColor" d="M6.7 9.3a1 1 0 0 1 1.4 0L12 13.2l3.9-3.9a1 1 0 1 1 1.4 1.4l-4.6 4.6a1 1 0 0 1-1.4 0L6.7 10.7a1 1 0 0 1 0-1.4z"/>
+                </svg>
+              </summary>
+              <div class="post-intro-section post-intro-section--cover">
+                <div class="post-intro-cover">
+                  <el-image class="post-intro-cover-img"
+                            :src="article.articleCover"
+                            fit="cover"
+                            @error="coverError = true">
+                    <template #error>
+                      <div class="post-intro-cover-fallback"></div>
+                    </template>
+                  </el-image>
+                </div>
+              </div>
+            </details>
           </div>
 
-          <!-- 评论 -->
-          <div v-if="article.commentStatus === true">
+          <!-- 正文 -->
+          <article class="post-body">
+            <div v-if="!$common.isEmpty(article.videoUrl)" class="post-video">
+              <VideoPlayer :url="{src: $common.decrypt(article.videoUrl)}"
+                           :cover="article.articleCover">
+              </VideoPlayer>
+            </div>
+
+            <!-- 最新进展 -->
+            <div v-if="!$common.isEmpty(treeHoleList)" class="process-wrap">
+              <el-collapse accordion model-value="1">
+                <el-collapse-item title="最新进展" name="1">
+                  <Process :treeHoleList="treeHoleList" @deleteTreeHole="deleteTreeHole"></Process>
+                </el-collapse-item>
+              </el-collapse>
+
+              <hr>
+            </div>
+
+            <!-- 文章内容 -->
+            <div v-html="articleContentHtml" class="entry-content"></div>
+
+            <!-- 作者与版权 -->
+            <div class="post-end">
+              <div class="post-end-info">
+                <span>作者：{{ article.username }}</span>
+                <span class="post-end-link" @click="copyrightDialogVisible = true">版权声明</span>
+              </div>
+              <button class="post-subscribe"
+                      :class="{'post-subscribe--active': subscribe}"
+                      type="button"
+                      @click="subscribeLabel()">
+                <el-icon>
+                  <Pointer/>
+                </el-icon>
+                <span>{{ subscribe ? '已订阅专栏' : '订阅专栏' }}</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- 相关文章 -->
+          <section class="post-related" v-if="relatedArticles.length > 0" aria-label="相关文章">
+            <h2 class="post-related-head">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor"
+                      d="M11 14h2q.425 0 .713-.288T14 13t-.288-.712T13 12h-2q-.425 0-.712.288T10 13t.288.713T11 14m0-3h6q.425 0 .713-.288T18 10t-.288-.712T17 9h-6q-.425 0-.712.288T10 10t.288.713T11 11m0-3h6q.425 0 .713-.288T18 7t-.288-.712T17 6h-6q-.425 0-.712.288T10 7t.288.713T11 8M8 18q-.825 0-1.412-.587T6 16V4q0-.825.588-1.412T8 2h12q.825 0 1.413.588T22 4v12q0 .825-.587 1.413T20 18zm0-2h12V4H8zm-4 6q-.825 0-1.412-.587T2 20V7q0-.425.288-.712T3 6t.713.288T4 7v13h13q.425 0 .713.288T18 21t-.288.713T17 22zM8 4v12z"/>
+              </svg>
+              <span>相关文章</span>
+            </h2>
+            <div class="post-related-grid">
+              <div class="post-related-item" v-for="item in relatedArticles" :key="item.id">
+                <div class="post-related-card" @click="openArticle(item.id)">
+                  <div class="post-related-media">
+                    <img v-if="!$common.isEmpty(item.articleCover)"
+                         :src="item.articleCover"
+                         :alt="item.articleTitle"
+                         @error="$event.target.style.display = 'none'"/>
+                    <span class="post-related-scrim"></span>
+                  </div>
+                  <div class="post-related-body">
+                    <div class="post-related-name">{{ item.articleTitle }}</div>
+                    <div class="post-related-meta">
+                      {{ (item.sort && item.sort.sortName) || (item.label && item.label.labelName) }} ·
+                      {{ formatDate(item.createTime) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 剪刀分割线 -->
+          <div class="post-cut">
+            <span>✂</span>
+          </div>
+
+          <!-- 评论：组件与样式保持原样 -->
+          <div class="post-comments" v-if="article.commentStatus === true">
             <Comment :type="'article'" :source="article.id" :userId="article.userId"></Comment>
           </div>
         </div>
 
-        <div id="toc" class="toc"></div>
+        <!-- 目录抽屉 -->
+        <aside class="post-aside" v-if="hasHeadings">
+          <div id="toc" class="toc"></div>
+        </aside>
+        <div class="post-float" v-if="hasHeadings">
+          <button class="post-float-btn" type="button" title="目录" @click="clickTocButton()">
+            <i class="fa fa-align-justify" aria-hidden="true"></i>
+          </button>
+          <button class="post-float-btn" type="button" title="回到顶部" @click="scrollToTop">
+            <i class="fa fa-angle-up" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
       <div style="background: var(--background)">
         <MyFooter></MyFooter>
       </div>
-    </div>
-
-    <div id="toc-button" @click="clickTocButton()">
-      <i class="fa fa-align-justify" aria-hidden="true"></i>
     </div>
 
     <el-dialog title="版权声明"
@@ -268,6 +292,7 @@
         </div>
         <div style="display: flex;justify-content: center">
           <ProButton :info="'提交'"
+                     :unified="true"
                      @click="submitPassword()"
                      :before="$constant.before_color_2"
                      :after="$constant.after_color_2">
@@ -288,6 +313,44 @@
   import CommentBox from "../components/comment/CommentBox.vue";
   import ProButton from "../components/common/ProButton.vue";
   import VideoPlayer from "../components/common/VideoPlayer.vue";
+  import { emojiPlugin } from "../utils/emoji";
+
+  // markdown-it 未内置任务列表语法（- [ ] / - [x]），补一个最小实现：
+  // 列表项加 task-list-item、所属列表加 contains-task-list，行首插入只读复选框，
+  // 与 md-editor 预览里的任务列表保持一致（样式见 markdown-highlight.css）。
+  function taskListPlugin(md) {
+    md.core.ruler.after('inline', 'task-lists', (state) => {
+      const tokens = state.tokens;
+      for (let i = 2; i < tokens.length; i++) {
+        if (tokens[i].type !== 'inline') {
+          continue;
+        }
+        if (tokens[i - 1].type !== 'paragraph_open' || tokens[i - 2].type !== 'list_item_open') {
+          continue;
+        }
+        const match = /^\[([ xX])\][ \t]+/.exec(tokens[i].content);
+        if (!match) {
+          continue;
+        }
+        tokens[i].content = tokens[i].content.slice(match[0].length);
+        // 去掉前缀后重新解析行内内容，避免残留 "[x] " 文本
+        tokens[i].children.length = 0;
+        state.md.inline.parse(tokens[i].content, state.md, state.env, tokens[i].children);
+        const checkbox = new state.Token('html_inline', '', 0);
+        checkbox.content = `<input type="checkbox" disabled${match[1].toLowerCase() === 'x' ? ' checked' : ''}>`;
+        tokens[i].children.unshift(checkbox);
+        tokens[i - 2].attrJoin('class', 'task-list-item');
+        for (let j = i - 3; j >= 0; j--) {
+          if (tokens[j].type === 'bullet_list_open' || tokens[j].type === 'ordered_list_open') {
+            tokens[j].attrJoin('class', 'contains-task-list');
+            break;
+          }
+        }
+      }
+      return true;
+    });
+  }
+
 
   export default {
     components: {
@@ -312,8 +375,56 @@
         showPasswordDialog: false,
         password: "",
         tips: "",
-        scrollTop: 0
+        scrollTop: 0,
+        coverError: false,
+        relatedArticles: []
       };
+    },
+    computed: {
+      wordCount() {
+        const content = this.article.articleContent || "";
+        const chineseCount = (content.match(/[\u4e00-\u9fa5]/g) || []).length;
+        const wordCount = (content.replace(/[\u4e00-\u9fa5]/g, " ").match(/[a-zA-Z0-9]+/g) || []).length;
+        return chineseCount + wordCount;
+      },
+      readMinutes() {
+        return Math.max(1, Math.round(this.wordCount / 400));
+      },
+      hasHeadings() {
+        return /^#{1,5}\s+\S/m.test(this.article.articleContent || "");
+      },
+      articleSummary() {
+        let content = this.article.articleContent || "";
+        content = content
+          .replace(/```[\s\S]*?```/g, " ")
+          .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+          .replace(/\[([^\]]*)]\([^)]*\)/g, "$1")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+          .replace(/^\s{0,3}>\s?/gm, "")
+          .replace(/^\s{0,3}([-*+]|\d+\.)\s+/gm, "")
+          .replace(/[*_`~]/g, "")
+          .replace(/\|/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        return content.length > 140 ? content.slice(0, 140) + "…" : content;
+      }
+    },
+    watch: {
+      '$route.params.id'(val) {
+        if (!val || val === this.id) {
+          return;
+        }
+        this.id = val;
+        this.article = {};
+        this.articleContentHtml = "";
+        this.treeHoleList = [];
+        this.relatedArticles = [];
+        this.coverError = false;
+        this.subscribe = false;
+        window.scrollTo(0, 0);
+        this.getArticle(localStorage.getItem("article_password_" + val));
+      }
     },
     created() {
       if (!this.$common.isEmpty(this.id)) {
@@ -336,24 +447,71 @@
     unmounted() {
       window.removeEventListener("scroll", this.onScrollPage);
     },
-    watch: {
-      scrollTop(scrollTop, oldScrollTop) {
-        let isShow = scrollTop - window.innerHeight > 30;
-        if (isShow) {
-          $("#toc-button").css("bottom", "14.1vh");
-        } else {
-          $("#toc-button").css("bottom", "8vh");
-        }
-      },
-    },
+    watch: {},
     methods: {
       clickTocButton() {
-        let display = $(".toc");
+        let display = $(".post-aside");
         if ("none" === display.css("display")) {
-          display.css("display", "unset");
+          $(".toc").css("display", "block");
+          display.css("display", "block");
         } else {
           display.css("display", "none");
         }
+      },
+      scrollToTop() {
+        window.scrollTo({top: 0, behavior: "smooth"});
+      },
+      formatDate(value) {
+        return value ? String(value).slice(0, 10) : "";
+      },
+      getRelatedArticles() {
+        if (this.$common.isEmpty(this.article.id)) {
+          return;
+        }
+        this.relatedArticles = [];
+        const merge = (records) => {
+          (records || []).forEach((item) => {
+            if (this.relatedArticles.length >= 3) {
+              return;
+            }
+            if (item.id === this.article.id) {
+              return;
+            }
+            if (this.relatedArticles.some((article) => article.id === item.id)) {
+              return;
+            }
+            this.relatedArticles.push(item);
+          });
+        };
+        const params = {current: 1, size: 4};
+        if (!this.$common.isEmpty(this.article.labelId)) {
+          params.labelId = this.article.labelId;
+        }
+        this.$http.post(this.$constant.baseURL + "/article/listArticle", params)
+          .then((res) => {
+            merge(res.data && res.data.records);
+            if (this.relatedArticles.length < 3 && !this.$common.isEmpty(this.article.sortId)) {
+              return this.$http.post(this.$constant.baseURL + "/article/listArticle", {
+                current: 1,
+                size: 6,
+                sortId: this.article.sortId
+              });
+            }
+            return null;
+          })
+          .then((res) => {
+            if (res) {
+              merge(res.data && res.data.records);
+            }
+          })
+          .catch(() => {
+          });
+      },
+      openArticle(id) {
+        if (id === this.article.id) {
+          return;
+        }
+        this.$router.push("/article/" + id);
       },
       subscribeLabel() {
         if (this.$common.isEmpty(this.$store.state.currentUser)) {
@@ -522,15 +680,20 @@
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.article = res.data;
+              this.coverError = false;
               this.getNews();
-              const md = new MarkdownIt({breaks: true}).use(multimdTable);
-              this.articleContentHtml = md.render(this.article.articleContent);
+              // html:true 让正文里的 <audio>/<video>/<u>/<sub>/<sup> 等按标签渲染，
+              // 渲染结果随后统一走 sanitizeHtml 白名单过滤（含音视频地址协议校验）
+              const md = new MarkdownIt({breaks: true, html: true}).use(multimdTable).use(taskListPlugin).use(emojiPlugin);
+              // 渲染结果统一净化后再交给 v-html，避免正文里的 HTML 注入
+              this.articleContentHtml = this.$common.sanitizeHtml(md.render(this.article.articleContent));
               this.$nextTick(() => {
                 this.$common.imgShow(".entry-content img");
                 this.highlight();
                 this.addId();
                 this.getTocbot();
               });
+              this.getRelatedArticles();
               if (!this.$common.isEmpty(password)) {
                 localStorage.setItem("article_password_" + this.id, password);
               }
@@ -634,117 +797,477 @@
 
 <style scoped>
 
-  .article-head {
-    height: 40vh;
-    position: relative;
+  /* ===== 文章页：白底、无卡片正文、右下浮动目录 ===== */
+  .post-page {
+    --postPageBg: #ffffff;
+    --postText: #364153;
+    --postMeta: #808080;
+    --postLine: #16181c;
+    --postSoftLine: rgba(0, 0, 0, 0.09);
+    --postIntroBg: #f6f6f6;
+    --postDrawerBg: #ffffff;
+    --postSubtleBg: #f3f3f3;
+    --postAccent: #16181c;
+    --postViews: oklch(62% 0.19 145);
+    --postComments: oklch(62% 0.19 250);
+    background: var(--postPageBg);
+    padding: 90px 20px 60px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
   }
 
-  .article-image::before {
-    position: absolute;
+  html.dark .post-page {
+    --postPageBg: #0d0d0d;
+    --postText: #d1d5dc;
+    --postMeta: #99a1af;
+    --postLine: #ededed;
+    --postSoftLine: rgba(255, 255, 255, 0.13);
+    --postIntroBg: #1c1c1c;
+    --postDrawerBg: #161616;
+    --postSubtleBg: #202020;
+    --postAccent: #ededed;
+  }
+
+  .post-main {
+    width: 100%;
+    max-width: 1008px;
+    min-width: 0;
+    padding: 0 40px;
+    box-sizing: border-box;
+  }
+
+  /* 面包屑 */
+  .post-crumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--postMeta);
+  }
+
+  .post-crumb-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--postMeta);
+  }
+
+  .post-crumb-link {
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .post-crumb-link:hover {
+    color: var(--postText);
+  }
+
+  .post-crumb-sep {
+    opacity: 0.55;
+  }
+
+  .post-crumb-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 8px;
+    border: 1px solid var(--postSoftLine);
+    border-radius: 999px;
+    background: var(--postIntroBg);
+    line-height: 1.7;
+    color: var(--postText);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .post-crumb-pill:hover {
+    background: var(--postSubtleBg);
+  }
+
+  .post-crumb-current {
+    color: var(--postMeta);
+  }
+
+  /* 标题与元信息 */
+  .post-hero {
+    padding: 0.25rem 0 0.75rem;
+    text-align: center;
+  }
+
+  .post-hero-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--postText);
+    word-break: break-word;
+  }
+
+  .post-hero-meta,
+  .post-hero-extra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--postMeta);
+  }
+
+  .post-hero-extra {
+    margin-top: 4px;
+  }
+
+  .post-meta-dot {
+    opacity: 0.55;
+  }
+
+  .post-meta-tag {
+    color: var(--postText);
+  }
+
+  .post-meta-tag--link {
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .post-meta-tag--link:hover {
+    color: var(--ui-accent);
+  }
+
+  .post-views {
+    color: var(--postViews);
+    font-weight: 500;
+  }
+
+  .post-comments-count {
+    color: var(--postComments);
+  }
+
+  /* 简介卡：更新提示 + AI 摘要 + 封面 */
+  .post-intro-card {
+    margin: 1.25rem 0 1.5rem;
+    border: 1px solid var(--postSoftLine);
+    border-radius: 0.75rem;
+    background: var(--postIntroBg);
+    overflow: hidden;
+  }
+
+  .post-intro-outdated {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.125rem;
+    color: var(--postMeta);
+  }
+
+  .post-intro-outdated svg {
+    flex: 0 0 auto;
+    color: #ef4444;
+  }
+
+  .post-intro-outdated-text {
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .post-intro-divider {
+    height: 1px;
+    background: var(--postSoftLine);
+  }
+
+  .post-intro-details {
+    display: block;
+  }
+
+  .post-intro-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 2.75rem;
+    padding: 0.625rem 1.125rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--postText);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .post-intro-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .post-intro-summary-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .post-intro-summary-title svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--postAccent);
+  }
+
+  .post-intro-model {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--postMeta);
+  }
+
+  .post-intro-arrow {
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--postMeta);
+    transition: transform 0.2s;
+  }
+
+  .post-intro-details[open] .post-intro-arrow {
+    transform: rotate(180deg);
+  }
+
+  .post-intro-section {
+    padding: 0 1.125rem 0.875rem;
+  }
+
+  .post-intro-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--postMeta);
+  }
+
+  .post-intro-cover {
+    overflow: hidden;
+    border-radius: 0.5rem;
+  }
+
+  .post-intro-cover-img {
+    display: block;
+    width: 100%;
+    max-height: 480px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .post-intro-cover-img :deep(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    object-fit: cover;
+  }
+
+  .post-intro-cover-fallback {
+    height: 240px;
+    background: var(--postSubtleBg);
+  }
+
+  /* 正文 */
+  .post-body {
+    padding-top: 0.5rem;
+  }
+
+  .post-video {
+    margin-bottom: 20px;
+  }
+
+  /* 正文排版统一由 src/assets/css/markdown-highlight.css 提供（照搬 halo-theme-joe2.0），
+     本组件不再覆盖 rich text 样式，避免与全局排版规则层叠打架 */
+
+  /* 相关文章 */
+  .post-related {
+    margin-top: 2.5rem;
+  }
+
+  .post-related-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--postSoftLine);
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--postText);
+  }
+
+  .post-related-head svg {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .post-related-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .post-related-item {
+    display: flex;
+    min-width: 0;
+  }
+
+  .post-related-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: var(--postSubtleBg);
+    cursor: pointer;
+  }
+
+  .post-related-media {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    max-height: 16rem;
+    background: var(--postSubtleBg);
+  }
+
+  .post-related-media img {
+    display: block;
     width: 100%;
     height: 100%;
-    background-color: var(--miniMask);
-    content: "";
+    object-fit: cover;
   }
 
-  .article-info-container {
+  .post-related-scrim {
     position: absolute;
-    bottom: 15px;
-    left: 20%;
-    color: var(--white);
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.55));
   }
 
-  .article-info-news {
+  .post-related-body {
     position: absolute;
-    bottom: 10px;
-    right: 20%;
-    cursor: pointer;
-    animation: scale 1s ease-in-out infinite;
-  }
-
-  .article-title {
-    font-size: 28px;
-    margin-bottom: 15px;
-  }
-
-  .article-info {
-    font-size: 14px;
-    user-select: none;
-  }
-
-  .article-info i {
-    margin-right: 6px;
-  }
-
-  .article-info span:not(:last-child) {
-    margin-right: 5px;
-  }
-
-  .article-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px 20px;
-  }
-
-  .article-update-time {
-    color: var(--greyFont);
-    font-size: 12px;
-    margin: 20px 0;
-    user-select: none;
-  }
-
-  blockquote {
-    line-height: 2;
-    border-left: 0.2rem solid var(--blue);
-    padding: 10px 1rem;
-    background-color: var(--azure);
-    border-radius: 4px;
-    margin: 0 0 40px 0;
-    user-select: none;
-    color: var(--fontColor);
-  }
-
-  .article-sort {
+    bottom: 0;
+    left: 0;
+    right: 0;
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 20px;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.6rem 0.75rem;
+    color: #ffffff;
   }
 
-  .article-sort span {
-    padding: 3px 10px;
-    background-color: var(--themeBackground);
-    border-radius: 5px;
-    font-size: 14px;
-    color: var(--white);
-    transition: all 0.3s;
-    margin-right: 25px;
+  .post-related-name {
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .post-related-meta {
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .post-related-card:hover .post-related-name {
+    text-decoration: underline;
+  }
+
+  @media screen and (min-width: 768px) {
+    .post-related-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  /* 作者与订阅 */
+  .post-end {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--postSoftLine);
+  }
+
+  .post-end-info {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.9rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--postMeta);
+  }
+
+  .post-end-link {
+    color: var(--postText);
+    text-decoration: underline;
+    text-underline-offset: 3px;
     cursor: pointer;
-    user-select: none;
   }
 
-  .article-sort span:hover {
-    background-color: var(--red);
-  }
-
-  .article-like {
-    color: var(--red) !important;
-  }
-
-  .article-like-icon {
-    font-size: 60px;
+  .post-subscribe {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--postAccent);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--postText);
+    font-size: 0.82rem;
     cursor: pointer;
-    color: var(--greyFont);
-    transition: all 0.5s;
-    border-radius: 50%;
-    margin-bottom: 20px;
+    transition: all 0.2s;
   }
 
-  .article-like-icon:hover {
-    transform: rotate(360deg);
+  .post-subscribe:hover,
+  .post-subscribe--active {
+    background: var(--postAccent);
+    color: var(--postPageBg);
   }
 
+  /* 剪刀分割线 */
+  .post-cut {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2.5rem 0 1.25rem;
+    color: var(--postMeta);
+  }
+
+  .post-cut::before,
+  .post-cut::after {
+    content: '';
+    flex: 1;
+    border-top: 1px dashed var(--postSoftLine);
+  }
+
+  .post-cut span {
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.8;
+  }
+
+  /* 评论区：组件与样式保持原样；宽度与参考站一致，铺满文章栏（正文左右各缩进 40px） */
+  .post-comments {
+    margin-top: 0;
+    margin-left: -40px;
+    margin-right: -40px;
+  }
+
+  /* 最新进展 */
   .process-wrap {
-    margin: 0 0 40px;
+    margin: 0 0 32px;
   }
 
   .process-wrap hr {
@@ -772,20 +1295,16 @@
   .process-wrap :deep(.el-collapse-item__header) {
     border-bottom: unset;
     font-size: 20px;
-    background-color: var(--background);
+    background-color: transparent;
     color: var(--lightGreen);
   }
 
   .process-wrap :deep(.el-collapse-item__wrap) {
-    background-color: var(--background);
+    background-color: transparent;
   }
 
   .process-wrap .el-collapse {
     border-top: unset;
-    border-bottom: unset;
-  }
-
-  .process-wrap :deep(.el-collapse-item__wrap) {
     border-bottom: unset;
   }
 
@@ -795,21 +1314,6 @@
     line-height: 1.5;
   }
 
-  #toc-button {
-    position: fixed;
-    right: 3vh;
-    bottom: 8vh;
-    animation: slide-bottom 0.5s ease-in-out both;
-    z-index: 100;
-    cursor: pointer;
-    font-size: 23px;
-    width: 30px;
-  }
-
-  #toc-button:hover {
-    color: var(--themeBackground);
-  }
-
   .copyright-container {
     color: var(--fontColor);
     line-height: 2.5;
@@ -817,20 +1321,170 @@
     font-size: 16px;
   }
 
-  @media screen and (max-width: 700px) {
-    .article-info-container {
-      left: 20px;
-      max-width: 320px;
-    }
+  /* ===== 右下角目录抽屉 ===== */
+  .post-aside {
+    position: fixed;
+    right: 18px;
+    bottom: 144px;
+    z-index: 120;
+    display: none;
+    width: 352px;
+    max-width: calc(100vw - 36px);
+    max-height: min(70vh, 560px);
+    overflow-y: auto;
+    padding: 18px 18px 16px;
+    background: var(--postDrawerBg);
+    border: 1.6px solid var(--postLine);
+    border-radius: 12px;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.08);
+  }
 
-    .article-info-news {
-      right: 20px;
+  html.dark .post-aside {
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
+  }
+
+  .toc {
+    position: static;
+    top: auto;
+    right: auto;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: var(--postMeta);
+    font-size: 0.82rem;
+  }
+
+  .toc::before {
+    content: '目录';
+    display: block;
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--postText);
+  }
+
+  .toc :deep(.toc-list) {
+    margin: 0;
+    padding-left: 0 !important;
+    list-style: none;
+  }
+
+  .toc :deep(.toc-list .toc-list) {
+    margin-top: 0.15rem;
+    padding-left: 0.9rem !important;
+  }
+
+  .toc :deep(.toc-link) {
+    display: block;
+    padding: 0.2rem 0;
+    border: none;
+    line-height: 1.45;
+    color: var(--postMeta);
+    transition: color 0.15s;
+  }
+
+  .toc :deep(.toc-link:hover) {
+    color: var(--postText);
+  }
+
+  .toc :deep(.is-active-link) {
+    padding: 0;
+    background: transparent;
+    color: var(--postText) !important;
+    font-weight: 600;
+  }
+
+  .toc :deep(.is-active-link::before) {
+    background-color: var(--postText);
+  }
+
+  /* 右下角浮动按钮：与参考站 ud-dock 一致 */
+  .post-float {
+    position: fixed;
+    right: 84px;
+    bottom: 20px;
+    z-index: 121;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+  }
+
+  .post-float-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.125rem;
+    height: 3.125rem;
+    flex-shrink: 0;
+    padding: 0;
+    background: var(--postPageBg);
+    border: 2px solid var(--postText);
+    border-radius: 1.25rem;
+    color: var(--postText);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .post-float-btn:hover {
+    background: var(--postText);
+    border-color: var(--postPageBg);
+    color: var(--postPageBg);
+  }
+
+  .post-float-btn:active {
+    transform: scale(0.96);
+  }
+
+  @media screen and (min-width: 768px) {
+    .post-intro-cover-img,
+    .post-intro-cover-img :deep(img) {
+      max-height: 560px;
     }
   }
 
-  @media screen and (max-width: 400px) {
-    #toc-button {
-      right: 0.5vh;
+  @media screen and (max-width: 767px) {
+    .post-page {
+      padding: 78px 0 40px;
+    }
+
+    .post-main {
+      padding: 0 18px;
+    }
+    .post-comments {
+      margin-left: -18px;
+      margin-right: -18px;
+    }
+    .post-hero-title {
+      font-size: 1.5rem;
+    }
+
+    .post-intro-card {
+      margin: 1rem 0 1.25rem;
+    }
+
+    .post-end {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .post-aside {
+      right: 12px;
+      bottom: 134px;
+      width: calc(100vw - 24px);
+      max-width: 352px;
+    }
+
+    .post-float {
+      right: 56px;
+      bottom: 12px;
     }
   }
 </style>

@@ -7,19 +7,7 @@
       </div>
       <div class="handle-box">
         <el-select clearable v-model="pagination.resourceType" placeholder="资源类型" class="handle-select mrb10">
-          <el-option key="1" label="用户头像" value="userAvatar"></el-option>
-          <el-option key="2" label="网站头像" value="webAvatar"></el-option>
-          <el-option key="3" label="背景图片" value="webBackgroundImage"></el-option>
-          <el-option key="4" label="随机头像" value="randomAvatar"></el-option>
-          <el-option key="5" label="随机封面" value="randomCover"></el-option>
-          <el-option key="6" label="文章封面" value="articleCover"></el-option>
-          <el-option key="7" label="文章图片" value="articlePicture"></el-option>
-          <el-option key="8" label="评论图片" value="commentPicture"></el-option>
-          <el-option key="9" label="相册相片" value="lovePhoto"></el-option>
-          <el-option key="10" label="追番封面" value="animeCover"></el-option>
-          <el-option key="11" label="友链头像" value="friendCover"></el-option>
-          <el-option key="12" label="音乐封面" value="musicCover"></el-option>
-          <el-option key="13" label="音乐文件" value="musicUrl"></el-option>
+          <el-option v-for="item in resourceTypes" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <el-button type="primary" @click="search()">
           <el-icon><Search /></el-icon>
@@ -31,7 +19,11 @@
         <el-table-column prop="id" label="ID" width="55" align="center"></el-table-column>
         <el-table-column prop="originalName" label="名称" align="center"></el-table-column>
         <el-table-column prop="userId" label="用户ID" align="center"></el-table-column>
-        <el-table-column prop="type" label="资源类型" align="center"></el-table-column>
+        <el-table-column label="资源类型" align="center">
+          <template #default="scope">
+            {{ getTypeLabel(scope.row.type) }}
+          </template>
+        </el-table-column>
         <el-table-column label="状态" align="center">
           <template #default="scope">
             <el-tag :type="scope.row.status === false ? 'danger' : 'success'"
@@ -61,8 +53,12 @@
         <el-table-column prop="mimeType" label="类型" align="center"></el-table-column>
         <el-table-column prop="storeType" label="存储平台" align="center"></el-table-column>
         <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
-        <el-table-column label="操作" width="180" align="center">
+        <el-table-column label="操作" width="240" align="center">
           <template #default="scope">
+            <el-button type="text" @click="copyPath(scope.row.path)">
+              <el-icon><Document /></el-icon>
+              复制地址
+            </el-button>
             <el-button type="text" style="color: var(--orangeRed)"
                        @click="handleDelete(scope.row)">
               <el-icon><Delete /></el-icon>
@@ -102,7 +98,7 @@
           </el-select>
         </div>
         <UploadPicture :isAdmin="true" :prefix="pagination.resourceType" @addPicture="addFile"
-                       :storeType="storeType"
+                       :storeType="storeType" :registerResource="true"
                        :listType="'text'" :accept="'image/*, video/*, audio/*'"
                        :maxSize="100" :maxNumber="10"></UploadPicture>
       </div>
@@ -127,6 +123,23 @@
           resourceType: ""
         },
         resources: [],
+        resourceTypes: [
+          {label: "用户头像", value: "userAvatar"},
+          {label: "网站头像", value: "webAvatar"},
+          {label: "背景图片", value: "webBackgroundImage"},
+          {label: "随机头像", value: "randomAvatar"},
+          {label: "随机封面", value: "randomCover"},
+          {label: "文章封面", value: "articleCover"},
+          {label: "文章图片", value: "articlePicture"},
+          {label: "评论图片", value: "commentPicture"},
+          {label: "相册相片", value: "lovePhoto"},
+          {label: "追番封面", value: "animeCover"},
+          {label: "友链头像", value: "friendCover"},
+          {label: "音乐封面", value: "musicCover"},
+          {label: "音乐文件", value: "musicUrl"},
+          {label: "微信图片", value: "wechatPicture"},
+          {label: "打赏图片", value: "rewardPicture"}
+        ],
         resourceDialog: false,
         storeTypes: [
           {label: "服务器", value: "local"},
@@ -179,6 +192,50 @@
       },
 
       addFile(res) {
+        this.$message({
+          message: "上传成功！",
+          type: "success"
+        });
+        this.getResources();
+      },
+
+      getTypeLabel(type) {
+        let item = this.resourceTypes.find((t) => t.value === type);
+        return item ? item.label : type;
+      },
+
+      copyPath(path) {
+        if (this.$common.isEmpty(path)) {
+          return;
+        }
+        const done = () => {
+          this.$message({
+            message: "地址已复制！",
+            type: "success"
+          });
+        };
+        const fail = () => {
+          this.$message({
+            message: "复制失败，请手动复制",
+            type: "error"
+          });
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(path).then(done).catch(fail);
+          return;
+        }
+        const textarea = document.createElement("textarea");
+        textarea.value = path;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand("copy") ? done() : fail();
+        } catch (e) {
+          fail();
+        }
+        document.body.removeChild(textarea);
       },
 
       addResources() {
@@ -253,6 +310,11 @@
     margin: auto;
     width: 40px;
     height: 40px;
+  }
+
+  /* 表格单元格自带 z-index:1 会形成层叠上下文，导致图片预览遮罩被后台顶栏/侧栏盖住 */
+  .table :deep(.el-table__cell) {
+    z-index: auto;
   }
 
   .pagination {

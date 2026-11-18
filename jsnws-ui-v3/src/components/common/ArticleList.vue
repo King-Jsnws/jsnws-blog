@@ -126,7 +126,7 @@
         <!-- 分类 标签 -->
         <div class="sort-label">
           <span style="margin-right: 12px"
-                @click.stop="$router.push({path: '/sort', query: {sortId: article.sortId}})">
+                @click.stop="$router.push({path: '/archive', query: {category: article.sort && article.sort.sortName}})">
             <svg viewBox="0 0 1024 1024" width="15" height="15" style="vertical-align: -3px;">
               <path
                 d="M179.2 153.6m89.6 0l588.8 0q89.6 0 89.6 89.6l0 486.4q0 89.6-89.6 89.6l-588.8 0q-89.6 0-89.6-89.6l0-486.4q0-89.6 89.6-89.6Z"
@@ -145,7 +145,7 @@
                 fill="#FFA86A"></path>
             </svg> {{ article.sort.sortName }}
           </span>
-          <span @click.stop="$router.push({path: '/sort', query: {sortId: article.sortId, labelId: article.labelId}})">
+          <span @click.stop="$router.push({path: '/archive', query: {tag: article.label.labelName}})">
             <svg viewBox="0 0 1024 1024" width="15" height="15" style="vertical-align: -3px;">
               <path
                 d="M905.0112 560.4352l-342.784 342.784c-56.7808 56.7808-148.7872 56.7808-205.568 0l-231.5776-231.5776c-56.7808-56.7808-56.7808-148.7872 0-205.568l342.9376-342.9376a114.8928 114.8928 0 0 1 84.224-33.5872l266.3936 7.2192c60.7744 1.6384 109.7216 50.3808 111.5648 111.1552l8.2944 267.8272c1.024 31.6928-11.1104 62.3104-33.4848 84.6848z"
@@ -275,7 +275,7 @@
     background-color: var(--maxLightGray);
     border-radius: 3px;
     font-size: 14px;
-    color: var(--greyFont);
+    color: var(--greyFontOnGray);
     transition: all 0.3s;
     cursor: pointer;
     user-select: none;
@@ -284,6 +284,11 @@
   .sort-label span:hover {
     background-color: var(--themeBackground);
     color: var(--white);
+  }
+
+  /* 深色：主题蓝 #63b3ff 偏亮，白字压在上面仅 2.23:1，实心块改用深色字（7.72:1） */
+  html.dark .sort-label span:hover {
+    color: #0b1b2b;
   }
 
   .error-text {

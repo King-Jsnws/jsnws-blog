@@ -1,94 +1,100 @@
 <template>
   <div class="myAside-root">
     <div class="myAside-container">
-      <!-- 网站信息 -->
-      <div v-if="!$common.mobile()" class="card-content1 shadow-box background-opacity">
-        <div class="card-banner"></div>
-        <el-avatar class="user-avatar" :size="90" :src="webInfo.avatar || '/images/default-avatar.jpg'"></el-avatar>
-        <div class="web-name">{{ownerName}}</div>
-        <div class="web-desc">{{ webInfo.description || webInfo.footer }}</div>
-        <div class="web-info">
-          <div class="blog-info-box">
-            <span>文章</span>
-            <span class="blog-info-num">{{ $store.getters.articleTotal }}</span>
-          </div>
-          <div class="blog-info-box">
-            <span>分类</span>
-            <span class="blog-info-num">{{ sortInfo.length }}</span>
-          </div>
-          <div class="blog-info-box">
-            <span>访问量</span>
-            <span class="blog-info-num">{{ webInfo.historyAllCount }}</span>
-          </div>
-        </div>
-        <div class="web-social" v-if="hasSocial">
-          <a v-if="webInfo.wechat" href="javascript:void(0)" title="微信" @click="wechatDialog = true">
-            <i class="fa fa-weixin"></i>
-          </a>
-          <a v-if="webInfo.qq" :href="webInfo.qq" target="_blank" title="QQ">
-            <i class="fa fa-qq"></i>
-          </a>
-          <a v-if="webInfo.github" :href="webInfo.github" target="_blank" title="GitHub">
-            <i class="fa fa-github"></i>
-          </a>
-          <a v-if="webInfo.email" :href="'mailto:' + webInfo.email" title="邮箱">
-            <i class="fa fa-envelope-o"></i>
-          </a>
-          <a v-if="webInfo.bilibili" :href="webInfo.bilibili" target="_blank" title="Bilibili">
-            <!-- viewBox 裁到图形实际边界（x 3~21、y 3~20），与企鹅同为 17px 视觉尺寸 -->
-            <svg viewBox="3 3 18 17" width="17" height="17" fill="currentColor" style="vertical-align: -2px">
-              <path d="M7.2 3.2 9 5h6l1.8-1.8 1.4 1.4L17 6h1.5A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-9A2.5 2.5 0 0 1 5.5 6H7L5.8 4.6l1.4-1.4zM5.5 8a.5.5 0 0 0-.5.5v9c0 .28.22.5.5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
-              <circle cx="9" cy="12" r="1.2"/>
-              <circle cx="15" cy="12" r="1.2"/>
-            </svg>
-          </a>
-        </div>
-      </div>
+      <!-- 网站信息（统一复用站点信息卡组件） -->
+      <SiteInfoCard v-if="!$common.mobile()"></SiteInfoCard>
 
       <!-- 搜索 -->
-      <div style="padding: 15px;border-radius: 10px;animation: hideToShow 1s ease-in-out"
-           class="shadow-box background-opacity wow">
-        <div style="color: var(--fontColor);font-size: 20px;font-weight: bold;margin-bottom: 10px">
-          搜索
+      <div class="side-card search-card wow">
+        <div class="side-card-head">
+          <span>搜索</span>
         </div>
-        <div style="display: flex">
-          <input class="ais-SearchBox-input" type="text"
-                 v-model="articleSearch"
-                 placeholder="搜索文章" maxlength="32">
-          <div class="ais-SearchBox-submit" @click="selectArticle()">
-            <svg style="margin-top: 3.5px;margin-left: 18px" viewBox="0 0 1024 1024" width="20" height="20">
-              <path
-                d="M51.2 508.8c0 256.8 208 464.8 464.8 464.8s464.8-208 464.8-464.8-208-464.8-464.8-464.8-464.8 208-464.8 464.8z"
-                fill="#1f1f1f"></path>
-              <path
-                d="M772.8 718.4c48-58.4 76.8-132.8 76.8-213.6 0-186.4-151.2-337.6-337.6-337.6-186.4 0-337.6 151.2-337.6 337.6 0 186.4 151.2 337.6 337.6 337.6 81.6 0 156-28.8 213.6-76.8L856 896l47.2-47.2-130.4-130.4zM512 776c-149.6 0-270.4-121.6-270.4-271.2S363.2 233.6 512 233.6c149.6 0 271.2 121.6 271.2 271.2C782.4 654.4 660.8 776 512 776z"
-                fill="#FFFFFF"></path>
-            </svg>
+        <div class="side-card-body">
+          <div class="search-pill">
+            <input class="ais-SearchBox-input" type="text"
+                   v-model="articleSearch"
+                   placeholder="搜索文章" maxlength="32">
+            <button class="ais-SearchBox-submit" type="button" aria-label="搜索" @click="selectArticle()">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                   stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="M20.5 20.5 16 16"></path>
+              </svg>
+            </button>
           </div>
         </div>
       </div>
 
       <!-- 天气 -->
-      <div v-if="weather" class="weather-card shadow-box background-opacity wow">
-        <div class="weather-head">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"
-               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M7 18a4 4 0 0 1-.6-7.96 5.5 5.5 0 0 1 10.68-1.3A3.75 3.75 0 0 1 17.5 18z"/>
-          </svg>
-          <span>天气预报</span>
+      <div v-if="weather" class="side-card weather-card wow">
+        <div class="side-card-head weather-head">
+          <span class="weather-head-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 18a4 4 0 0 1-.6-7.96 5.5 5.5 0 0 1 10.68-1.3A3.75 3.75 0 0 1 17.5 18z"/>
+            </svg>
+            <span>天气预报</span>
+          </span>
         </div>
-        <div class="weather-temp">{{weather.temp}}°</div>
-        <div class="weather-foot">
-          <span>{{weather.city}}{{weather.desc ? '，' + weather.desc : ''}}</span>
-          <span v-if="weather.aqi !== null">AQI: {{weather.aqi}}（{{weather.aqiLevel}}）</span>
+        <div class="side-card-body">
+          <!-- 温度与插画同处一行，插画占固定宽高的独立槽位，后续文字排在下方正常流 -->
+          <div class="weather-main-row">
+            <div class="weather-temp">{{weather.temp}}°</div>
+            <div class="weather-art-pos">
+              <WeatherArt :desc="weather.desc"/>
+            </div>
+          </div>
+          <div class="weather-foot">
+            <span>{{weather.city}}{{weather.desc ? '，' + weather.desc : ''}}</span>
+            <span v-if="weather.aqi !== null">AQI: {{weather.aqi}}（{{weather.aqiLevel}}）</span>
+          </div>
         </div>
       </div>
 
+      <!-- 日历与后续卡片同处一个吸顶块：日历在块首随视口固定，
+           后续卡片在同一条文档流内排布，不会滑入吸顶区域造成叠字 -->
       <div class="aside-sticky">
+      <!-- 日历：归档页右栏已有独立日历时，通过 hideCalendar 关闭本卡，避免同页出现两个日历 -->
+      <div v-if="!hideCalendar" class="side-card calendar-card wow">
+        <div class="side-card-head calendar-head">
+          <div class="calendar-nav" @click="changeMonth(-1)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7"/>
+            </svg>
+          </div>
+          <div class="calendar-title">{{calendarYear}}年{{calendarMonth}}月</div>
+          <div class="calendar-nav" @click="changeMonth(1)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+        <div class="side-card-body">
+          <div class="calendar-week">
+            <span v-for="(week, index) in weekNames" :key="index">{{week}}</span>
+          </div>
+          <div class="calendar-grid">
+            <div v-for="(day, index) in calendarDays"
+                 :key="index"
+                 class="calendar-day"
+                 :class="{ 'is-empty': !day.date, 'is-today': day.isToday }">
+              <span class="calendar-day-num">{{day.date}}</span>
+              <span v-if="day.label"
+                    class="calendar-day-label"
+                    :class="day.labelType === 'festival' ? 'is-festival' : 'is-term'">{{day.label}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分类 / 标签索引：各页面侧栏共用同一套卡片；与日历同处吸顶块，视觉顺序不变 -->
+      <SidebarIndexCards></SidebarIndexCards>
+
       <!-- 音乐 -->
-      <div v-if="!$common.isEmpty(musicList)" class="music-card shadow-box background-opacity wow">
-        <div class="music-title">
-          <span class="music-title-bar"></span>
+      <div v-if="!$common.isEmpty(musicList)" class="side-card music-card wow">
+        <div class="side-card-head">
           <span>音乐</span>
         </div>
         <div class="music-main">
@@ -203,71 +209,41 @@
                @ended="onEnded"></audio>
       </div>
 
-      <!-- 日历 -->
-      <div class="calendar-card shadow-box background-opacity wow">
-        <div class="calendar-head">
-          <div class="calendar-nav" @click="changeMonth(-1)">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M15 5l-7 7 7 7"/>
-            </svg>
-          </div>
-          <div class="calendar-title">{{calendarYear}}年{{calendarMonth}}月</div>
-          <div class="calendar-nav" @click="changeMonth(1)">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M9 5l7 7-7 7"/>
-            </svg>
-          </div>
-        </div>
-        <div class="calendar-week">
-          <span v-for="(week, index) in weekNames" :key="index">{{week}}</span>
-        </div>
-        <div class="calendar-grid">
-          <div v-for="(day, index) in calendarDays"
-               :key="index"
-               class="calendar-day"
-               :class="{ 'is-empty': !day.date, 'is-today': day.isToday }">
-            {{day.date}}
-          </div>
-        </div>
-      </div>
-
       <!-- 推荐文章 -->
-      <div v-if="!$common.isEmpty(recommendArticles)"
-           style="padding: 25px;border-radius: 10px;animation: hideToShow 1s ease-in-out"
-           class="shadow-box background-opacity wow">
-        <div class="card-content2-title">
+      <div v-if="!$common.isEmpty(recommendArticles)" class="side-card recommend-card wow">
+        <div class="side-card-head">
           <span>🔥推荐文章</span>
         </div>
-        <div v-for="(article, index) in recommendArticles"
-             :key="index"
-             @click="$router.push({path: `/article/${article.id}`})">
-          <div class="aside-post-detail">
-            <div class="aside-post-image">
-              <el-image lazy class="my-el-image" :src="article.articleCover" fit="cover">
-                <template #error>
-                  <div class="image-slot">
-                    <div class="error-aside-image">
-                      {{article.username}}
+        <div class="side-card-body">
+          <div v-for="(article, index) in recommendArticles"
+               :key="index"
+               @click="$router.push({path: `/article/${article.id}`})">
+            <div class="aside-post-detail">
+              <div class="aside-post-image">
+                <el-image lazy class="my-el-image" :src="article.articleCover" fit="cover">
+                  <template #error>
+                    <div class="image-slot">
+                      <div class="error-aside-image">
+                        {{article.username}}
+                      </div>
                     </div>
-                  </div>
-                </template>
-              </el-image>
-              <div class="hasVideo transformCenter" v-if="article.hasVideo">
-                <svg viewBox="0 0 1024 1024" width="30" height="30">
-                  <path
-                    d="M514 114.3c-219.9 0-398.9 178.9-398.9 398.9 0.1 219.9 179 398.8 398.9 398.8 219.9 0 398.8-178.9 398.8-398.8S733.9 114.3 514 114.3z m173 421.9L437.1 680.5c-17.7 10.2-39.8-2.6-39.8-23V368.9c0-20.4 22.1-33.2 39.8-23L687 490.2c17.7 10.2 17.7 35.8 0 46z"
-                    fill="#0C0C0C"></path>
-                </svg>
+                  </template>
+                </el-image>
+                <div class="hasVideo transformCenter" v-if="article.hasVideo">
+                  <svg viewBox="0 0 1024 1024" width="30" height="30">
+                    <path
+                      d="M514 114.3c-219.9 0-398.9 178.9-398.9 398.9 0.1 219.9 179 398.8 398.9 398.8 219.9 0 398.8-178.9 398.8-398.8S733.9 114.3 514 114.3z m173 421.9L437.1 680.5c-17.7 10.2-39.8-2.6-39.8-23V368.9c0-20.4 22.1-33.2 39.8-23L687 490.2c17.7 10.2 17.7 35.8 0 46z"
+                      fill="#0C0C0C"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="aside-post-title">
+                {{ article.articleTitle }}
               </div>
             </div>
-            <div class="aside-post-title">
-              {{ article.articleTitle }}
+            <div class="aside-post-date">
+              <el-icon style="color: var(--greyFont);vertical-align: -2px"><Calendar /></el-icon>{{ article.createTime }}
             </div>
-          </div>
-          <div class="aside-post-date">
-            <el-icon style="color: var(--greyFont);vertical-align: -2px"><Calendar /></el-icon>{{ article.createTime }}
           </div>
         </div>
       </div>
@@ -278,32 +254,13 @@
              @click="selectSort(sort)"
              :key="index"
              :style="{background: $constant.sortColor[index % $constant.sortColor.length]}"
-             class="shadow-box-mini background-opacity wow"
-             style="position: relative;padding: 10px 25px 15px;border-radius: 10px;animation: hideToShow 1s ease-in-out;cursor: pointer;color: var(--white)">
+             class="side-card quick-card wow">
           <div>速览</div>
           <div class="sort-name">
             {{sort.sortName}}
           </div>
           <div style="font-weight: bold;margin-top: 15px;white-space: nowrap;text-overflow: ellipsis;overflow: hidden">
             {{sort.sortDescription}}
-          </div>
-        </div>
-      </div>
-
-      <!-- 分类 -->
-      <div class="shadow-box background-opacity wow"
-           v-if="false"
-           style="padding: 25px 25px 5px;border-radius: 10px;animation: hideToShow 1s ease-in-out">
-        <div class="card-content2-title">
-          <el-icon class="card-content2-icon"><FolderOpened /></el-icon>
-          <span>分类</span>
-        </div>
-        <div v-for="(sort, index) in sortInfo"
-             :key="index"
-             class="post-sort"
-             @click="$router.push({path: '/sort', query: {sortId: sort.id}})">
-          <div>
-            <span v-for="(s, i) in sort.sortName.split('')" :key="i">{{ s }}</span>
           </div>
         </div>
       </div>
@@ -351,25 +308,29 @@
         </div>
       </div>
     </el-dialog>
-
-    <!-- 微信二维码 -->
-    <el-dialog title="微信"
-               v-model="wechatDialog"
-               width="300px"
-               :append-to-body="true"
-               destroy-on-close
-               center>
-      <img class="wechat-qrcode" :src="webInfo.wechat" alt="微信二维码">
-    </el-dialog>
   </div>
 </template>
 
 <script>
   import { Vue3SeamlessScroll } from "vue3-seamless-scroll";
+  import SiteInfoCard from "./SiteInfoCard.vue";
+  import SidebarIndexCards from "./SidebarIndexCards.vue";
+  import WeatherArt from "./WeatherArt.vue";
 
   export default {
     components: {
-      Vue3SeamlessScroll
+      Vue3SeamlessScroll,
+      SiteInfoCard,
+      SidebarIndexCards,
+      WeatherArt
+    },
+    props: {
+      // 默认 false：六个复用页面的侧栏保持原样（含日历）；
+      // 归档页右栏自带参考站日历，传 true 关闭左栏日历，避免同页重复。
+      hideCalendar: {
+        type: Boolean,
+        default: false
+      }
     },
     data() {
       return {
@@ -381,7 +342,6 @@
         recommendArticles: [],
         admires: [],
         showAdmireDialog: false,
-        wechatDialog: false,
         articleSearch: "",
         weather: null,
         weekNames: ["日", "一", "二", "三", "四", "五", "六"],
@@ -451,35 +411,28 @@
         const daysInMonth = new Date(year, month, 0).getDate();
         const now = new Date();
         const isCurrentMonth = now.getFullYear() === year && now.getMonth() + 1 === month;
+        // 当月「节气 / 节日」标注，按日号索引
+        const labels = this.calendarLabels(year, month);
         const days = [];
         for (let i = 0; i < firstWeekDay; i++) {
           days.push({ date: null, isToday: false });
         }
         for (let d = 1; d <= daysInMonth; d++) {
-          days.push({ date: d, isToday: isCurrentMonth && now.getDate() === d });
+          const label = labels[d];
+          days.push({
+            date: d,
+            isToday: isCurrentMonth && now.getDate() === d,
+            label: label ? label.text : "",
+            labelType: label ? label.type : ""
+          });
         }
         while (days.length % 7 !== 0) {
           days.push({ date: null, isToday: false });
         }
         return days;
       },
-      webInfo() {
-        return this.$store.state.webInfo;
-      },
-      // 卡片上的名字是站长名称：取站长账号昵称，缺失时兜底站点名称（不回落到登录用户名）
-      ownerName() {
-        let boss = this.$store.state.bossInfo || {};
-        if (!this.$common.isEmpty(boss.username)) {
-          return boss.username;
-        }
-        return this.$common.isEmpty(this.webInfo.webName) ? "站长" : this.webInfo.webName;
-      },
       sortInfo() {
         return this.$store.getters.navigationBar;
-      },
-      hasSocial() {
-        let w = this.webInfo;
-        return !!w && !!(w.wechat || w.qq || w.github || w.email || w.bilibili);
       }
     },
     watch: {
@@ -637,6 +590,79 @@
         this.calendarYear = year;
         this.calendarMonth = month;
       },
+      // 农历换算：交给浏览器内置的中国历（ICU），不联网；闰月或解析失败时返回 null，对应日期不标注
+      lunarDate(date) {
+        try {
+          const parts = new Intl.DateTimeFormat("zh-CN-u-ca-chinese", {
+            month: "numeric",
+            day: "numeric"
+          }).formatToParts(date);
+          const monthPart = parts.find(p => p.type === "month");
+          const dayPart = parts.find(p => p.type === "day");
+          // 闰月的 month 值不是纯数字（如 2bis），此处直接放弃该日期的标注，避免误标节日
+          if (!monthPart || !dayPart || !/^\d+$/.test(monthPart.value)) {
+            return null;
+          }
+          return {
+            month: parseInt(monthPart.value, 10),
+            day: parseInt(dayPart.value, 10)
+          };
+        } catch (e) {
+          return null;
+        }
+      },
+      // 生成某年某月的标注表：日号 -> { text, type }
+      calendarLabels(year, month) {
+        const labels = {};
+        // 公历固定节日（清明由节气表返回，标明为节日）
+        const solarFestivals = {"1-1": "元旦", "5-1": "劳动", "10-1": "国庆"};
+        const solar = solarFestivals[month + "-1"];
+        if (solar) {
+          labels[1] = {text: solar, type: "festival"};
+        }
+        // 二十四节气：1900 年小寒起的分钟偏移推算，覆盖 1900-2100，超出范围不显示
+        if (year >= 1900 && year <= 2100) {
+          const termMinutes = [0, 21208, 42467, 63836, 85337, 107014, 128867, 150921, 173149, 195551, 218072, 240693,
+            263343, 285989, 308563, 331033, 353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758];
+          const termNames = ["小寒", "大寒", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至",
+            "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至"];
+          const baseUtc = Date.UTC(1900, 0, 6, 2, 5);
+          [(month - 1) * 2, (month - 1) * 2 + 1].forEach((n) => {
+            const time = new Date(baseUtc + 31556925974.7 * (year - 1900) + termMinutes[n] * 60000);
+            if (time.getUTCMonth() + 1 !== month) {
+              return;
+            }
+            const day = time.getUTCDate();
+            // 清明既是节气也是法定节假日，按节日样式显示；同日已有公历节日则不覆盖
+            labels[day] = {text: termNames[n], type: termNames[n] === "清明" ? "festival" : "term"};
+          });
+        }
+        // 农历节日 + 除夕（除夕通过「次日为正月初一」判定，跨年月份同样有效）
+        const lunarFestivals = {
+          "1-1": "春节",
+          "1-15": "元宵",
+          "5-5": "端午",
+          "7-7": "七夕",
+          "8-15": "中秋",
+          "9-9": "重阳"
+        };
+        const daysInMonth = new Date(year, month, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+          const lunar = this.lunarDate(new Date(year, month - 1, d));
+          if (!lunar) {
+            continue;
+          }
+          const festival = lunarFestivals[lunar.month + "-" + lunar.day];
+          if (festival) {
+            labels[d] = {text: festival, type: "festival"};
+          }
+          const nextLunar = this.lunarDate(new Date(year, month - 1, d + 1));
+          if (nextLunar && nextLunar.month === 1 && nextLunar.day === 1) {
+            labels[d] = {text: "除夕", type: "festival"};
+          }
+        }
+        return labels;
+      },
       selectSort(sort) {
         this.$emit("selectSort", sort);
       },
@@ -784,147 +810,95 @@
     margin-bottom: 30px;
   }
 
-  .card-content1 {
-    background: var(--cardBg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card-banner {
-    width: 100%;
-    height: 110px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 55%, var(--cardBg) 100%),
-                url('/images/site-card-bg-sakura.png') center 35% / cover no-repeat;
-  }
-
-  .user-avatar {
-    margin-top: -45px;
-    border: 4px solid var(--cardBg);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1;
-  }
-
-  .web-name {
-    font-size: 20px;
-    font-weight: 600;
-    margin: 12px 0 6px;
-    color: var(--fontColor);
-  }
-
-  .web-desc {
-    max-width: 88%;
-    font-size: 13px;
-    color: var(--greyFont);
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .web-info {
-    width: 88%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 8px;
-    margin: 16px 0 12px;
-  }
-
-  /* 三个统计项（文章 / 分类 / 访问量）各自加描边：与站内浅色边框同一套语言 */
-  .blog-info-box {
-    flex: 1 1 0;
+  /* ===== 侧栏卡片统一外壳：与分类 / 标签卡（参考站 card-base）同一套 =====
+     卡片底色 + 1px 描边 + 16px 圆角 + 1px 阴影 + 上 0 / 左右 0 / 下 16px 内边距，
+     卡头统一 18px / 700 + 左侧 4×16 主题色竖条，内容区左右 16px */
+  .side-card {
     box-sizing: border-box;
+    padding: 0 0 16px;
+    border: var(--ui-card-border);
+    border-radius: var(--ui-card-radius);
+    background: var(--ui-card-bg);
+    box-shadow: var(--ui-card-shadow);
+  }
+
+  .side-card-head {
+    position: relative;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 8px 4px 6px;
-    font-size: 12px;
-    color: var(--greyFont);
-    /* 1px 浅灰描边 + 10px 圆角，无外发光/阴影；边框宽度恒定，尺寸不跳 */
-    border: 1px solid var(--statBorder);
-    border-radius: 10px;
-    transition: border-color 0.18s ease, background-color 0.18s ease;
-  }
-
-  /* 悬停：边框由实线变虚线（线宽/圆角/颜色不变，border-style 不可动画，故只过渡颜色） */
-  .blog-info-box:hover {
-    border-style: dashed;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .blog-info-box {
-      transition: none;
-    }
-  }
-
-  .blog-info-num {
-    margin-top: 6px;
-    font-size: 16px;
-    font-weight: 600;
+    justify-content: space-between;
+    margin: 16px 16px 8px 32px;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
     color: var(--fontColor);
   }
 
-  .web-social {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    margin-bottom: 18px;
+  /* 卡头左侧竖条：4px 宽、16px 高、6px 圆角，距卡片左边缘 16px */
+  .side-card-head::before {
+    content: "";
+    position: absolute;
+    top: 5.5px;
+    left: -16px;
+    width: 4px;
+    height: 16px;
+    border-radius: 6px;
+    background: var(--ui-accent);
   }
 
-  .web-social a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* 统一成企鹅图标的实际渲染框：17×17，图标在同一方形框内居中，基线一致 */
-    width: 17px;
-    height: 17px;
-    margin: 0 9px;
-    color: var(--greyFont);
-    text-decoration: none;
-    transition: color 0.3s;
-  }
-
-  /* GitHub 字形本身比企鹅窄（17px 字号下墨迹仅 14.5px），放大到与企鹅等宽 */
-  .web-social .fa-github {
-    font-size: 20px;
-    line-height: 17px;
-  }
-
-  /* bilibili 是内联 SVG：元素尺寸与企鹅一致，靠 viewBox 裁到图形边界，墨迹铺满 17px */
-  .web-social svg {
-    width: 17px;
-    height: 17px;
-  }
-
-  .web-social a:hover {
-    color: var(--themeBackground);
-  }
-
-  .wechat-qrcode {
-    display: block;
-    width: 100%;
-    max-width: 220px;
-    margin: 0 auto;
+  .side-card-body {
+    padding: 0 16px;
   }
 
   .weather-card {
-    padding: 20px;
-    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
     animation: hideToShow 1s ease-in-out;
   }
 
-  .weather-head {
+  /* 搜索卡：外壳由 .side-card 统一提供，这里只保留入场动画 */
+  .search-card {
+    animation: hideToShow 1s ease-in-out;
+  }
+
+  /* 温度与插画一行：插画占固定槽位，文字不再与插画重叠 */
+  .weather-main-row {
     display: flex;
     align-items: center;
-    font-size: 13px;
-    color: var(--maxGreyFont);
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .weather-art-pos {
+    position: static;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .weather-art-pos :deep(.weather-art),
+  .weather-art-pos :deep(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .weather-art-pos {
+      flex-basis: 56px;
+      width: 56px;
+      height: 56px;
+    }
+  }
+
+  /* 天气卡头里的「图标 + 天气预报」：字号 / 颜色 / 间距由 .side-card-head 统一 */
+  .weather-head-title {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
   }
 
   .weather-head svg {
@@ -934,7 +908,6 @@
   }
 
   .weather-temp {
-    margin-top: 10px;
     font-size: 44px;
     font-weight: 300;
     line-height: 1.1;
@@ -952,27 +925,17 @@
   }
 
   .music-card {
-    padding: 18px 18px 20px;
-    border-radius: 10px;
     animation: hideToShow 1s ease-in-out;
   }
 
-  .music-title {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 14px;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--fontColor);
-  }
-
-  .music-title-bar {
-    width: 3px;
-    height: 16px;
-    border-radius: 2px;
-    background: #3b82f6;
-    margin-right: 8px;
+  /* 音乐卡内容与卡头对齐：左右各 16px（外壳由 .side-card 统一提供） */
+  .music-main,
+  .music-progress,
+  .music-controls,
+  .music-lyrics,
+  .music-playlist {
+    margin-left: 16px;
+    margin-right: 16px;
   }
 
   .music-main {
@@ -1293,24 +1256,12 @@
   }
 
   .calendar-card {
-    padding: 18px 18px 20px;
-    border-radius: 10px;
     animation: hideToShow 1s ease-in-out;
   }
 
-  .calendar-head {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-
+  /* 日历卡头即「月份切换行」：字号 / 字重 / 竖条 / 间距由 .side-card-head 统一 */
   .calendar-title {
-    font-size: 19px;
-    font-weight: 700;
     letter-spacing: 0.5px;
-    color: var(--fontColor);
   }
 
   .calendar-nav {
@@ -1344,14 +1295,51 @@
   }
 
   .calendar-day {
-    height: 32px;
+    /* 高度容纳「日号 + 小字标注」，用 border-box 保证今日描边不改变格子尺寸 */
+    box-sizing: border-box;
+    height: 38px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 1px;
     font-size: 14px;
     color: var(--fontColor);
     border-radius: 6px;
     user-select: none;
+  }
+
+  .calendar-day-num {
+    line-height: 17px;
+  }
+
+  .calendar-day-label {
+    max-width: 100%;
+    font-size: 9px;
+    line-height: 10px;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+
+  /* 节气用次要文字色，节日用暖红强调，深浅模式各自适配 */
+  .calendar-day-label.is-term {
+    color: var(--maxGreyFont);
+  }
+
+  .calendar-day-label.is-festival {
+    color: #d4553a;
+  }
+
+  html.dark .calendar-day-label.is-festival {
+    color: #f08a68;
+  }
+
+  @media (max-width: 768px) {
+    .calendar-day-label {
+      font-size: 8px;
+    }
   }
 
   .calendar-day.is-empty {
@@ -1366,21 +1354,27 @@
   .collection-btn {
     position: relative;
     margin-top: 12px;
-    background: var(--lightGreen);
+    background: var(--ui-accent-strong);
     cursor: pointer;
     width: 65%;
-    height: 35px;
-    border-radius: 1rem;
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-btn-radius);
+    box-shadow: var(--ui-btn-shadow);
     text-align: center;
-    line-height: 35px;
+    line-height: 20px;
     color: var(--white);
+    font-size: 14px;
+    font-weight: 500;
     overflow: hidden;
     z-index: 1;
     margin-bottom: 25px;
+    transition: var(--ui-btn-transition);
   }
 
   .collection-btn::before {
-    background: var(--gradualRed);
+    background: var(--ui-accent-strong-hover);
     position: absolute;
     top: 0;
     right: 0;
@@ -1391,7 +1385,7 @@
     transform-origin: 0;
     transition: transform 0.5s ease-out;
     transition-timing-function: cubic-bezier(0.45, 1.64, 0.47, 0.66);
-    border-radius: 1rem;
+    border-radius: var(--ui-btn-radius);
     z-index: -1;
   }
 
@@ -1399,11 +1393,12 @@
     transform: scaleX(1);
   }
 
-  .card-content2-title {
-    font-size: 18px;
-    margin-bottom: 20px;
-    color: var(--lightGreen);
-    font-weight: bold;
+  /* 按压瞬时缩放，与参考站 active:scale-95 一致 */
+  .collection-btn:active {
+    border-color: rgba(255, 255, 255, 0.55);
+    border-style: dashed;
+    box-shadow: var(--ui-btn-shadow-hover);
+    scale: 0.95;
   }
 
   .card-content2-icon {
@@ -1449,18 +1444,13 @@
     font-size: 12px;
   }
 
-  .post-sort {
-    border-radius: 1rem;
-    margin-bottom: 15px;
-    line-height: 30px;
-    transition: all 0.3s;
-  }
-
-  .post-sort:hover {
-    background: var(--themeBackground);
-    padding: 2px 15px;
+  /* 速览：底色仍按分类色（内容自带），只统一外壳的圆角 / 描边 / 阴影 / 内边距 */
+  .quick-card {
+    position: relative;
+    padding: 16px;
     cursor: pointer;
     color: var(--white);
+    animation: hideToShow 1s ease-in-out;
   }
 
   .sort-name {
@@ -1473,9 +1463,9 @@
   }
 
   .sort-name:after {
-    top: 74px;
+    top: 80px;
     width: 22px;
-    left: 26px;
+    left: 17px;
     height: 2px;
     background: var(--white);
     content: "";
@@ -1491,20 +1481,36 @@
   }
 
   .admire-btn {
-    padding: 13px 15px;
+    padding: 8px 14px;
+    min-height: 36px;
     background: var(--maxLightRed);
-    border-radius: 3rem;
+    border: 1px solid transparent;
+    border-radius: var(--ui-btn-radius);
+    box-shadow: var(--ui-btn-shadow);
     color: var(--white);
     width: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
     user-select: none;
     cursor: pointer;
     text-align: center;
     margin: 20px auto 0;
-    transition: all 1s;
+    transition: var(--ui-btn-transition);
   }
 
   .admire-btn:hover {
-    transform: scale(1.2);
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: var(--ui-btn-shadow-hover);
+  }
+
+  /* 按压瞬时缩放，与参考站 active:scale-95 一致 */
+  .admire-btn:active {
+    border-style: dashed;
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow: var(--ui-btn-shadow-hover);
+    scale: 0.95;
   }
 
   .admire-image {
@@ -1522,26 +1528,83 @@
     margin: 5px;
   }
 
-  .ais-SearchBox-input {
-    padding: 0 14px;
+  /* 搜索条：按参考图落地的胶囊形单行输入——浅蓝 1px 描边 + 近白底 + 右侧细线放大镜，
+     尺寸沿用改造前的原值（30px 高、左右 14px 内边距、20px 图标、默认正文字号），
+     放大镜与输入区同处一个胶囊内，输入框只负责剩余宽度 */
+  .search-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     height: 30px;
-    width: calc(100% - 50px);
-    outline: 0;
-    border: 2px solid var(--panelBorder);
-    border-right: 0;
-    border-radius: 40px 0 0 40px;
-    color: var(--maxGreyFont);
-    background: var(--cardBg);
+    padding: 0 14px;
+    border: 1px solid #e1eefc;
+    border-radius: 999px;
+    background: #fefeff;
+  }
+
+  /* 聚焦只换描边与底色，不加动效 */
+  .search-pill:focus-within {
+    border-color: #bcd9f8;
+    background: #ffffff;
   }
 
   .ais-SearchBox-submit {
-    height: 30px;
-    width: 50px;
-    border: 2px solid var(--panelBorder);
-    border-left: 0;
-    border-radius: 0 40px 40px 0;
-    background: var(--cardBg);
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #b2b2b3;
     cursor: pointer;
+  }
+
+  .ais-SearchBox-submit:hover {
+    color: #8a8f94;
+  }
+
+  .ais-SearchBox-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #2f343a;
+  }
+
+  .ais-SearchBox-input::placeholder {
+    color: #6b7280;
+  }
+
+  html.dark .search-pill {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  html.dark .search-pill:focus-within {
+    border-color: rgba(99, 179, 255, 0.55);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  html.dark .ais-SearchBox-submit {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  html.dark .ais-SearchBox-submit:hover {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  html.dark .ais-SearchBox-input {
+    color: #e6e6e6;
+  }
+
+  html.dark .ais-SearchBox-input::placeholder {
+    color: #9aa4af;
   }
 
   .hasVideo {

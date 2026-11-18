@@ -46,57 +46,70 @@
     data() {
       return {
         year: new Date().getFullYear(),
-        // 每项 isBoss 为 true 时仅站长可见
+        // roles：可访问该菜单的角色等级（1 主理人 2 管理员 3 作者 4 普通用户 5 AI 站长）
         groups: [{
           title: "概览",
           items: [{
             icon: "DataBoard",
             path: "/welcome",
-            title: "仪表盘"
+            title: "仪表盘",
+            roles: [1, 2, 3, 5]
           }, {
             icon: "Histogram",
             path: "/main",
             title: "数据统计",
-            isBoss: true
+            roles: [1]
           }]
         }, {
           title: "内容",
           items: [{
             icon: "Tickets",
             path: "/postList",
-            title: "文章管理"
+            title: "文章管理",
+            roles: [1, 3, 5]
+          }, {
+            icon: "Document",
+            path: "/changelogList",
+            title: "更新日志",
+            roles: [1]
           }, {
             icon: "Collection",
             path: "/sortList",
             title: "分类管理",
-            isBoss: true
+            roles: [1, 5]
           }, {
             icon: "Paperclip",
             path: "/resourceList",
             title: "资源管理",
-            isBoss: true
+            roles: [1, 2, 5]
           }]
         }, {
           title: "互动",
           items: [{
             icon: "ChatDotRound",
             path: "/commentList",
-            title: "评论管理"
+            title: "评论管理",
+            roles: [1, 2, 5]
           }, {
             icon: "Message",
             path: "/treeHoleList",
             title: "留言管理",
-            isBoss: true
+            roles: [1, 2, 5]
+          }, {
+            icon: "ChatLineRound",
+            path: "/barrageList",
+            title: "弹幕管理",
+            roles: [1, 2, 5]
           }, {
             icon: "Connection",
             path: "/friendList",
             title: "友链管理",
-            isBoss: true
+            roles: [1, 2]
           }, {
             icon: "CreditCard",
             path: "/sponsorList",
             title: "赞助记录",
-            isBoss: true
+            roles: [1, 2]
           }]
         }, {
           title: "娱乐",
@@ -104,17 +117,17 @@
             icon: "VideoCamera",
             path: "/animeList",
             title: "追番管理",
-            isBoss: true
+            roles: [1, 2, 5]
           }, {
             icon: "Headset",
             path: "/musicList",
             title: "音乐管理",
-            isBoss: true
+            roles: [1, 2, 5]
           }, {
             icon: "Picture",
             path: "/photoList",
             title: "相片管理",
-            isBoss: true
+            roles: [1, 2, 5]
           }]
         }, {
           title: "系统",
@@ -122,30 +135,54 @@
             icon: "User",
             path: "/userList",
             title: "用户管理",
-            isBoss: true
+            roles: [1]
           }, {
             icon: "Setting",
             path: "/webEdit",
             title: "网站设置",
-            isBoss: true
+            roles: [1, 5]
           }, {
             icon: "Message",
             path: "/emailConfig",
             title: "邮箱配置",
-            isBoss: true
+            roles: [1]
           }, {
             icon: "Operation",
             path: "/configList",
             title: "配置管理",
-            isBoss: true
+            roles: [1]
+          }, {
+            icon: "Menu",
+            path: "/navManage",
+            title: "导航管理",
+            roles: [1]
           }]
         }]
       }
     },
 
     computed: {
-      isBoss() {
-        return this.$store.state.currentAdmin.isBoss;
+      // 当前后台登录者的角色等级：站长固定 1 级，其余按 userType 归一化
+      roleLevel() {
+        const admin = this.$store.state.currentAdmin || {};
+        if (admin.isBoss) {
+          return 1;
+        }
+        // 与后端 resolveRole 兜底一致：站长固定 id=1 且 user_type=1 时按主理人处理，
+        // 避免线上 boss-username 与用户名不一致时后台看不到「网站设置」
+        const bossId = this.$constant && Number(this.$constant.userId);
+        if (Number(admin.id) === bossId && Number(admin.userType) === 1) {
+          return 1;
+        }
+        const type = Number(admin.userType);
+        if (type === 5) {
+          // AI 站长：独立等级，不走 1-4 的兼容归一化
+          return 5;
+        }
+        if (type === 1) {
+          return 2; // 兼容未迁移的旧管理员数据
+        }
+        return type >= 2 && type <= 4 ? type : 4;
       },
 
       siteName() {
@@ -157,7 +194,7 @@
         return this.groups
           .map(group => ({
             title: group.title,
-            items: group.items.filter(item => this.isBoss || !item.isBoss)
+            items: group.items.filter(item => item.roles.includes(this.roleLevel))
           }))
           .filter(group => group.items.length > 0);
       }

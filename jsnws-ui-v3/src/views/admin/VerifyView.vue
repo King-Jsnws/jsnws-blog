@@ -27,6 +27,7 @@
 
 <script>
   import ProButton from "../../components/common/ProButton.vue";
+  import { allowAdminEntry } from "../../utils/adminEntry";
 
   export default {
     name: "VerifyView",
@@ -63,9 +64,13 @@
             if (!this.$common.isEmpty(res.data)) {
               localStorage.setItem("adminToken", res.data.accessToken);
               this.$store.commit("loadCurrentAdmin", res.data);
+              // 登录成功即写入后台进入标记：维护状态下也能从登录页直接进后台恢复站点
+              allowAdminEntry();
               this.account = "";
               this.password = "";
-              this.$router.push({path: this.redirect});
+              // 只接受站内路径，直接访问 /verify 或传入外部地址时后台仪表盘
+              const target = typeof this.redirect === "string" && this.redirect.startsWith("/") ? this.redirect : "/welcome";
+              this.$router.push(target);
             }
           })
           .catch((error) => {
@@ -85,7 +90,7 @@
     height: 100vh;
     /* 背景图变量缺失时也保留主题底色；图片加载失败时颜色仍在 */
     background-color: var(--background);
-    background-image: var(--backgroundPicture, url('/images/login-bg.webp'));
+    background-image: var(--backgroundPicture, url('/images/login-bg.4f8a16.webp'));
     background-position: center center;
     background-size: cover;
     background-repeat: repeat;

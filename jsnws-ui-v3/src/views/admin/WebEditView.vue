@@ -17,6 +17,14 @@
             <el-input v-model="webInfo.webTitle" placeholder="请输入网站标题"></el-input>
           </el-form-item>
 
+          <el-form-item label="标签页标题" prop="tabTitle">
+            <div class="field-stack">
+              <el-input v-model="webInfo.tabTitle" maxlength="50" show-word-limit
+                        placeholder="留空则使用网站名称"></el-input>
+              <div class="switch-tip">浏览器标签页上显示的文字，与网站名称分开配置；留空时自动回退为网站名称。</div>
+            </div>
+          </el-form-item>
+
           <el-form-item label="网站状态" prop="status">
             <div class="switch-row">
               <el-switch @click="changeWebStatus(webInfo)" v-model="webInfo.status"></el-switch>
@@ -35,6 +43,15 @@
             <div class="switch-row">
               <el-switch v-model="titleEnabled" @change="changeTitleEnabled"></el-switch>
               <span class="switch-tip">{{ titleEnabled ? "显示首屏标题" : "已隐藏" }}</span>
+            </div>
+          </el-form-item>
+
+          <el-form-item label="头像呼吸光环">
+            <div class="switch-row">
+              <el-switch v-model="avatarGlowEnabled" @change="changeAvatarGlowEnabled"></el-switch>
+              <span class="switch-tip">
+                {{ avatarGlowEnabled ? "已开启：头像呼吸光环 + 悬停旋转放大" : "已关闭：头像保持静态" }}
+              </span>
             </div>
           </el-form-item>
         </div>
@@ -72,16 +89,39 @@
                            :maxSize="2"
                            :maxNumber="1"></UploadPicture>
           </el-form-item>
+
+          <!-- 站点 LOGO：顶栏独立展示，与头像分开存储；留空时顶栏回退文字站名 -->
+          <el-form-item label="站点 LOGO" prop="logo">
+            <div class="media-row">
+              <el-input v-model="webInfo.logo" placeholder="顶栏 LOGO 图片地址，留空则显示文字站名"></el-input>
+              <el-image lazy class="media-thumb"
+                        :preview-src-list="[webInfo.logo]"
+                        :src="webInfo.logo"
+                        fit="contain"></el-image>
+            </div>
+            <UploadPicture :isAdmin="true" :prefix="'webLogo'" class="media-upload" @addPicture="addLogo"
+                           :maxSize="2"
+                           :maxNumber="1"></UploadPicture>
+          </el-form-item>
         </div>
 
         <h3 class="form-subtitle">联系方式</h3>
         <div class="form-grid">
+          <!-- 微信联系方式：只作用于侧栏社交入口弹出的二维码，与打赏收款码互不影响 -->
+          <el-form-item label="微信二维码" prop="wechat">
+            <el-input v-model="webInfo.wechat" placeholder="微信二维码图片地址，留空则不显示"></el-input>
+          </el-form-item>
+
           <el-form-item label="QQ" prop="qq">
             <el-input v-model="webInfo.qq" placeholder="QQ 号、QQ 群链接或其他链接，留空则不显示"></el-input>
           </el-form-item>
 
           <el-form-item label="GitHub" prop="github">
             <el-input v-model="webInfo.github" placeholder="https://github.com/xxx，留空则不显示"></el-input>
+          </el-form-item>
+
+          <el-form-item label="Gitee" prop="gitee">
+            <el-input v-model="webInfo.gitee" placeholder="https://gitee.com/xxx，留空则不显示"></el-input>
           </el-form-item>
 
           <el-form-item label="邮箱" prop="email">
@@ -99,41 +139,6 @@
       </div>
     </section>
 
-    <!-- 底部信息 -->
-    <section class="settings-card">
-      <div class="settings-card-head">
-        <h2>底部信息</h2>
-        <p>管理前台页脚展示的站点描述与备案信息。</p>
-      </div>
-
-      <el-form :model="webInfo" label-position="top" class="settings-form">
-        <el-form-item label="页脚文字">
-          <el-input v-model="webInfo.footer" type="textarea" :rows="3" maxlength="200" show-word-limit
-                    placeholder="例如：一个热爱技术与生活的个人博客"></el-input>
-        </el-form-item>
-        <div class="form-grid">
-          <el-form-item label="备案号">
-            <el-input v-model="beian" maxlength="60" placeholder="例如：桂ICP备2026000000号，留空则不显示"></el-input>
-          </el-form-item>
-          <el-form-item label="备案链接">
-            <el-input v-model="beianUrl" maxlength="200" placeholder="https://beian.miit.gov.cn/"></el-input>
-          </el-form-item>
-        </div>
-        <div class="form-grid">
-          <el-form-item label="公安备案号">
-            <el-input v-model="policeBeian" maxlength="60" placeholder="例如：桂公网安备 45010302000000号，留空则不显示"></el-input>
-          </el-form-item>
-          <el-form-item label="公安备案链接">
-            <el-input v-model="policeBeianUrl" maxlength="200" placeholder="https://beian.mps.gov.cn/"></el-input>
-          </el-form-item>
-        </div>
-      </el-form>
-
-      <div class="settings-actions">
-        <el-button type="primary" @click="saveFooterInfo()">保存底部信息</el-button>
-      </div>
-    </section>
-
     <!-- 打赏 -->
     <section class="settings-card">
       <div class="settings-card-head">
@@ -145,10 +150,10 @@
         <div class="form-grid">
           <el-form-item label="微信收款码">
             <div class="media-row">
-              <el-input v-model="webInfo.wechat" placeholder="微信收款码图片地址，留空则不显示"></el-input>
-              <el-image v-if="webInfo.wechat" lazy class="media-thumb"
-                        :preview-src-list="[webInfo.wechat]"
-                        :src="webInfo.wechat"
+              <el-input v-model="webInfo.wechatReward" placeholder="微信收款码图片地址，留空则不显示"></el-input>
+              <el-image v-if="webInfo.wechatReward" lazy class="media-thumb"
+                        :preview-src-list="[webInfo.wechatReward]"
+                        :src="webInfo.wechatReward"
                         fit="cover"></el-image>
             </div>
           </el-form-item>
@@ -189,7 +194,6 @@
                   v-if="inputNoticeVisible"
                   v-model="inputNoticeValue"
                   ref="saveNoticeInput"
-                  size="small"
                   @keyup.enter="handleInputNoticeConfirm"
                   @blur="handleInputNoticeConfirm">
         </el-input>
@@ -197,36 +201,6 @@
       </div>
       <div class="settings-actions">
         <el-button type="primary" @click="saveNotice()">保存公告</el-button>
-      </div>
-    </section>
-
-    <!-- 随机名称 -->
-    <section class="settings-card">
-      <div class="settings-card-head">
-        <h2>随机名称</h2>
-        <p>用于站点随机展示的名称列表。</p>
-      </div>
-      <div class="tag-editor">
-        <el-tag :key="i"
-                v-for="(name, i) in randomName"
-                class="item-tag"
-                closable
-                :disable-transitions="false"
-                @close="handleClose(randomName, name)">
-          {{name}}
-        </el-tag>
-        <el-input class="tag-input"
-                  v-if="inputRandomNameVisible"
-                  v-model="inputRandomNameValue"
-                  ref="saveRandomNameInput"
-                  size="small"
-                  @keyup.enter="handleInputRandomNameConfirm"
-                  @blur="handleInputRandomNameConfirm">
-        </el-input>
-        <el-button v-else class="tag-add" size="small" @click="showRandomNameInput">+ 随机名称</el-button>
-      </div>
-      <div class="settings-actions">
-        <el-button type="primary" @click="saveRandomName()">保存随机名称</el-button>
       </div>
     </section>
 
@@ -251,7 +225,6 @@
                   v-if="inputRandomAvatarVisible"
                   v-model="inputRandomAvatarValue"
                   ref="saveRandomAvatarInput"
-                  size="small"
                   @keyup.enter="handleInputRandomAvatarConfirm"
                   @blur="handleInputRandomAvatarConfirm">
         </el-input>
@@ -263,6 +236,42 @@
                      :maxNumber="5"></UploadPicture>
       <div class="settings-actions">
         <el-button type="primary" @click="saveRandomAvatar()">保存随机头像</el-button>
+      </div>
+    </section>
+
+    <!-- 网站灰度 -->
+    <section class="settings-card">
+      <div class="settings-card-head">
+        <h2>网站灰度</h2>
+        <p>到达设定日期后首页自动转为灰度，用于哀悼日等场景；其他页面和后台不受影响。</p>
+      </div>
+      <div class="form-grid">
+        <el-form-item label="灰度开关">
+          <div class="switch-row">
+            <el-switch v-model="grayEnabled"></el-switch>
+            <span class="switch-tip">{{ grayEnabled ? "已启用灰度" : "已关闭" }}</span>
+          </div>
+        </el-form-item>
+        <el-form-item label="灰度日期">
+          <div class="gray-date-editor">
+            <el-date-picker v-model="newGrayDate"
+                            type="date"
+                            format="YYYY-MM-DD"
+                            value-format="YYYY-MM-DD"
+                            placeholder="选择日期后点添加"></el-date-picker>
+            <el-button @click="addGrayDate()">添加日期</el-button>
+          </div>
+        </el-form-item>
+      </div>
+      <div v-if="grayDates.length" class="gray-date-list">
+        <el-tag v-for="(date, index) in grayDates"
+                :key="date"
+                closable
+                @close="removeGrayDate(index)">{{ date }}</el-tag>
+      </div>
+      <div class="switch-tip">日期只记录「月-日」，每年自动生效：当天 0 点首页变灰，次日恢复；未添加日期时开启开关会立即变灰。</div>
+      <div class="settings-actions">
+        <el-button type="primary" @click="saveGrayMode()">保存灰度设置</el-button>
       </div>
     </section>
 
@@ -287,7 +296,6 @@
                   v-if="inputRandomCoverVisible"
                   v-model="inputRandomCoverValue"
                   ref="saveRandomCoverInput"
-                  size="small"
                   @keyup.enter="handleInputRandomCoverConfirm"
                   @blur="handleInputRandomCoverConfirm">
         </el-input>
@@ -299,6 +307,41 @@
                      :maxNumber="5"></UploadPicture>
       <div class="settings-actions">
         <el-button type="primary" @click="saveRandomCover()">保存随机封面</el-button>
+      </div>
+    </section>
+
+    <!-- 底部信息 -->
+    <section class="settings-card">
+      <div class="settings-card-head">
+        <h2>底部信息</h2>
+        <p>管理前台页脚展示的站点描述与备案信息。</p>
+      </div>
+
+      <el-form :model="webInfo" label-position="top" class="settings-form">
+        <el-form-item label="页脚文字">
+          <el-input v-model="webInfo.footer" type="textarea" :rows="3" maxlength="200" show-word-limit
+                    placeholder="例如：一个热爱技术与生活的个人博客"></el-input>
+        </el-form-item>
+        <div class="form-grid">
+          <el-form-item label="备案号">
+            <el-input v-model="beian" maxlength="60" placeholder="例如：桂ICP备2026000000号，留空则不显示"></el-input>
+          </el-form-item>
+          <el-form-item label="备案链接">
+            <el-input v-model="beianUrl" maxlength="200" placeholder="https://beian.miit.gov.cn/"></el-input>
+          </el-form-item>
+        </div>
+        <div class="form-grid">
+          <el-form-item label="公安备案号">
+            <el-input v-model="policeBeian" maxlength="60" placeholder="例如：桂公网安备 45010302000000号，留空则不显示"></el-input>
+          </el-form-item>
+          <el-form-item label="公安备案链接">
+            <el-input v-model="policeBeianUrl" maxlength="200" placeholder="https://beian.mps.gov.cn/"></el-input>
+          </el-form-item>
+        </div>
+      </el-form>
+
+      <div class="settings-actions">
+        <el-button type="primary" @click="saveFooterInfo()">保存底部信息</el-button>
       </div>
     </section>
 
@@ -322,8 +365,6 @@
         types: ['', 'success', 'info', 'danger', 'warning'],
         inputNoticeVisible: false,
         inputNoticeValue: "",
-        inputRandomNameVisible: false,
-        inputRandomNameValue: "",
         inputRandomAvatarVisible: false,
         inputRandomAvatarValue: "",
         inputRandomCoverVisible: false,
@@ -332,14 +373,18 @@
           id: null,
           webName: "",
           webTitle: "",
+          tabTitle: "",
           description: "",
           footer: "",
           backgroundImage: "",
           avatar: "",
+          logo: "",
           wechat: "",
+          wechatReward: "",
           alipay: "",
           qq: "",
           github: "",
+          gitee: "",
           email: "",
           bilibili: "",
           status: false
@@ -352,13 +397,18 @@
         printerConfigId: null,
         titleEnabled: true,
         titleConfigId: null,
+        avatarGlowEnabled: false,
+        avatarGlowConfigId: null,
+        grayEnabled: false,
+        grayDates: [],
+        newGrayDate: "",
+        grayConfigId: null,
         policeBeian: "",
         policeBeianUrl: "https://beian.mps.gov.cn/",
         policeBeianConfigId: null,
         policeBeianUrlConfigId: null,
         notices: [],
         randomAvatar: [],
-        randomName: [],
         randomCover: [],
         rules: {
           webName: [
@@ -367,6 +417,9 @@
           ],
           webTitle: [
             {required: true, message: '请输入网站标题', trigger: 'blur'}
+          ],
+          tabTitle: [
+            {max: 50, message: '标签页标题不能超过 50 个字符', trigger: 'change'}
           ],
           backgroundImage: [
             {required: true, message: '请输入背景', trigger: 'change'}
@@ -400,6 +453,9 @@
       },
       addAvatar(res) {
         this.webInfo.avatar = res;
+      },
+      addLogo(res) {
+        this.webInfo.logo = res;
       },
       addRandomAvatar(res) {
         this.randomAvatar.push(res);
@@ -474,27 +530,103 @@
             });
           });
       },
-      getWebInfo() {
-        this.$http.get(this.$constant.baseURL + "/admin/webInfo/getAdminWebInfo", {}, true)
+      changeAvatarGlowEnabled(val) {
+        this.$http.post(this.$constant.baseURL + "/sysConfig/saveOrUpdateConfig", {
+          id: this.avatarGlowConfigId,
+          configName: "头像呼吸光环",
+          configKey: "avatarGlowEnabled",
+          configValue: val ? "1" : "0",
+          configType: "2"
+        }, true)
+          .then(() => {
+            this.getSysConfig();
+            this.refreshStoreSysConfig();
+            this.$message({
+              message: "保存成功！",
+              type: "success"
+            });
+          })
+          .catch((error) => {
+            this.avatarGlowEnabled = !val;
+            this.$message({
+              message: error.message,
+              type: "error"
+            });
+          });
+      },
+      addGrayDate() {
+        if (!this.newGrayDate) {
+          this.$message({
+            message: "请先选择日期",
+            type: "warning"
+          });
+          return;
+        }
+        // 只保留月-日，配置的日期每年都会生效
+        const monthDay = String(this.newGrayDate).slice(5);
+        if (this.grayDates.indexOf(monthDay) > -1) {
+          this.$message({
+            message: "该日期已添加",
+            type: "info"
+          });
+          return;
+        }
+        this.grayDates.push(monthDay);
+        this.grayDates.sort();
+        this.newGrayDate = "";
+      },
+      removeGrayDate(index) {
+        this.grayDates.splice(index, 1);
+      },
+      saveGrayMode() {
+        this.$http.post(this.$constant.baseURL + "/sysConfig/saveOrUpdateConfig", {
+          id: this.grayConfigId,
+          configName: "网站灰度",
+          configKey: "grayMode",
+          configValue: JSON.stringify({
+            enabled: this.grayEnabled,
+            dates: this.grayDates
+          }),
+          configType: "2"
+        }, true)
+          .then(() => {
+            this.getSysConfig();
+            this.refreshStoreSysConfig();
+            this.$message({
+              message: "保存成功！",
+              type: "success"
+            });
+          })
+          .catch((error) => {
+            this.$message({
+              message: error.message,
+              type: "error"
+            });
+          });
+      },
+      getWebInfo() {        this.$http.get(this.$constant.baseURL + "/admin/webInfo/getAdminWebInfo", {}, true)
           .then((res) => {
             if (!this.$common.isEmpty(res.data)) {
               this.webInfo.id = res.data.id;
               this.webInfo.webName = res.data.webName;
               this.webInfo.webTitle = res.data.webTitle;
+              this.webInfo.tabTitle = res.data.tabTitle || "";
               this.webInfo.description = res.data.description;
               this.webInfo.footer = res.data.footer;
               this.webInfo.backgroundImage = res.data.backgroundImage;
               this.webInfo.avatar = res.data.avatar;
+              this.webInfo.logo = res.data.logo || "";
               this.webInfo.wechat = res.data.wechat;
+              this.webInfo.wechatReward = res.data.wechatReward;
               this.webInfo.alipay = res.data.alipay;
               this.webInfo.qq = res.data.qq;
               this.webInfo.github = res.data.github;
+              this.webInfo.gitee = res.data.gitee;
               this.webInfo.email = res.data.email;
               this.webInfo.bilibili = res.data.bilibili;
               this.webInfo.status = res.data.status;
               this.notices = JSON.parse(res.data.notices);
               this.randomAvatar = JSON.parse(res.data.randomAvatar);
-              this.randomName = JSON.parse(res.data.randomName);
               this.randomCover = JSON.parse(res.data.randomCover);
             }
           })
@@ -528,6 +660,30 @@
             const title = list.find((item) => item.configKey === "titleEnabled");
             this.titleConfigId = title ? title.id : null;
             this.titleEnabled = !title || title.configValue !== "0";
+            // 头像呼吸光环：默认关闭，仅显式配置为 1/true 时开启
+            const avatarGlow = list.find((item) => item.configKey === "avatarGlowEnabled");
+            this.avatarGlowConfigId = avatarGlow ? avatarGlow.id : null;
+            this.avatarGlowEnabled = !!avatarGlow
+              && (avatarGlow.configValue === "1" || avatarGlow.configValue === "true");
+            const gray = list.find((item) => item.configKey === "grayMode");
+            this.grayConfigId = gray ? gray.id : null;
+            let grayConfig = null;
+            if (gray && gray.configValue) {
+              try {
+                grayConfig = JSON.parse(gray.configValue);
+              } catch (e) {
+                grayConfig = null;
+              }
+            }
+            this.grayEnabled = !!(grayConfig && grayConfig.enabled);
+            if (grayConfig && Array.isArray(grayConfig.dates)) {
+              this.grayDates = grayConfig.dates.map((date) => String(date).slice(-5)).sort();
+            } else if (grayConfig && grayConfig.startTime) {
+              // 兼容旧版单日期配置
+              this.grayDates = [String(grayConfig.startTime).slice(-5)];
+            } else {
+              this.grayDates = [];
+            }
           })
           .catch((error) => {
             this.$message({
@@ -642,26 +798,6 @@
         }
         this.updateWebInfo(param);
       },
-      handleInputRandomNameConfirm() {
-        if (this.inputRandomNameValue) {
-          this.randomName.push(this.inputRandomNameValue);
-        }
-        this.inputRandomNameVisible = false;
-        this.inputRandomNameValue = '';
-      },
-      showRandomNameInput() {
-        this.inputRandomNameVisible = true;
-        this.$nextTick(() => {
-          this.$refs.saveRandomNameInput.focus();
-        });
-      },
-      saveRandomName() {
-        let param = {
-          id: this.webInfo.id,
-          randomName: JSON.stringify(this.randomName)
-        }
-        this.updateWebInfo(param);
-      },
       handleInputRandomAvatarConfirm() {
         if (this.inputRandomAvatarValue) {
           this.randomAvatar.push(this.inputRandomAvatarValue);
@@ -705,7 +841,7 @@
       saveReward() {
         this.updateWebInfo({
           id: this.webInfo.id,
-          wechat: this.webInfo.wechat,
+          wechatReward: this.webInfo.wechatReward,
           alipay: this.webInfo.alipay
         });
       },
@@ -825,6 +961,13 @@
     color: var(--admin-text-secondary);
   }
 
+  .field-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+
   .media-row {
     display: flex;
     align-items: center;
@@ -920,7 +1063,9 @@
   }
 
   .tag-input {
-    width: 180px;
+    flex: 1 0 100%;
+    width: 100%;
+    min-width: 0;
   }
 
   .tag-add {
@@ -996,6 +1141,25 @@
     .media-list {
       grid-template-columns: minmax(0, 1fr);
     }
+  }
+
+  .gray-date-editor {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .gray-date-editor .el-date-editor {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .gray-date-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 12px;
   }
 
 </style>

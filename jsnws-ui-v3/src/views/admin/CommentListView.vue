@@ -7,7 +7,6 @@
     <div class="handle-box">
       <el-select v-if="isBoss" v-model="pagination.commentType" placeholder="评论来源类型" style="margin-right: 10px">
         <el-option key="1" label="文章评论" value="article"></el-option>
-        <el-option key="2" label="树洞留言" value="message"></el-option>
         <el-option key="3" label="家庭祝福" value="love"></el-option>
       </el-select>
       <el-input class="my-input" type="number" style="width: 140px;margin-right: 10px" v-model="pagination.source"
@@ -23,6 +22,11 @@
       <el-table-column prop="likeCount" label="点赞数" align="center"></el-table-column>
       <el-table-column prop="commentContent" label="评论内容" align="center"></el-table-column>
       <el-table-column prop="commentInfo" label="评论额外信息" align="center"></el-table-column>
+      <el-table-column label="IP地址" width="140" align="center">
+        <template #default="scope">
+          <span>{{ scope.row.ipAddress || '—' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="createTime" label="创建时间" align="center"></el-table-column>
       <el-table-column label="操作" width="180" align="center">
         <template #default="scope">
@@ -48,13 +52,15 @@
   export default {
     data() {
       return {
-        isBoss: this.$store.state.currentAdmin.isBoss,
+        // AI 站长沿用站长的全量视图
+        isBoss: this.$store.state.currentAdmin.isBoss ||
+          Number(this.$store.state.currentAdmin.userType) === 5,
         pagination: {
           current: 1,
           size: 10,
           total: 0,
           source: null,
-          commentType: ""
+          commentType: "article"
         },
         comments: []
       }
@@ -78,7 +84,7 @@
           size: 10,
           total: 0,
           source: null,
-          commentType: ""
+          commentType: "article"
         }
         this.getComments();
       },

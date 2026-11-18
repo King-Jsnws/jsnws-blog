@@ -1,10 +1,15 @@
 <template>
   <div>
+    <!-- 两句诗：与关于我页共用同一组件，背景图取图规则一致 -->
+    <div class="my-animation-slide-top">
+      <TwoPoem :isHitokoto="false"></TwoPoem>
+    </div>
+
     <div class="favorite-container">
       <!-- 内容 -->
       <div class="favorite-content">
         <!-- 友链 -->
-        <div class="my-animation-hideToShow">
+        <div class="my-animation-slide-bottom">
           <friend></friend>
         </div>
       </div>
@@ -19,21 +24,23 @@
 
 <script>
   import Friend from "../components/common/Friend.vue";
+  import TwoPoem from "../components/common/TwoPoem.vue";
 
   import MyFooter from "../components/common/MyFooter.vue";
 
   export default {
     components: {
       MyFooter,
-      Friend
+      Friend,
+      TwoPoem
     }
   }
 </script>
 
 <style scoped>
   .favorite-container {
-    /* 顶部留白与归档/随笔/图谱一致：内容区从固定导航栏下方 60px 开始 */
-    padding: 80px 25px 25px;
+    /* 只承担整页底色，宽度与缩进统一交给 .favorite-content，避免与左右留白叠加 */
+    padding: 0;
     background: var(--favoriteBg);
   }
 
@@ -48,7 +55,7 @@
     position: relative;
     width: 250px;
     height: 120px;
-    border-radius: 20px;
+    border-radius: var(--ui-card-radius);
     animation: hideToShow 1s ease-in-out;
     cursor: pointer;
     overflow: hidden;
@@ -82,8 +89,11 @@
   }
 
   .favorite-content {
+    /* 与全站内容页同一套容器规则：92vw / 112rem 居中，左右 16px，底部统一留白 */
+    width: var(--ui-page-inline);
+    max-width: var(--ui-page-width);
     margin: 0 auto;
-    max-width: 1200px;
+    padding: var(--ui-page-top-banner) var(--ui-page-gutter) var(--ui-page-bottom);
   }
 
   @media screen and (max-width: 906px) {
@@ -93,9 +103,10 @@
   }
 
   @media screen and (max-width: 600px) {
-    .favorite-container {
-      /* 与随笔页移动端留白一致 */
-      padding: 40px 25px 25px;
+    .favorite-content {
+      /* 窄屏沿用同一套宽度与内边距变量，不再单独切换到百分比 */
+      width: var(--ui-page-inline);
+      padding: var(--ui-page-top-banner) var(--ui-page-gutter) var(--ui-page-bottom);
     }
   }
 </style>

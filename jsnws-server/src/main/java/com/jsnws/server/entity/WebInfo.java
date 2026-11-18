@@ -14,6 +14,8 @@ public class WebInfo {
     private Long id;
     private String webName;
     private String webTitle;
+    /** 浏览器标签页标题，与站点名称独立配置；为空时前端回退站点名称 */
+    private String tabTitle;
     private String description;
     private String notices;
     private String randomCover;
@@ -22,11 +24,16 @@ public class WebInfo {
     private String footer;
     private String backgroundImage;
     private String avatar;
+    /** 站点 LOGO：仅用于顶栏图片；与站点头像（avatar）独立存储，为空时顶栏回退文字站名 */
+    private String logo;
     private String defaultStoreType;
     private String wechat;
+    /** 打赏微信收款码；wechat 专用于联系方式（社交入口）的微信二维码 */
+    private String wechatReward;
     private String alipay;
     private String qq;
     private String github;
+    private String gitee;
     private String email;
     private String bilibili;
     private Boolean status;
@@ -38,6 +45,8 @@ public class WebInfo {
     public void setWebName(String webName) { this.webName = webName; }
     public String getWebTitle() { return webTitle; }
     public void setWebTitle(String webTitle) { this.webTitle = webTitle; }
+    public String getTabTitle() { return tabTitle; }
+    public void setTabTitle(String tabTitle) { this.tabTitle = tabTitle; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public String getNotices() { return notices; }
@@ -54,16 +63,22 @@ public class WebInfo {
     public void setBackgroundImage(String backgroundImage) { this.backgroundImage = backgroundImage; }
     public String getAvatar() { return avatar; }
     public void setAvatar(String avatar) { this.avatar = avatar; }
+    public String getLogo() { return logo; }
+    public void setLogo(String logo) { this.logo = logo; }
     public String getDefaultStoreType() { return defaultStoreType; }
     public void setDefaultStoreType(String defaultStoreType) { this.defaultStoreType = defaultStoreType; }
     public String getWechat() { return wechat; }
     public void setWechat(String wechat) { this.wechat = wechat; }
+    public String getWechatReward() { return wechatReward; }
+    public void setWechatReward(String wechatReward) { this.wechatReward = wechatReward; }
     public String getAlipay() { return alipay; }
     public void setAlipay(String alipay) { this.alipay = alipay; }
     public String getQq() { return qq; }
     public void setQq(String qq) { this.qq = qq; }
     public String getGithub() { return github; }
     public void setGithub(String github) { this.github = github; }
+    public String getGitee() { return gitee; }
+    public void setGitee(String gitee) { this.gitee = gitee; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getBilibili() { return bilibili; }

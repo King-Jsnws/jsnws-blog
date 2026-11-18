@@ -203,7 +203,16 @@
       },
 
       isBoss() {
-        return !!this.admin.isBoss;
+        return !!this.admin.isBoss || Number(this.admin.userType) === 5;
+      },
+
+      // 访问统计明细仅对主理人/管理员开放；作者只看公开的汇总计数，避免 300 被踢下线
+      canViewVisitDetail() {
+        if (this.admin.isBoss) {
+          return true;
+        }
+        const type = this.admin.userType;
+        return type === 1 || type === 2;
       },
 
       greeting() {
@@ -364,12 +373,13 @@
         const base = this.$constant.baseURL;
         const articleUrl = this.isBoss ? "/admin/article/boss/list" : "/admin/article/user/list";
         const commentUrl = this.isBoss ? "/admin/comment/boss/list" : "/admin/comment/user/list";
+        const visitUrl = this.canViewVisitDetail ? "/webInfo/getHistoryInfo" : "/webInfo/getVisitSummary";
 
         const results = await Promise.allSettled([
           this.$http.post(base + articleUrl, {current: 1, size: 5}, true),
           this.$http.post(base + commentUrl, {current: 1, size: 6}, true),
           this.$http.get(base + "/webInfo/listSortAndLabel", {}, true),
-          this.$http.get(base + "/webInfo/getHistoryInfo", {}, true)
+          this.$http.get(base + visitUrl, {}, true)
         ]);
 
         const articleRes = results[0];

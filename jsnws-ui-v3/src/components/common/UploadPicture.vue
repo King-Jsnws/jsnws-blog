@@ -41,7 +41,7 @@
 
     <div class="upload-submit">
       <el-button v-if="isAdmin" type="primary" plain size="small" @click="submitUpload">开始上传</el-button>
-      <el-button v-else type="success" style="font-size: 12px" @click="submitUpload">上传</el-button>
+      <el-button v-else class="ui-btn ui-btn--sm ui-btn--primary" @click="submitUpload">上传</el-button>
     </div>
   </div>
 </template>
@@ -78,6 +78,10 @@
       maxNumber: {
         type: Number,
         default: 5
+      },
+      registerResource: {
+        type: Boolean,
+        default: false
       }
     },
 
@@ -117,6 +121,9 @@
           fd.append("relativePath", key);
           fd.append("type", this.prefix);
           fd.append("storeType", this.storeType);
+          if (this.registerResource) {
+            fd.append("register", "true");
+          }
 
           return this.$http.upload(this.$constant.baseURL + "/resource/upload", fd, this.isAdmin, options);
         } else if (this.storeType === "qiniu") {

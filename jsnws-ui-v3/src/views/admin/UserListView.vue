@@ -7,9 +7,11 @@
       </div>
       <div class="handle-box">
         <el-select v-model="pagination.userType" placeholder="用户类型" class="handle-select mrb10">
-          <el-option key="1" label="站长" :value="0"></el-option>
-          <el-option key="2" label="管理员" :value="1"></el-option>
-          <el-option key="3" label="普通用户" :value="2"></el-option>
+          <el-option key="1" label="本站主理人" :value="1"></el-option>
+          <el-option key="2" label="管理员" :value="2"></el-option>
+          <el-option key="3" label="作者" :value="3"></el-option>
+          <el-option key="5" label="AI 站长" :value="5"></el-option>
+          <el-option key="4" label="普通用户" :value="4"></el-option>
         </el-select>
         <el-select v-model="pagination.userStatus" placeholder="用户状态" class="handle-select mrb10">
           <el-option key="1" label="启用" :value="true"></el-option>
@@ -18,6 +20,7 @@
         <el-input v-model="pagination.searchKey" placeholder="账号/昵称/手机号/邮箱" class="handle-input mrb10"></el-input>
         <el-button type="primary" icon="Search" @click="searchUser()">搜索</el-button>
         <el-button type="danger" @click="clearSearch()">清除参数</el-button>
+        <el-button v-if="isBoss" type="success" icon="Plus" @click="openCreate()">新增用户</el-button>
       </div>
       <div class="table-scroll">
         <el-table :data="users" border class="table" header-cell-class-name="table-header">
@@ -25,13 +28,17 @@
           <el-table-column prop="username" label="账号" align="center">
             <template #default="scope">
               <span v-if="isAdmin" class="username-cell" title="点击修改账号" @click="editUsername(scope.row)">
-                <span>{{ scope.row.username }}</span>
+                <span :class="{ 'user-ai-name': scope.row.userType === 5 }">{{ scope.row.username }}</span>
                 <el-icon class="username-edit"><Edit/></el-icon>
               </span>
-              <span v-else>{{ scope.row.username }}</span>
+              <span v-else :class="{ 'user-ai-name': scope.row.userType === 5 }">{{ scope.row.username }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="nickname" label="昵称" align="center"></el-table-column>
+          <el-table-column prop="nickname" label="昵称" align="center">
+            <template #default="scope">
+              <span :class="{ 'user-ai-name': scope.row.userType === 5 }">{{ scope.row.nickname }}</span>
+            </template>
+          </el-table-column>
           <el-table-column prop="phoneNumber" label="手机号" align="center"></el-table-column>
           <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
           <el-table-column label="赞赏" width="190" align="center">
@@ -39,7 +46,7 @@
               <div class="admire-cell">
                 <el-input v-model="scope.row.admireInput" size="small" maxlength="10" placeholder="金额"
                           @keyup.enter="addAdmire(scope.row)"></el-input>
-                <el-button type="text" :loading="scope.row.admireSaving"
+                <el-button type="primary" size="small" :loading="scope.row.admireSaving"
                            @click="addAdmire(scope.row)">记录</el-button>
               </div>
             </template>
@@ -55,7 +62,12 @@
           </el-table-column>
           <el-table-column label="头像" align="center">
             <template #default="scope">
-              <el-image lazy class="table-td-thumb" :src="scope.row.avatar" fit="cover"></el-image>
+              <span class="avatar-cell">
+                <el-image lazy class="table-td-thumb" :src="scope.row.avatar" fit="cover"></el-image>
+                <span class="identity-v-badge" v-if="[1, 2, 5].includes(Number(scope.row.userType))" title="认证身份">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#ffffff" d="M6.2 4.5h3.3l2.5 9.6 2.5-9.6h3.3L13.9 20h-3.8z"/></svg>
+                </span>
+              </span>
             </template>
           </el-table-column>
           <el-table-column label="性别" align="center">
@@ -80,17 +92,31 @@
           <el-table-column prop="introduction" label="简介" align="center"></el-table-column>
           <el-table-column label="用户类型" width="100" align="center">
             <template #default="scope">
-              <el-tag type="success"
-                      v-if="scope.row.userType === 0"
+              <el-tag type="danger"
+                      v-if="scope.row.userType === 1"
                       disable-transitions>
-                站长
+                本站主理人
               </el-tag>
-              <el-tag type="success"
-                      v-else-if="scope.row.userType === 1"
+              <el-tag type="warning"
+                      v-else-if="scope.row.userType === 2"
                       style="cursor: pointer"
                       @click="editUser(scope.row)"
                       disable-transitions>
                 管理员
+              </el-tag>
+              <span v-else-if="scope.row.userType === 5"
+                    class="art-ai"
+                    style="cursor: pointer"
+                    @click="editUser(scope.row)">
+                <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 21v-8"/><path fill="currentColor" d="M12 13C7.6 13 5.2 10.7 5.2 6.6 9.6 6.6 12 8.9 12 13Z"/><path fill="currentColor" d="M12 11.4c3.5 0 6-2.3 6-6.2-3.5 0-6 2.5-6 6.2Z"/></svg>
+                AI站长
+              </span>
+              <el-tag type="primary"
+                      v-else-if="scope.row.userType === 3"
+                      style="cursor: pointer"
+                      @click="editUser(scope.row)"
+                      disable-transitions>
+                作者
               </el-tag>
               <el-tag type="success"
                       v-else
@@ -125,8 +151,10 @@
                center>
       <div class="myCenter">
         <el-radio-group v-model="changeUser.userType">
-          <el-radio-button :label="1">管理员</el-radio-button>
-          <el-radio-button :label="2">普通用户</el-radio-button>
+          <el-radio-button :label="2">管理员</el-radio-button>
+          <el-radio-button :label="3">作者</el-radio-button>
+          <el-radio-button :label="5">AI 站长</el-radio-button>
+          <el-radio-button :label="4">普通用户</el-radio-button>
         </el-radio-group>
       </div>
 
@@ -163,6 +191,48 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 新增用户弹窗 -->
+    <el-dialog class="admin-dialog"
+               title="新增用户"
+               v-model="createVisible"
+               width="30%"
+               :before-close="handleCreateClose"
+               :append-to-body="true"
+               destroy-on-close
+               center>
+      <el-form ref="createFormRef"
+               :model="createForm"
+               :rules="createRules"
+               label-position="top"
+               class="create-form"
+               @submit.prevent>
+        <el-form-item label="账号" prop="username">
+          <el-input v-model="createForm.username" maxlength="50" placeholder="用于登录，不可含空格"/>
+        </el-form-item>
+        <el-form-item label="昵称" prop="nickname">
+          <el-input v-model="createForm.nickname" maxlength="50" placeholder="不填则与账号相同"/>
+        </el-form-item>
+        <el-form-item label="初始密码" prop="password">
+          <el-input v-model="createForm.password" type="password" show-password placeholder="6-20 个字符"/>
+        </el-form-item>
+        <el-form-item label="用户角色" prop="userType">
+          <el-radio-group v-model="createForm.userType">
+            <el-radio-button :label="2">管理员</el-radio-button>
+            <el-radio-button :label="3">作者</el-radio-button>
+            <el-radio-button :label="5">AI 站长</el-radio-button>
+            <el-radio-button :label="4">普通用户</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="handleCreateClose()">取 消</el-button>
+          <el-button type="primary" :loading="createSaving" @click="saveCreate()">创 建</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -190,11 +260,59 @@
         usernameForm: {
           id: null,
           username: ""
+        },
+        createVisible: false,
+        createSaving: false,
+        createForm: {
+          username: "",
+          nickname: "",
+          password: "",
+          userType: 4
+        },
+        createRules: {
+          username: [
+            {required: true, message: "请输入账号", trigger: "blur"},
+            {min: 2, max: 50, message: "账号长度需为 2-50 个字符", trigger: "blur"},
+            {
+              validator: (rule, value, callback) => {
+                if (value && /[\s\u3000]/.test(value)) {
+                  callback(new Error("账号不能包含空格"));
+                } else {
+                  callback();
+                }
+              },
+              trigger: "blur"
+            }
+          ],
+          nickname: [
+            {max: 50, message: "昵称不能超过 50 个字符", trigger: "blur"}
+          ],
+          password: [
+            {required: true, message: "请输入初始密码", trigger: "blur"},
+            {min: 6, max: 20, message: "密码长度需为 6-20 个字符", trigger: "blur"},
+            {
+              validator: (rule, value, callback) => {
+                if (value && /[\s\u3000]/.test(value)) {
+                  callback(new Error("密码不能包含空格"));
+                } else {
+                  callback();
+                }
+              },
+              trigger: "blur"
+            }
+          ],
+          userType: [
+            {required: true, message: "请选择用户角色", trigger: "change"}
+          ]
         }
       }
     },
 
     computed: {
+      // 新增用户仅本站主理人可用
+      isBoss() {
+        return !!this.$store.state.currentAdmin.isBoss;
+      },
       // 账号编辑入口仅管理员可见（后台页面本身已受路由与后端双重鉴权）
       isAdmin() {
         return !this.$common.isEmpty(this.$store.state.currentAdmin) && Boolean(localStorage.getItem("adminToken"));
@@ -289,7 +407,8 @@
       },
       editUser(user) {
         this.changeUser.id = user.id;
-        this.changeUser.userType = user.userType;
+        // 兼容旧数据：0/1 统一落到普通用户，避免弹窗里没有选中项
+        this.changeUser.userType = [2, 3, 4, 5].includes(Number(user.userType)) ? Number(user.userType) : 4;
         this.editVisible = true;
       },
       editUsername(user) {
@@ -370,6 +489,70 @@
             });
           });
       },
+      openCreate() {
+        this.createForm = {
+          username: "",
+          nickname: "",
+          password: "",
+          userType: 4
+        };
+        this.createSaving = false;
+        this.createVisible = true;
+        this.$nextTick(() => {
+          if (this.$refs.createFormRef) {
+            this.$refs.createFormRef.clearValidate();
+          }
+        });
+      },
+      handleCreateClose() {
+        this.createForm = {
+          username: "",
+          nickname: "",
+          password: "",
+          userType: 4
+        };
+        this.createSaving = false;
+        this.createVisible = false;
+      },
+      saveCreate() {
+        if (this.createSaving || !this.$refs.createFormRef) {
+          return;
+        }
+        this.$refs.createFormRef.validate((valid) => {
+          if (!valid) {
+            this.$message({
+              message: "请检查表单填写是否正确！",
+              type: "warning"
+            });
+            return;
+          }
+          const username = this.createForm.username.trim();
+          const nickname = this.createForm.nickname.trim();
+          const password = this.createForm.password.trim();
+          this.createSaving = true;
+          this.$http.post(this.$constant.baseURL + "/admin/user/create", {
+            username: username,
+            nickname: nickname,
+            password: this.$common.encrypt(password),
+            userType: this.createForm.userType
+          }, true)
+            .then(() => {
+              this.handleCreateClose();
+              this.getUsers();
+              this.$message({
+                message: "用户创建成功！",
+                type: "success"
+              });
+            })
+            .catch((error) => {
+              this.createSaving = false;
+              this.$message({
+                message: error.message,
+                type: "error"
+              });
+            });
+        });
+      },
       handlePageChange(val) {
         this.pagination.current = val;
         this.getUsers();
@@ -416,6 +599,25 @@
   .table-scroll {
     width: 100%;
     overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c7cbd6 transparent;
+  }
+
+  .table-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .table-scroll::-webkit-scrollbar-thumb {
+    background-color: #d0d4dd;
+    border-radius: 999px;
+  }
+
+  .table-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--admin-primary, #4c6fff);
   }
 
   .table-scroll :deep(.table) {
@@ -428,11 +630,30 @@
     gap: 6px;
   }
 
+  .admire-cell .el-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .admire-cell .el-button {
+    flex-shrink: 0;
+  }
+
   .username-cell {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     cursor: pointer;
+  }
+
+  /* AI 站长账号 / 昵称：与专属徽章同色，仅 user_type=5 命中 */
+  .user-ai-name {
+    color: #5c49c7;
+    font-weight: 600;
+  }
+
+  html.dark .user-ai-name {
+    color: #cfc7ff;
   }
 
   .username-edit {
@@ -450,6 +671,16 @@
     width: 120px;
   }
 
+  .create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .create-form .el-radio-group {
+    align-self: center;
+  }
+
   .handle-input {
     width: 160px;
     display: inline-block;
@@ -465,6 +696,14 @@
     margin: auto;
     width: 40px;
     height: 40px;
+  }
+
+  .avatar-cell {
+    position: relative;
+    display: block;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
   }
 
   .pagination {

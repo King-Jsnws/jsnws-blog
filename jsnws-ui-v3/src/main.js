@@ -44,6 +44,7 @@ import {
   ArrowRight,
   Calendar,
   ChatDotRound,
+  ChatLineRound,
   Collection,
   Connection,
   CreditCard,
@@ -123,11 +124,20 @@ import 'element-plus/theme-chalk/dark/css-vars.css'
 // 项目自定义样式放在 Element Plus 之后，保证覆盖顺序与旧项目一致
 import './assets/css/animation.css'
 import './assets/css/index.css'
+import './assets/css/button.css'
 import './assets/css/admin.css'
 import './assets/css/tocbot.css'
 import './assets/css/color.css'
 import './assets/css/markdown-highlight.css'
+// 正文自定义标签（joe2.0 Web Components）的样式，作用域与正文排版一致
+import './assets/css/joe-components.css'
 import './assets/css/font-awesome.min.css'
+// 评论区身份徽章与用户名配色：评论区与站点统计「最近评论」共用
+import './assets/css/comment-identity.css'
+// 移动端复刻样式：全部规则限制在 ≤767px 媒体查询内，桌面端不受影响
+import './assets/css/mobile.css'
+// 头像呼吸光环：后台开关控制，仅 html.avatar-glow 时生效
+import './assets/css/avatar-glow.css'
 
 import App from './App.vue'
 import router from './router'
@@ -136,7 +146,10 @@ import http from './utils/request'
 import common from './utils/common'
 import constant from './utils/constant'
 import { applyTheme } from './utils/theme'
-import './utils/title'
+// 注册正文自定义标签（joe-mtitle / joe-abtn / ...），供 v-html 渲染时自动升级
+import './utils/joeComponents'
+// 媒体类标签（B 站视频 / APlayer 音频 / 歌单），APlayer 按需从本地加载
+import './utils/joeMedia'
 
 const app = createApp(App)
 
@@ -187,6 +200,7 @@ const icons = {
   ArrowRight,
   Calendar,
   ChatDotRound,
+  ChatLineRound,
   Collection,
   Connection,
   CreditCard,
